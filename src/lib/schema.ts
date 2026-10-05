@@ -1,8 +1,9 @@
 // Structured data (JSON-LD) for search engines, built from the data files.
 // Typed with schema-dts so a wrong property or type fails `astro check`.
-import type { BlogPosting, Graph, Offer } from 'schema-dts';
+import type { BlogPosting, FAQPage, Graph, Offer, WithContext } from 'schema-dts';
 import site from '../data/site.json';
 import services from '../data/services.json';
+import faq from '../data/faq.json';
 import { absolute, telHref } from './url';
 
 const businessId = absolute('/#business');
@@ -89,5 +90,22 @@ export function postSchema(post: PostInfo): BlogPosting & { '@context': string }
     inLanguage: 'en-GB',
     author: { '@type': 'Person', '@id': personId, name: site.about.name, url: absolute('/#about') },
     publisher: { '@type': 'LocalBusiness', '@id': businessId, name: site.name, logo: absolute('/icon-512.png') },
+  };
+}
+
+// Answers still waiting for Peter (<mark> placeholders) are left out, so search
+// engines never see unconfirmed text. Returns null when none are ready.
+export function faqSchema(): WithContext<FAQPage> | null {
+  const ready = faq.filter((f) => !f.answer.includes('<mark>'));
+  if (ready.length === 0) return null;
+  const plain = (md: string) => md.replace(/\[([^\]]+)\]\([^)]+\)/g, '$1').replace(/[*_`]/g, '');
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: ready.map((f) => ({
+      '@type': 'Question',
+      name: f.question,
+      acceptedAnswer: { '@type': 'Answer', text: plain(f.answer) },
+    })),
   };
 }

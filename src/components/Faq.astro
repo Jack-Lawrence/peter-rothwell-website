@@ -1,0 +1,110 @@
+---
+// Common questions, from src/data/faq.json (answers are Markdown).
+import { marked } from 'marked';
+import faq from '../data/faq.json';
+import { baseLinks } from '../lib/url';
+
+const items = faq.map((f) => ({ ...f, html: baseLinks(marked.parseInline(f.answer, { async: false })) }));
+---
+
+<section class="section faq" aria-labelledby="faq-title">
+  <div class="wrap inner">
+    <div class="head">
+      <span class="mono accent">Before you get in touch</span>
+      <h2 id="faq-title" class="display h2">Questions</h2>
+    </div>
+    <div class="list">
+      {
+        items.map((f) => (
+          <details>
+            <summary>
+              <span>{f.question}</span>
+              <svg class="chev" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true">
+                <path d="M6 9l6 6 6-6" />
+              </svg>
+            </summary>
+            <p set:html={f.html} />
+          </details>
+        ))
+      }
+    </div>
+  </div>
+</section>
+
+<style>
+  .faq {
+    background: var(--granite-2);
+  }
+  .inner {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+    gap: 32px 64px;
+    align-items: start;
+  }
+  .head {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .list {
+    border-top: 1px solid var(--line);
+  }
+  details {
+    border-bottom: 1px solid var(--line);
+  }
+  summary {
+    list-style: none;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    min-height: 64px;
+    padding-block: 16px;
+    cursor: pointer;
+    font-weight: 700;
+    font-size: 19px;
+    line-height: 1.35;
+  }
+  summary::-webkit-details-marker {
+    display: none;
+  }
+  summary:hover span {
+    text-decoration: underline;
+    text-underline-offset: 4px;
+  }
+  .chev {
+    flex: none;
+    color: var(--gorse);
+    transition: transform 0.2s ease;
+  }
+  details[open] .chev {
+    transform: rotate(180deg);
+  }
+  p {
+    margin: 0;
+    padding: 0 40px 24px 0;
+    color: var(--muted-2);
+    font-size: 17px;
+    line-height: 1.6;
+    max-width: 44em;
+  }
+  p :global(a) {
+    color: var(--chalk);
+  }
+  /* Placeholders Peter still needs to fill in. */
+  p :global(mark) {
+    background: var(--gorse);
+    color: var(--granite);
+    padding: 1px 4px;
+    border-radius: 3px;
+  }
+
+  @media (max-width: 900px) {
+    .inner {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    p {
+      padding-right: 0;
+    }
+  }
+</style>

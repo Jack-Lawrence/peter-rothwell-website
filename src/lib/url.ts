@@ -11,6 +11,11 @@ export function absolute(path: string): string {
   return new URL(href(path), import.meta.env.SITE).href;
 }
 
+// Adds the base path to site-relative links (href="/terms/") in rendered Markdown.
+export function baseLinks(html: string): string {
+  return html.replace(/href="\/(?!\/)/g, `href="${base}/`);
+}
+
 export function telHref(phone: string): string {
   return `tel:${phone.replace(/\s+/g, '').replace(/^0/, '+44')}`;
 }
