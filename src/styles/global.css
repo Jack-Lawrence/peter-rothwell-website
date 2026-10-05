@@ -14,6 +14,10 @@
   --ink-soft: #3b4540;
   --ink-muted: #5c6862;
   --gorse: #e3b23c;
+  /* Same saturation and lightness as gorse, other hues: for the coaching plan panels.
+     Text on all three is --ink (contrast 4.6:1 or better). */
+  --loch: #3c9de3;
+  --bracken: #e35d3c;
   --error: #a3341b; /* form errors on light backgrounds */
 
   /* Surface colours for the dark (granite) sections. Light mode swaps these,

@@ -18,7 +18,7 @@ Pre-launch. The site is previewed on **GitHub Pages** so Peter can review it. No
 
 ## Design rules
 
-- Direction "Pentlands": dark granite greens (`--granite #1b211e`), chalk light sections (`--chalk #eeede8`), one accent, gorse yellow (`--gorse #e3b23c`). Use the tokens in `global.css`, never new literal colours.
+- Direction "Pentlands": dark granite greens (`--granite #1b211e`), chalk light sections (`--chalk #eeede8`), one accent, gorse yellow (`--gorse #e3b23c`). The only exception is the coaching plan panels, which use `--loch` and `--bracken` (gorse's saturation and lightness, other hues) alongside gorse. Use the tokens in `global.css`, never new literal colours.
 - Light/dark mode (sun/moon button, `ThemeToggle.astro`): dark is the default. Light mode (`html[data-theme="light"]`) swaps the surface tokens (`--granite`, `--granite-2`, `--panel`, `--line`, `--muted`, `--muted-2`, `--chalk`, `--accent`), so granite sections turn light; `.light` sections and the gorse `.footer` keep their colours. Use the surface tokens in granite sections, `--accent` (not `--gorse`) for gorse text and icons, and the fixed `--ink`/`--paper` where a colour must never change (e.g. text on gorse). Check contrast in both modes.
 - Square corners everywhere: no `border-radius` on the public site (cards, buttons, fields, photos, icons). The admin area keeps its own rounded style.
 - Fonts (self-hosted via Fontsource): Sofia Sans Extra Condensed (uppercase headings), Figtree (body), JetBrains Mono (small uppercase labels).

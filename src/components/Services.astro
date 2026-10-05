@@ -45,6 +45,12 @@ function scheduleLine(schedule?: Schedule) {
               <li>{p}</li>
             ))}
           </ul>
+          <a class="enquire" href="#contact" data-enquire={s.name}>
+            Enquire<span class="visually-hidden"> about {s.name}</span>
+            <span class="arrow" aria-hidden="true">
+              →
+            </span>
+          </a>
         </article>
       ))}
     </div>
@@ -103,12 +109,23 @@ function scheduleLine(schedule?: Schedule) {
   </div>
 </section>
 
+<script>
+  // "Enquire" on a card jumps to the form with that plan already chosen.
+  document.querySelectorAll<HTMLAnchorElement>('[data-enquire]').forEach((link) => {
+    link.addEventListener('click', () => {
+      const select = document.querySelector<HTMLSelectElement>('#enq-interest');
+      const choice = [...(select?.options ?? [])].find((o) => o.value === link.dataset.enquire);
+      if (select && choice) select.value = choice.value;
+    });
+  });
+</script>
+
 <style>
   .inner {
-    padding-block: clamp(56px, 8svh, 80px);
+    padding-block: clamp(40px, 6svh, 80px);
     display: flex;
     flex-direction: column;
-    gap: clamp(28px, 4svh, 44px);
+    gap: clamp(20px, 3svh, 44px);
   }
   /* On desktop the section fills exactly one screen, content centred. */
   @media (min-width: 901px) {
@@ -144,21 +161,29 @@ function scheduleLine(schedule?: Schedule) {
   .cards {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    border-top: 2px solid var(--granite);
+    gap: 16px;
   }
+  /* Each plan is a coloured panel: loch blue, gorse, bracken (then repeating). */
   .card {
-    padding: 28px 32px 8px;
+    --pane: var(--loch);
+    background: var(--pane);
+    color: var(--ink);
+    padding: 22px 26px 24px;
     display: flex;
     flex-direction: column;
     gap: 14px;
-    border-right: 1px solid var(--chalk-line);
   }
-  .card:first-child {
-    padding-left: 0;
+  .card:nth-child(3n + 2) {
+    --pane: var(--gorse);
   }
-  .card:last-child {
-    border-right: 0;
-    padding-right: 0;
+  .card:nth-child(3n) {
+    --pane: var(--bracken);
+  }
+  /* The softer greys don't have enough contrast on the colours, so everything is ink. */
+  .card .label,
+  .card .per,
+  .card ul {
+    color: var(--ink);
   }
   .name {
     font-size: 36px;
@@ -185,13 +210,35 @@ function scheduleLine(schedule?: Schedule) {
     text-wrap: balance;
   }
   ul {
-    margin: 0;
+    margin: 0 0 10px;
     padding-left: 18px;
     display: flex;
     flex-direction: column;
     gap: 6px;
     color: var(--ink-soft);
     font-size: 16px;
+  }
+  /* Sits at the bottom of each card, so the three line up. */
+  .enquire {
+    margin-top: auto;
+    align-self: flex-start;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 44px;
+    padding: 0 18px;
+    background: var(--granite);
+    color: var(--chalk);
+    font-weight: 700;
+    font-size: 15px;
+    text-decoration: none;
+    transition: background-color 0.15s ease;
+  }
+  .enquire:hover {
+    background: var(--ink-soft);
+  }
+  .enquire .arrow {
+    color: var(--gorse);
   }
 
   .where {
@@ -290,12 +337,8 @@ function scheduleLine(schedule?: Schedule) {
     .cards {
       grid-template-columns: minmax(0, 1fr);
     }
-    .card,
-    .card:first-child,
-    .card:last-child {
-      padding: 28px 0;
-      border-right: 0;
-      border-bottom: 1px solid var(--chalk-line);
+    .card {
+      padding: 24px 22px;
     }
     .spot {
       flex-wrap: wrap;

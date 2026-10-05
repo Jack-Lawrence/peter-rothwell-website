@@ -60,6 +60,10 @@ interface Testimonial {
   service: string;
   quote: string;
   consent?: boolean;
+  /** YYYY-MM-DD the client started training. */
+  started?: string;
+  /** YYYY-MM-DD they finished, or "ongoing". */
+  ended?: string;
 }
 interface Week {
   title: string;
@@ -1207,6 +1211,9 @@ async function testimonialsScreen(arg: string) {
     name: Field;
     service: Field;
     quote: Field;
+    started: Field;
+    ongoing: HTMLInputElement;
+    ended: Field;
     consent: HTMLInputElement;
     consentWrap: HTMLElement;
     box: HTMLElement;
@@ -1232,6 +1239,26 @@ async function testimonialsScreen(arg: string) {
       textArea(t.quote, { rows: 4, maxlength: 600 }),
       'Paste their words exactly as they wrote them.',
     );
+    // How long they've trained together: shown on the site as "Client for 4 months".
+    const started = field(
+      'Started training with you (optional)',
+      h('input', { type: 'date', value: t.started ?? '', max: today() }),
+      'Shows how long they’ve been your client, e.g. “Client for 4 months”. Leave blank to hide it.',
+    );
+    const ongoing = h('input', {
+      type: 'checkbox',
+      id: `ongoing-${Math.random().toString(36).slice(2)}`,
+      checked: !t.ended || t.ended === 'ongoing',
+    });
+    const ended = field(
+      'Finished on',
+      h('input', { type: 'date', value: t.ended && t.ended !== 'ongoing' ? t.ended : '', max: today() }),
+    );
+    const showEnded = () => {
+      ended.wrap.hidden = ongoing.checked;
+    };
+    ongoing.addEventListener('change', showEnded);
+    showEnded();
     const consent = h('input', {
       type: 'checkbox',
       id: `consent-${Math.random().toString(36).slice(2)}`,
@@ -1250,6 +1277,14 @@ async function testimonialsScreen(arg: string) {
       name.wrap,
       service.wrap,
       quote.wrap,
+      started.wrap,
+      h(
+        'label',
+        { class: 'check', for: ongoing.id },
+        ongoing,
+        h('span', {}, 'Still training with me (the time keeps counting up by itself)'),
+      ),
+      ended.wrap,
       consentWrap,
       h(
         'div',
@@ -1279,7 +1314,7 @@ async function testimonialsScreen(arg: string) {
         ),
       ),
     );
-    const row = { name, service, quote, consent, consentWrap, box };
+    const row = { name, service, quote, started, ongoing, ended, consent, consentWrap, box };
     return row;
   };
   const move = (row: Row, by: number) => {
@@ -1319,6 +1354,15 @@ async function testimonialsScreen(arg: string) {
           if (!r.service.input.value) errors.add(r.service, `${who}: choose what they did with you.`);
           if (r.quote.input.value.trim().length < 20)
             errors.add(r.quote, `${who}: paste what they said (at least a sentence).`);
+          const start = r.started.input.value;
+          const end = r.ended.input.value;
+          if (start > today()) errors.add(r.started, `${who}: the start date is in the future.`);
+          if (start && !r.ongoing.checked) {
+            if (!end) errors.add(r.ended, `${who}: choose when they finished, or tick “Still training with me”.`);
+            else if (end <= start) errors.add(r.ended, `${who}: the finish date must be after the start date.`);
+            else if (end > today())
+              errors.add(r.ended, `${who}: the finish date is in the future. Tick “Still training with me” instead.`);
+          }
           if (!r.consent.checked)
             errors.add(r.consent, `${who}: tick the box to confirm they agreed to it being published.`);
         });
@@ -1328,6 +1372,10 @@ async function testimonialsScreen(arg: string) {
           service: r.service.input.value,
           quote: r.quote.input.value.trim(),
           consent: true,
+          ...(r.started.input.value && {
+            started: r.started.input.value,
+            ended: r.ongoing.checked ? 'ongoing' : r.ended.input.value,
+          }),
         }));
         if (await save([{ path: PATHS.testimonials, text: toJson(next) }], 'Update testimonials', saveBtn)) {
           toast(savedMessage());

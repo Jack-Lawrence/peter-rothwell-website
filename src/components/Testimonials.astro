@@ -1,5 +1,18 @@
 ---
-import testimonials from '../data/testimonials.json';
+import data from '../data/testimonials.json';
+import { tenureLabel } from '../lib/tenure';
+
+interface Testimonial {
+  name: string;
+  service: string;
+  quote: string;
+  started?: string;
+  ended?: string;
+}
+
+// "Client for 4 months", from the dates set in the admin area. Ongoing clients
+// count up to the day the site was last built.
+const testimonials = (data as Testimonial[]).map((t) => ({ ...t, tenure: tenureLabel(t.started, t.ended) }));
 ---
 
 <section class="section reviews" aria-labelledby="reviews-title">
@@ -55,6 +68,7 @@ import testimonials from '../data/testimonials.json';
                     ></path>
                   </svg>
                 </span>
+                {t.tenure && <span class="mono tenure">{t.tenure}</span>}
                 <p>{t.quote}</p>
               </blockquote>
               <figcaption class="who">
@@ -265,6 +279,17 @@ import testimonials from '../data/testimonials.json';
     place-items: center;
     box-shadow: 0 0 0 6px var(--granite-2);
   }
+  /* How long they've trained together, top right, level with the quote badge. */
+  .tenure {
+    position: absolute;
+    top: 14px;
+    right: 18px;
+    padding: 4px 8px;
+    background: var(--ink);
+    color: var(--paper);
+    font-size: 11px;
+    line-height: 1.4;
+  }
   .bubble p {
     margin: 0;
     font-size: 19px;
@@ -336,6 +361,12 @@ import testimonials from '../data/testimonials.json';
     }
     .badge {
       left: 22px;
+    }
+    /* Not enough room beside the badge for a long label, so it sits above the quote. */
+    .tenure {
+      position: static;
+      display: inline-block;
+      margin-bottom: 12px;
     }
     .who {
       padding-left: 14px;
