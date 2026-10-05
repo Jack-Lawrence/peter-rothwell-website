@@ -10,8 +10,9 @@ module.exports = {
       startServerCommand: `npx astro preview --port ${port}`,
       startServerReadyPattern: `localhost:${port}`,
       url: pages.map((p) => `http://localhost:${port}${p}`),
-      // One run per page keeps the whole check run under three minutes.
-      numberOfRuns: 1,
+      // Shared CI machines are noisy, so each page is tested three times and the
+      // best run counts (Lighthouse CI's default "optimistic" aggregation).
+      numberOfRuns: 3,
       settings: {
         // Mobile is Lighthouse's default. Preview builds are noindex on purpose,
         // so the SEO category is skipped for them.
@@ -30,7 +31,7 @@ module.exports = {
     upload: {
       // Reports are kept as files (uploaded as a workflow artifact), not sent to a public server.
       target: 'filesystem',
-      outputDir: '.lighthouseci',
+      outputDir: 'lighthouse-reports',
     },
   },
 };

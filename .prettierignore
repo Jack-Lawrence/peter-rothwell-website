@@ -4,6 +4,7 @@ dist/
 node_modules/
 package-lock.json
 .lighthouseci/
+lighthouse-reports/
 public/
 src/assets/
 
