@@ -5,9 +5,11 @@ import '@fontsource-variable/figtree';
 import '@fontsource/jetbrains-mono/500';
 import '../styles/global.css';
 import Header from '../components/Header.astro';
+import PreviewBar from '../components/PreviewBar.astro';
 import ContactFooter from '../components/ContactFooter.astro';
 import site from '../data/site.json';
 import { href } from '../lib/url';
+import { PREVIEW } from 'astro:env/server';
 
 interface Props {
   title?: string;
@@ -20,7 +22,7 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
 ---
 
 <!doctype html>
-<html lang="en-GB">
+<html lang="en-GB" class:list={{ 'has-preview': PREVIEW }}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -32,9 +34,20 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
     <meta property="og:description" content={description} />
     <meta property="og:type" content="website" />
     <meta name="theme-color" content="#1b211e" />
+    {PREVIEW && <meta name="robots" content="noindex, nofollow" />}
+    {
+      PREVIEW && (
+        <script is:inline>
+          try {
+            if (sessionStorage.getItem('preview-hidden')) document.documentElement.classList.add('preview-hidden');
+          } catch {}
+        </script>
+      )
+    }
   </head>
   <body>
     <a class="skip" href="#main">Skip to content</a>
+    {PREVIEW && <PreviewBar />}
     <Header />
     <main id="main">
       <slot />

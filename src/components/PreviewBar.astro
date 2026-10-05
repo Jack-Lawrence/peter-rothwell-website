@@ -1,0 +1,65 @@
+---
+// Slim bar shown on every page of the client preview build (PREVIEW=true).
+// Its height is reserved in --preview-h so the first screen still fits.
+---
+
+<div class="preview-bar" role="note">
+  <span class="mono">Preview site, not live yet</span>
+  <button type="button" class="close" aria-label="Hide preview notice">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+      <path d="M6 6l12 12M18 6L6 18"></path>
+    </svg>
+  </button>
+</div>
+
+<script>
+  document.querySelector('.preview-bar .close')?.addEventListener('click', () => {
+    document.documentElement.classList.add('preview-hidden');
+    try {
+      sessionStorage.setItem('preview-hidden', '1');
+    } catch {}
+  });
+</script>
+
+<style>
+  :global(.preview-hidden) .preview-bar {
+    display: none;
+  }
+  .preview-bar {
+    height: var(--preview-h);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding-inline: var(--gutter) 44px;
+    position: relative;
+    background: var(--granite);
+    color: var(--gorse);
+    border-bottom: 1px solid var(--line);
+  }
+  .preview-bar .mono {
+    font-size: 11px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .close {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    translate: 0 -50%;
+    display: grid;
+    place-items: center;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    border: 0;
+    border-radius: 6px;
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+  }
+  .close:hover {
+    background: var(--panel);
+  }
+</style>

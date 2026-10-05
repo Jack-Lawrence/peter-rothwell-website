@@ -44,6 +44,9 @@ jobs:
         env:
           SITE_URL: ${{ steps.pages.outputs.origin }}
           BASE_PATH: ${{ steps.pages.outputs.base_path }}
+          # Client preview: noindex, disallow-all robots.txt and a "not live" bar.
+          # Remove this line when the site goes live.
+          PREVIEW: 'true'
 
       - uses: actions/upload-pages-artifact@v4
         with:

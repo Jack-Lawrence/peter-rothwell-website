@@ -19,6 +19,7 @@
   --font-mono: 'JetBrains Mono', ui-monospace, Consolas, monospace;
 
   --header-h: 96px;
+  --preview-h: 0px; /* height of the preview bar, when shown */
   --wrap: 1240px;
   --gutter: clamp(16px, 4vw, 48px);
   --section: clamp(72px, 9vw, 112px);
@@ -34,6 +35,13 @@
 
 html {
   scroll-behavior: smooth;
+}
+
+:root.has-preview {
+  --preview-h: 32px;
+}
+:root.has-preview.preview-hidden {
+  --preview-h: 0px;
 }
 
 body {

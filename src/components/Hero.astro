@@ -92,8 +92,9 @@ const last = headline.length - 1;
 
   /* Shorter laptop screens (e.g. 1366×768): tighten spacing to stay on one screen. */
   @media (min-width: 901px) and (max-height: 820px) {
+    /* The preview bar, when shown, takes its room from the bottom padding. */
     .hero {
-      padding-block: 12px 28px;
+      padding-block: 12px calc(28px - var(--preview-h) / 2);
     }
     .copy {
       gap: 20px;

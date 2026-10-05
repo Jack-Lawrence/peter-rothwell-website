@@ -23,12 +23,12 @@ import InstagramFeed from '../components/InstagramFeed.astro';
 
 <style>
   /* On desktop the hero and week strip fill exactly one screen below the
-     header; the hero photo takes up whatever height is left. */
+     header (and the preview bar, if shown); the hero photo takes up whatever height is left. */
   @media (min-width: 901px) {
     .first-screen {
       display: flex;
       flex-direction: column;
-      min-height: calc(100svh - var(--header-h));
+      min-height: calc(100svh - var(--header-h) - var(--preview-h));
       padding-bottom: 32px;
     }
     .first-screen > :global(.hero) {
