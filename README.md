@@ -13,7 +13,7 @@ Open http://localhost:4321.
 
 ## Where the content lives
 
-Everything Peter can change is a plain file, so the admin area (coming next) can edit it by committing to this repo.
+Everything Peter can change is a plain file, so the admin area at `/admin` can edit it by committing to this repo.
 
 | What | File |
 | --- | --- |
@@ -24,6 +24,7 @@ Everything Peter can change is a plain file, so the admin area (coming next) can
 | Blog posts | `src/content/journal/*.md` |
 | Privacy, terms, refunds, accessibility | `src/content/legal/*.md` |
 | Instagram feed (generated) | `src/data/instagram.json` |
+| Photos uploaded in the admin area | `src/assets/journal/` |
 
 Optional fields that are left empty are hidden: `hero.badge` (e.g. "Longest run / 100 km") and `about.stats` (e.g. `[{ "value": "12", "label": "Ultras finished" }]`).
 
@@ -34,6 +35,21 @@ Optional fields that are left empty are hidden: `hero.badge` (e.g. "Longest run 
 - [ ] Peter to confirm what's included in each plan in `services.json`
 - [ ] Add hero badge and About stats if wanted
 - [ ] Peter to review the policy pages in `src/content/legal/` and fill in every highlighted `<mark>` placeholder (payment method, notice periods, insurer, ICO number, retention periods)
+
+## Admin area (`/admin`)
+
+A small app for Peter to edit the content files above: blog posts (with a simple editor that saves Markdown), prices, Run Club dates, testimonials, the typical week, contact details and the four policy pages. The code is in `src/admin/` and only loads on `/admin`, so public pages stay light. `/admin` is `noindex` and left out of the sitemap. Peter's instructions are in [docs/admin-guide.md](docs/admin-guide.md).
+
+It has two modes:
+
+- **Demo** (the default on the preview site, no sign-in): everything works, but changes stay in that browser (localStorage). "Reset demo" clears them. Nothing leaves the browser.
+- **Live**: Peter signs in once per device by pasting a GitHub fine-grained personal access token. Each save is one commit to `main` (for example "Update prices (via admin)"), which triggers the deploy workflow, so the site updates in about a minute. A post and its photos go up in the same commit. Photos are resized in the browser to at most 2000px before upload.
+
+The repo it commits to is `ADMIN_REPO` (default `Jack-Lawrence/peter-rothwell-website`; set it as an environment variable at build time if the repo moves).
+
+**Why a pasted token, not "Sign in with GitHub" (OAuth)?** GitHub's OAuth flow needs a server to swap the login code for a token while keeping a client secret hidden, and this site deliberately has no server. A fine-grained token can be limited to this one repository and to *Contents: read and write*, expires on a date Peter chooses, and can be revoked at any time on GitHub. It's stored only in Peter's browser (localStorage) and sent only to api.github.com. "Sign out" deletes it. If the site moves to Cloudflare, a small Worker could do the OAuth swap instead, and the admin would need only a new sign-in screen.
+
+To set Peter up: give him a GitHub account with write access to the repo, then follow "Signing in" in the admin guide together.
 
 ## Hosting
 

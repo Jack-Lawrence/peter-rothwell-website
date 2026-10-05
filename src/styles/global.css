@@ -13,6 +13,7 @@
   --ink-soft: #3b4540;
   --ink-muted: #5c6862;
   --gorse: #e3b23c;
+  --error: #a3341b; /* form errors on light backgrounds */
 
   --font-display: 'Big Shoulders Display', Impact, 'Arial Narrow', sans-serif;
   --font-body: 'Figtree Variable', Figtree, system-ui, sans-serif;

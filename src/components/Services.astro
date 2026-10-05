@@ -1,6 +1,20 @@
 ---
 import services from '../data/services.json';
 import site from '../data/site.json';
+
+interface Schedule {
+  starts: string;
+  when: string;
+  spaces: string;
+}
+
+// Run Club dates, set in the admin area. Hidden when empty.
+function scheduleLine(schedule?: Schedule) {
+  if (!schedule?.starts) return '';
+  const date = new Date(schedule.starts).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+  const spaces = schedule.spaces && `${schedule.spaces} ${schedule.spaces === '1' ? 'space' : 'spaces'} left`;
+  return [`Next block ${date}`, schedule.when, spaces].filter(Boolean).join(' · ');
+}
 ---
 
 <section id="coaching" class="light services">
@@ -22,6 +36,9 @@ import site from '../data/site.json';
               <span class="display amount">{s.price}</span>
               <span class="per">{s.per}</span>
             </p>
+            {scheduleLine((s as { schedule?: Schedule }).schedule) && (
+              <p class="mono schedule">{scheduleLine((s as { schedule?: Schedule }).schedule)}</p>
+            )}
             <ul>
               {s.points.map((p) => (
                 <li>{p}</li>
@@ -139,6 +156,13 @@ import site from '../data/site.json';
   }
   .per {
     color: var(--ink-muted);
+  }
+  .schedule {
+    margin: -8px 0 0;
+    color: var(--granite);
+    font-size: 11px;
+    line-height: 1.5;
+    text-wrap: balance;
   }
   ul {
     margin: 0;

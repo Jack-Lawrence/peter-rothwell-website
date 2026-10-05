@@ -58,9 +58,10 @@ Peter's account needs to be a **Business or Creator** account. Check in Instagra
 - [ ] **Test:** run "Refresh Instagram token" and "Deploy to GitHub Pages" by hand (Actions tab → Run workflow). The six latest posts should appear on the home page.
 - [ ] If the token ever expires (posts stop updating), generate a new one and replace `IG_ACCESS_TOKEN`.
 
-## 6. Admin area (once built) 🤝
+## 6. Admin area 🤝
 
 - [ ] Peter creates a free GitHub account, and Jack adds him as a collaborator on the repo.
+- [ ] Peter makes a fine-grained access token (this repo only, Contents: read and write, 1-year expiry) and signs in at `/admin` (see `docs/admin-guide.md`, "Signing in"). Put a calendar reminder in for the expiry date.
 - [ ] Walk Peter through `/admin`: write a test post, change a price, then undo both.
 - [ ] Give him `docs/admin-guide.md`.
 
