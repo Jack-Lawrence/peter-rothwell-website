@@ -1,5 +1,6 @@
 ---
 import Logo from './Logo.astro';
+import ThemeToggle from './ThemeToggle.astro';
 import { href } from '../lib/url';
 
 const links = [
@@ -17,33 +18,36 @@ const links = [
       <a href={href(l.path)}>{l.label}</a>
     ))}
   </nav>
-  <a class="btn cta" href={href('/#contact')}>
-    Book a free chat
-  </a>
+  <div class="actions">
+    <ThemeToggle />
+    <a class="btn cta" href={href('/#contact')}>
+      Book a free chat
+    </a>
 
-  <details class="mobile">
-    <summary aria-label="Menu">
-      <svg
-        width="26"
-        height="26"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="2"
-        aria-hidden="true"
-      >
-        <path d="M3 6h18M3 12h18M3 18h18"></path>
-      </svg>
-    </summary>
-    <nav class="sheet" aria-label="Mobile">
-      {links.map((l) => (
-        <a href={href(l.path)}>{l.label}</a>
-      ))}
-      <a class="btn" href={href('/#contact')}>
-        Book a free chat
-      </a>
-    </nav>
-  </details>
+    <details class="mobile">
+      <summary aria-label="Menu">
+        <svg
+          width="26"
+          height="26"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          aria-hidden="true"
+        >
+          <path d="M3 6h18M3 12h18M3 18h18"></path>
+        </svg>
+      </summary>
+      <nav class="sheet" aria-label="Mobile">
+        {links.map((l) => (
+          <a href={href(l.path)}>{l.label}</a>
+        ))}
+        <a class="btn" href={href('/#contact')}>
+          Book a free chat
+        </a>
+      </nav>
+    </details>
+  </div>
 </header>
 
 <script>
@@ -88,7 +92,12 @@ const links = [
     padding-block: 6px;
   }
   .links a:hover {
-    color: #fff;
+    color: var(--chalk);
+  }
+  .actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
   }
   .mobile {
     display: none;
@@ -137,6 +146,20 @@ const links = [
     }
     .mobile {
       display: block;
+    }
+  }
+  /* Very narrow screens (or 400% zoom): tighter spacing so everything fits. */
+  @media (max-width: 360px) {
+    .header {
+      gap: 12px;
+    }
+    .actions {
+      gap: 8px;
+    }
+    summary,
+    .actions :global(.theme-toggle) {
+      width: 44px;
+      height: 44px;
     }
   }
 </style>

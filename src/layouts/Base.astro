@@ -65,6 +65,16 @@ const share = image ?? {
     <meta property="og:image:alt" content={share.alt} />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="theme-color" content="#1b211e" />
+    <script is:inline>
+      // Light or dark mode, chosen with the sun/moon button. Set before the page
+      // draws so it never flashes the wrong colours. Dark is the default design.
+      try {
+        if (localStorage.getItem('rr-theme') === 'light') {
+          document.documentElement.dataset.theme = 'light';
+          document.querySelector('meta[name="theme-color"]').content = '#f7f7f5';
+        }
+      } catch {}
+    </script>
     {PREVIEW && <meta name="robots" content="noindex, nofollow" />}
     <slot name="head" />
     {PREVIEW && <script is:inline>
@@ -115,7 +125,7 @@ const share = image ?? {
     top: -60px;
     z-index: 10;
     background: var(--gorse);
-    color: var(--granite);
+    color: var(--ink);
     padding: 10px 16px;
     border-radius: 6px;
     font-weight: 700;

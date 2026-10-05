@@ -22,12 +22,32 @@ import { href } from '../lib/url';
     text-decoration: none;
   }
   svg {
-    color: var(--gorse);
+    color: var(--accent);
     flex: none;
   }
   .display {
     font-size: 26px;
     font-weight: 800;
     letter-spacing: 0.04em;
+    white-space: nowrap;
+  }
+  /* Phones: leave room for the light/dark and menu buttons. */
+  @media (max-width: 420px) {
+    .logo {
+      gap: 8px;
+    }
+    .display {
+      font-size: 21px;
+      letter-spacing: 0.02em;
+    }
+  }
+  @media (max-width: 360px) {
+    svg {
+      width: 28px;
+      height: 28px;
+    }
+    .display {
+      font-size: 17px;
+    }
   }
 </style>

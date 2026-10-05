@@ -7,114 +7,229 @@ import { href, telHref } from '../lib/url';
 const { contact, location } = site;
 const policies = (await getCollection('legal')).sort((a, b) => a.data.order - b.data.order);
 const year = new Date().getFullYear();
+
+// Stroke icons for the ways to get in touch (24×24).
+const icons = {
+  phone: 'M5 4h3l2 5-2.5 1.5a11 11 0 0 0 6 6L15 14l5 2v3a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z',
+  mail: 'M4 6h16v12H4zM4 7l8 6 8-6',
+  insta:
+    'M7 3h10a4 4 0 0 1 4 4v10a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V7a4 4 0 0 1 4-4zM12 8.5a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7zM17.3 6.7h.01',
+  pin: 'M12 21s-6.5-6-6.5-11a6.5 6.5 0 0 1 13 0c0 5-6.5 11-6.5 11zM12 7.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5z',
+  globe:
+    'M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zM3 12h18M12 3c2.5 2.7 3.8 5.7 3.8 9s-1.3 6.3-3.8 9c-2.5-2.7-3.8-5.7-3.8-9S9.5 5.7 12 3z',
+};
 ---
 
 <footer id="contact" class="section footer">
   <div class="wrap grid">
     <div class="intro">
-      <h2 class="display big">
-        Your next
-        <br />
-        start line
-        <br />
-        starts here.
-      </h2>
-      <div class="contact">
-        <span class="mono">{contact.bookingNote}, or send an enquiry</span>
-        <a class="phone" href={telHref(contact.phone)}>
-          {contact.phone.replace(/ /g, ' ')}
-        </a>
-        <a class="email" href={`mailto:${contact.email}`}>
-          {contact.email}
-        </a>
-        <a href={`https://www.instagram.com/${contact.instagram}/`} target="_blank" rel="noopener">
-          Instagram @{contact.instagram}
-          <span class="visually-hidden"> (opens in a new tab)</span>
-        </a>
-        <p class="addr">
-          In person: {location.address}
-          <br />
-          or online, anywhere
-        </p>
-      </div>
+      <span class="mono eyebrow">Get in touch</span>
+      <h2 class="display big">Your next start line starts here.</h2>
+      <p class="lede">Every plan starts with a free 15-minute chat. {contact.bookingNote}, or send an enquiry.</p>
+
+      <ul class="ways">
+        <li>
+          <span class="ico" aria-hidden="true">
+            <svg viewBox="0 0 24 24">
+              <path d={icons.phone}></path>
+            </svg>
+          </span>
+          <span class="mono label">Text or call</span>
+          <a class="value big-value" href={telHref(contact.phone)}>
+            {contact.phone.replace(/ /g, ' ')}
+          </a>
+        </li>
+        <li>
+          <span class="ico" aria-hidden="true">
+            <svg viewBox="0 0 24 24">
+              <path d={icons.mail}></path>
+            </svg>
+          </span>
+          <span class="mono label">Email</span>
+          <a class="value" href={`mailto:${contact.email}`}>
+            {contact.email}
+          </a>
+        </li>
+        <li>
+          <span class="ico" aria-hidden="true">
+            <svg viewBox="0 0 24 24">
+              <path d={icons.insta}></path>
+            </svg>
+          </span>
+          <span class="mono label">Instagram</span>
+          <a class="value" href={`https://www.instagram.com/${contact.instagram}/`} target="_blank" rel="noopener">
+            @{contact.instagram}
+            <span class="visually-hidden"> (opens in a new tab)</span>
+          </a>
+        </li>
+        <li>
+          <span class="ico" aria-hidden="true">
+            <svg viewBox="0 0 24 24">
+              <path d={icons.pin}></path>
+            </svg>
+          </span>
+          <span class="mono label">Train in person</span>
+          <span class="value">
+            {location.address}
+            <span class="sub">
+              Inside {location.place}
+              {' · '}
+              <a href={location.mapsUrl} target="_blank" rel="noopener">
+                Get directions<span class="visually-hidden"> (opens Google Maps in a new tab)</span>
+              </a>
+            </span>
+          </span>
+        </li>
+        <li>
+          <span class="ico" aria-hidden="true">
+            <svg viewBox="0 0 24 24">
+              <path d={icons.globe}></path>
+            </svg>
+          </span>
+          <span class="mono label">Or train online</span>
+          <span class="value">Anywhere you run</span>
+        </li>
+      </ul>
     </div>
+
     <EnquiryForm />
   </div>
-  <div class="wrap legal">
-    <span>
-      © {year} {site.name} · Edinburgh
-    </span>
-    <nav aria-label="Policies">
-      <ul>
-        {policies.map((p) => (
-          <li>
-            <a href={href(`/${p.id}/`)}>{p.data.title}</a>
-          </li>
-        ))}
-      </ul>
-    </nav>
+
+  <div class="bottom">
+    <div class="wrap bottom-inner">
+      <span>
+        © {year} {site.name} · Edinburgh
+      </span>
+      <nav aria-label="Policies">
+        <ul>
+          {policies.map((p) => (
+            <li>
+              <a href={href(`/${p.id}/`)}>{p.data.title}</a>
+            </li>
+          ))}
+        </ul>
+      </nav>
+    </div>
   </div>
 </footer>
 
 <style>
   .footer {
+    --rule: color-mix(in srgb, var(--ink) 22%, transparent);
     background: var(--gorse);
-    color: var(--granite);
-    padding-bottom: 48px;
+    color: var(--ink);
+    padding-bottom: 0;
   }
   .grid {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
-    gap: clamp(40px, 5vw, 72px);
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+    gap: clamp(40px, 5vw, 80px);
     align-items: start;
+    padding-bottom: var(--section);
   }
+
+  /* ---------- Left: heading and ways to get in touch ---------- */
   .intro {
     display: flex;
     flex-direction: column;
-    gap: 40px;
+  }
+  .eyebrow {
+    margin-bottom: 16px;
   }
   .big {
-    font-size: clamp(60px, 7.5vw, 116px);
+    font-size: clamp(52px, 5.6vw, 88px);
+    max-width: 9em;
   }
-  .contact {
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
+  .lede {
+    margin: 20px 0 36px;
     font-size: 18px;
+    line-height: 1.5;
+    max-width: 30em;
   }
-  .contact a {
-    text-decoration: none;
+  .ways {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    border-top: 1.5px solid var(--rule);
   }
-  .contact a:hover {
-    text-decoration: underline;
+  .ways li {
+    display: grid;
+    grid-template-columns: 44px minmax(0, 1fr);
+    grid-template-areas: 'ico label' 'ico value';
+    column-gap: 16px;
+    row-gap: 2px;
+    align-items: center;
+    padding-block: 16px;
+    border-bottom: 1.5px solid var(--rule);
   }
-  .phone {
-    font-size: 28px;
-    font-weight: 700;
+  .ico {
+    grid-area: ico;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: var(--ink);
+    display: grid;
+    place-items: center;
   }
-  .email {
-    font-size: 22px;
+  .ico svg {
+    width: 22px;
+    height: 22px;
+    fill: none;
+    stroke: var(--gorse);
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .label {
+    grid-area: label;
+    font-size: 11px;
+    color: var(--ink-soft);
+  }
+  .value {
+    grid-area: value;
+    font-size: 18px;
     font-weight: 600;
+    line-height: 1.35;
     overflow-wrap: anywhere;
   }
-  .addr {
-    margin: 0;
-    font-size: 16px;
-    padding-top: 12px;
-    border-top: 1.5px solid rgb(27 33 30 / 0.3);
+  a.value,
+  .sub a {
+    text-decoration: none;
   }
-  .legal {
-    margin-top: 72px;
-    padding-top: 20px;
-    border-top: 1.5px solid rgb(27 33 30 / 0.3);
+  a.value:hover,
+  .sub a:hover {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  .big-value {
+    font-size: 24px;
+    font-weight: 800;
+  }
+  .sub {
+    display: block;
+    margin-top: 2px;
+    font-size: 15px;
+    font-weight: 500;
+  }
+  .sub a {
+    font-weight: 700;
+  }
+
+  /* ---------- Bottom bar ---------- */
+  .bottom {
+    background: var(--ink);
+    color: var(--muted-2);
     font-size: 14px;
+  }
+  .bottom-inner {
     display: flex;
     justify-content: space-between;
     align-items: center;
     gap: 12px 24px;
     flex-wrap: wrap;
+    padding-block: 20px;
   }
-  .legal ul {
+  .bottom ul {
     list-style: none;
     margin: 0;
     padding: 0;
@@ -122,19 +237,26 @@ const year = new Date().getFullYear();
     flex-wrap: wrap;
     gap: 8px 24px;
   }
-  .legal a {
+  .bottom a {
     display: inline-flex;
     align-items: center;
     min-height: 24px;
+    color: var(--paper);
     text-decoration: none;
     font-weight: 600;
   }
-  .legal a:hover {
+  .bottom a:hover {
     text-decoration: underline;
   }
+
+  /* Focus outlines: granite on gorse, gorse on the dark bottom bar. */
   .footer :focus-visible {
-    outline-color: var(--granite);
+    outline-color: var(--ink);
   }
+  .bottom :focus-visible {
+    outline-color: var(--gorse);
+  }
+
   @media (max-width: 900px) {
     .grid {
       grid-template-columns: minmax(0, 1fr);

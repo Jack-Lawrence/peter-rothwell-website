@@ -1,21 +1,34 @@
 /* Direction A "Pentlands": hill-granite greens, chalk light sections, gorse-yellow accent.
    Tall condensed display type, friendly sans body, mono for small labels. */
 :root {
-  --granite: #1b211e;
-  --granite-2: #222a26;
-  --panel: #2a332e;
-  --line: #34403a;
-  --muted: #a9b3ad;
-  --muted-2: #c4ccc7;
-  --chalk: #eeede8;
+  /* Palette. These never change. */
+  --ink: #1b211e;
+  --ink-2: #222a26;
+  --ink-panel: #2a332e;
+  --ink-line: #34403a;
+  --stone: #a9b3ad;
+  --stone-2: #c4ccc7;
+  --paper: #eeede8;
   --chalk-2: #d9dbd5;
   --chalk-line: #c9ccc6;
   --ink-soft: #3b4540;
   --ink-muted: #5c6862;
   --gorse: #e3b23c;
   --error: #a3341b; /* form errors on light backgrounds */
-  /* Edges of form fields on dark backgrounds: at least 3:1 so the field is easy to see. */
-  --field-edge: color-mix(in srgb, var(--muted) 60%, var(--granite-2));
+
+  /* Surface colours for the dark (granite) sections. Light mode swaps these,
+     so components use them rather than the palette above. */
+  --granite: var(--ink);
+  --granite-2: var(--ink-2);
+  --panel: var(--ink-panel);
+  --line: var(--ink-line);
+  --muted: var(--stone);
+  --muted-2: var(--stone-2);
+  --chalk: var(--paper);
+  /* Gorse for text and icons (darker in light mode, so it stays readable). */
+  --accent: var(--gorse);
+  /* Edges of form fields and outline buttons: at least 3:1 so they're easy to see. */
+  --field-edge: color-mix(in srgb, var(--stone) 60%, var(--ink-2));
 
   --font-display: 'Big Shoulders Display', Impact, 'Arial Narrow', sans-serif;
   --font-body: 'Figtree Variable', Figtree, system-ui, sans-serif;
@@ -28,6 +41,32 @@
   --section: clamp(72px, 9vw, 112px);
 
   color-scheme: dark;
+}
+
+/* Light mode (the sun/moon button in the header). The granite sections turn
+   light; chalk sections and the gorse contact section look the same in both. */
+:root[data-theme='light'] {
+  color-scheme: light;
+  --granite: color-mix(in srgb, var(--paper) 45%, white);
+  --granite-2: color-mix(in srgb, var(--paper) 60%, var(--chalk-2));
+  --panel: var(--chalk-2);
+  --line: var(--chalk-line);
+  --muted: var(--ink-muted);
+  --muted-2: var(--ink-soft);
+  --chalk: var(--ink);
+  --accent: color-mix(in srgb, var(--gorse) 40%, var(--ink));
+  --field-edge: color-mix(in srgb, var(--ink-muted) 85%, white);
+}
+:root[data-theme='light'] :is(.light, .footer) {
+  --granite: var(--ink);
+  --granite-2: var(--ink-2);
+  --panel: var(--ink-panel);
+  --line: var(--ink-line);
+  --muted: var(--stone);
+  --muted-2: var(--stone-2);
+  --chalk: var(--paper);
+  --accent: var(--gorse);
+  --field-edge: color-mix(in srgb, var(--stone) 60%, var(--ink-2));
 }
 
 *,
@@ -72,8 +111,12 @@ a {
 }
 
 /* Gorse doesn't stand out on light backgrounds (1.7:1), so use granite there. */
-.light :focus-visible {
-  outline-color: var(--granite);
+.light :focus-visible,
+:root[data-theme='light'] :focus-visible {
+  outline-color: var(--ink);
+}
+:root[data-theme='light'] .footer .enquiry :focus-visible {
+  outline-color: var(--gorse);
 }
 
 .wrap {
@@ -114,7 +157,7 @@ a {
 }
 
 .accent {
-  color: var(--gorse);
+  color: var(--accent);
 }
 
 .btn {
@@ -129,7 +172,7 @@ a {
   font-size: 15px;
   text-decoration: none;
   background: var(--gorse);
-  color: var(--granite);
+  color: var(--ink);
   border: 1.5px solid var(--gorse);
   transition:
     transform 0.15s ease,

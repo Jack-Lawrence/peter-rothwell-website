@@ -141,6 +141,9 @@ import testimonials from '../data/testimonials.json';
   .reviews {
     background: var(--granite-2);
   }
+  :global(:root[data-theme='light']) .reviews {
+    --bubble: color-mix(in srgb, var(--paper) 25%, white);
+  }
   .section-head {
     align-items: center;
   }
@@ -156,9 +159,9 @@ import testimonials from '../data/testimonials.json';
     width: 52px;
     height: 52px;
     border-radius: 50%;
-    border: 1.5px solid var(--gorse);
+    border: 1.5px solid var(--accent);
     background: transparent;
-    color: var(--gorse);
+    color: var(--accent);
     display: grid;
     place-items: center;
     cursor: pointer;
@@ -169,7 +172,8 @@ import testimonials from '../data/testimonials.json';
   }
   .arrow:hover:not([aria-disabled='true']) {
     background: var(--gorse);
-    color: var(--granite);
+    border-color: var(--gorse);
+    color: var(--ink);
   }
   .arrow[aria-disabled='true'] {
     opacity: 0.3;
@@ -209,8 +213,9 @@ import testimonials from '../data/testimonials.json';
     position: relative;
     flex: 1;
     margin: 0;
-    background: var(--chalk);
-    color: var(--granite);
+    /* Reviews are light cards in both modes. */
+    background: var(--bubble, var(--paper));
+    color: var(--ink);
     border-radius: 22px;
     padding: 32px 30px 30px;
     display: flex;
@@ -224,12 +229,12 @@ import testimonials from '../data/testimonials.json';
     bottom: -14px;
     width: 28px;
     height: 28px;
-    background: var(--chalk);
+    background: var(--bubble, var(--paper));
     border-radius: 0 0 6px 0;
     transform: rotate(45deg);
   }
   .quote-mark {
-    color: var(--gorse);
+    color: var(--accent);
     flex: none;
   }
   .bubble p {
@@ -250,7 +255,7 @@ import testimonials from '../data/testimonials.json';
     flex: none;
     border-radius: 50%;
     background: var(--gorse);
-    color: var(--granite);
+    color: var(--ink);
     display: grid;
     place-items: center;
     font-family: var(--font-display);
@@ -266,7 +271,7 @@ import testimonials from '../data/testimonials.json';
     font-size: 17px;
   }
   .who-text .mono {
-    color: var(--gorse);
+    color: var(--accent);
   }
 
   @media (max-width: 1000px) {
