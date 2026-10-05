@@ -4,6 +4,8 @@ date: 2026-09-21
 topic: Strength
 excerpt: "Lifting won't make you heavy and slow. Here are the three lifts I give almost every runner I coach."
 sample: true
+cover: ../../assets/demo/cover-strength.jpg
+coverAlt: A lifter gripping a loaded barbell at the start of a deadlift
 ---
 
 Most of the runners I coach come to me with the same worry: "If I lift, won't I get heavy and slow?" The short answer is no. Two or three short strength sessions a week make you more resilient and more efficient, especially late in a race.

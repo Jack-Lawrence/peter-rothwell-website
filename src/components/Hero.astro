@@ -1,5 +1,6 @@
 ---
 import Photo from './Photo.astro';
+import heroPhoto from '../assets/demo/hero.jpg';
 import site from '../data/site.json';
 import { href } from '../lib/url';
 
@@ -22,6 +23,9 @@ const last = headline.length - 1;
 
   <Photo
     class="hero-photo"
+    src={heroPhoto}
+    alt="A runner in a red top running along a dark riverside path"
+    position="80% 50%"
     priority
     sizes="(max-width: 900px) 100vw, min(37vw, 450px)"
     label="Peter on a hill trail, mid-run. Full-bleed, high-contrast action shot.">

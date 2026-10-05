@@ -81,13 +81,14 @@ Peter's account needs to be a **Business or Creator** account. Check in Instagra
 ## 8. Pre-launch checks 🧑‍💻
 
 - [ ] All photos in place, with alt text.
+- [ ] Replace all demo photos (src/assets/demo/) with Peter's own, and delete the folder. The hero, About portrait and blog covers import from it, so the build will point out anything missed.
 - [ ] Sample blog posts removed or replaced.
 - [ ] No yellow placeholders left on the policy pages (search the repo for `<mark>`).
 - [ ] Prices and contact details match what Peter currently charges.
 - [ ] Enquiry form: test message received.
 - [ ] Instagram grid shows real posts.
 - [ ] Old Wix addresses redirect: `/english-privacy-policy`, `/english-terms-conditions`, `/english-refund-policy`, `/accessibility-statement`.
-- [ ] The `noindex` preview setting is off for the live build, and the canonical URLs use `https://www.rothwellsrunning.com`.
+- [ ] The `noindex` preview setting is off for the live build (remove `PREVIEW: 'true'` from the deploy workflow), and the canonical URLs use `https://www.rothwellsrunning.com`.
 - [ ] Check on a real iPhone and Android phone, plus desktop Chrome, Safari and Firefox.
 - [ ] Lighthouse on the live URL (mobile): all four scores 90+.
 

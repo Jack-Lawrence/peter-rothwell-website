@@ -1,5 +1,6 @@
 ---
 import Photo from './Photo.astro';
+import portrait from '../assets/demo/portrait.jpg';
 import site from '../data/site.json';
 
 const { name, paragraphs, stats } = site.about as {
@@ -13,6 +14,9 @@ const { name, paragraphs, stats } = site.about as {
   <div class="wrap about">
     <Photo
       class="portrait"
+      src={portrait}
+      alt="A runner in a white vest looking out over the hills, seen from behind"
+      position="50% 35%"
       sizes="(max-width: 900px) 100vw, min(42vw, 510px)"
       label="Portrait of Peter, ideally at a race finish or on a summit." />
     <div class="text">

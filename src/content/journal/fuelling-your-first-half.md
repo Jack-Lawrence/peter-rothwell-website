@@ -4,6 +4,8 @@ date: 2026-08-18
 topic: Fuelling
 excerpt: "What to eat the night before, the morning of, and during your first 21.1 km."
 sample: true
+cover: ../../assets/demo/cover-fuel.jpg
+coverAlt: A breakfast bowl of granola, blueberries, banana and strawberries
 ---
 
 A half marathon is long enough that fuelling matters, but short enough that you don't need to overthink it.

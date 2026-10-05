@@ -4,6 +4,8 @@ date: 2026-09-03
 topic: Race report
 excerpt: "The legs go long before the mind does, if you've trained the mind. A few notes from the back end of a long race."
 sample: true
+cover: ../../assets/demo/cover-ultra.jpg
+coverAlt: Trail runners climbing a grassy path below jagged mountain peaks
 ---
 
 Somewhere past the marathon mark, an ultra stops being a running race and becomes a problem-solving one. What to eat, when to walk, how to keep moving when every part of you wants to sit down.
