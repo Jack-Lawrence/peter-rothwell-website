@@ -3,7 +3,8 @@
 //   IG_ACCESS_TOKEN=... node scripts/fetch-instagram.mjs
 //
 // Writes src/data/instagram.json and downloads each image into
-// public/instagram/, because Instagram's image URLs expire after a few days.
+// src/assets/instagram/ (gitignored), because Instagram's image URLs expire
+// after a few days. The build then resizes them like any other photo.
 // Without a token it does nothing, so the site still builds with placeholders.
 //
 // The token is a long-lived token from the Instagram API with Instagram Login
@@ -16,7 +17,7 @@ import path from 'node:path';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const dataFile = path.join(root, 'src/data/instagram.json');
-const imageDir = path.join(root, 'public/instagram');
+const imageDir = path.join(root, 'src/assets/instagram');
 const API = 'https://graph.instagram.com';
 const LIMIT = 6;
 
@@ -65,7 +66,7 @@ for (const item of data.slice(0, LIMIT)) {
     permalink: item.permalink,
     caption: item.caption ?? '',
     timestamp: item.timestamp,
-    image: `/instagram/${file}`,
+    image: file,
   });
 }
 

@@ -11,7 +11,10 @@ const { name, paragraphs, stats } = site.about as {
 
 <section id="about" class="section">
   <div class="wrap about">
-    <Photo class="portrait" label="Portrait of Peter, ideally at a race finish or on a summit." />
+    <Photo
+      class="portrait"
+      sizes="(max-width: 900px) 100vw, min(42vw, 510px)"
+      label="Portrait of Peter, ideally at a race finish or on a summit." />
     <div class="text">
       <span class="mono accent">Meet your coach</span>
       <h2 class="display h2">{name}</h2>

@@ -10,6 +10,10 @@ const to = (/** @type {string} */ path) => base.replace(/\/$/, '') + path;
 export default defineConfig({
   site: process.env.SITE_URL || 'https://www.rothwellsrunning.com',
   base,
+  // Inline the (small) CSS into each page so it doesn't block the first paint.
+  build: {
+    inlineStylesheets: 'always',
+  },
   integrations: [
     sitemap({
       // Leave out the old Wix redirect pages and the admin area.

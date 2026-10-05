@@ -4,6 +4,8 @@ import '@fontsource/big-shoulders-display/900';
 import '@fontsource-variable/figtree';
 import '@fontsource/jetbrains-mono/500';
 import '../styles/global.css';
+// The hero headline's font, preloaded so the first screen doesn't wait for it.
+import headlineFont from '@fontsource/big-shoulders-display/files/big-shoulders-display-latin-900-normal.woff2?url';
 import Header from '../components/Header.astro';
 import PreviewBar from '../components/PreviewBar.astro';
 import ContactFooter from '../components/ContactFooter.astro';
@@ -36,6 +38,7 @@ const share = image ?? {
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{pageTitle}</title>
+    <link rel="preload" href={headlineFont} as="font" type="font/woff2" crossorigin />
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
     <link rel="icon" type="image/svg+xml" href={href('/favicon.svg')} />

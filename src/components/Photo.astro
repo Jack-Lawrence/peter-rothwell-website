@@ -1,29 +1,59 @@
 ---
 // Shows a real image when one is supplied, otherwise a labelled placeholder
 // so the layout can be reviewed before the photography is ready.
-import { Image } from 'astro:assets';
+// Images are resized at build time and served as AVIF/WebP with a JPEG fallback.
+import { Picture } from 'astro:assets';
 import type { ImageMetadata } from 'astro';
 
 interface Props {
-  src?: ImageMetadata | string;
+  src?: ImageMetadata;
   alt?: string;
   label?: string;
   class?: string;
   tone?: 'dark' | 'light';
+  /** How wide the image shows at each screen size, e.g. "(max-width: 900px) 100vw, 400px". */
   sizes?: string;
+  /** Widths (in pixels) to generate; pick enough to cover `sizes` on high-density screens. */
+  widths?: number[];
+  /** Crop to a fixed size instead of using `widths` (e.g. 400×400 squares). */
+  width?: number;
+  height?: number;
+  /** Focal point kept in view when the box crops the photo, e.g. "50% 30%" or "left top". */
+  position?: string;
+  /** For the main image at the top of a page: load it straight away instead of lazily. */
+  priority?: boolean;
 }
 
-const { src, alt = '', label, class: className = '', tone = 'dark', sizes } = Astro.props;
+const {
+  src,
+  alt = '',
+  label,
+  class: className = '',
+  tone = 'dark',
+  sizes,
+  widths = [400, 800, 1200, 1600],
+  width,
+  height,
+  position,
+  priority = false,
+} = Astro.props;
+
+// The plain <img> fallback (for browsers without AVIF/WebP) uses the largest width, not the original.
+const size = width && height ? { width, height, fit: 'cover' as const } : { widths, sizes, width: Math.max(...widths) };
 ---
 
-<div class:list={['photo', `photo--${tone}`, className]}>
+<div class:list={['photo', `photo--${tone}`, className]} style={position && `--position: ${position}`}>
   {
     src ? (
-      typeof src === 'string' ? (
-        <img src={src} alt={alt} loading="lazy" decoding="async" />
-      ) : (
-        <Image src={src} alt={alt} sizes={sizes} widths={[400, 800, 1200]} />
-      )
+      <Picture
+        src={src}
+        alt={alt}
+        formats={['avif', 'webp']}
+        {...size}
+        loading={priority ? 'eager' : 'lazy'}
+        fetchpriority={priority ? 'high' : 'auto'}
+        decoding={priority ? 'sync' : 'async'}
+      />
     ) : (
       label && (
         <span class="label">
@@ -54,12 +84,14 @@ const { src, alt = '', label, class: className = '', tone = 'dark', sizes } = As
     background-image: repeating-linear-gradient(135deg, rgb(27 33 30 / 0.05) 0 2px, transparent 2px 14px);
     color: var(--ink-muted);
   }
+  /* The image always covers its box, whatever shape the layout gives it. */
   .photo :global(img) {
     position: absolute;
     inset: 0;
     width: 100%;
     height: 100%;
     object-fit: cover;
+    object-position: var(--position, 50% 50%);
   }
   .label {
     padding: 18px;

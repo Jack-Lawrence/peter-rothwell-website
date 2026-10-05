@@ -40,7 +40,15 @@ const dateLabel = date.toLocaleDateString('en-GB', { day: 'numeric', month: 'lon
     {
       cover && (
         <div class="wrap">
-          <Photo class="cover" tone="light" src={cover} alt={coverAlt ?? ''} sizes="(max-width: 1240px) 100vw, 1240px" />
+          <Photo
+            class="cover"
+            tone="light"
+            src={cover}
+            alt={coverAlt ?? ''}
+            priority
+            sizes="(max-width: 1240px) 100vw, 1240px"
+            widths={[640, 960, 1240, 1860, 2480]}
+          />
         </div>
       )
     }

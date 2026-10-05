@@ -20,7 +20,11 @@ const last = headline.length - 1;
     </div>
   </div>
 
-  <Photo class="hero-photo" label="Peter on a hill trail, mid-run. Full-bleed, high-contrast action shot.">
+  <Photo
+    class="hero-photo"
+    priority
+    sizes="(max-width: 900px) 100vw, min(37vw, 450px)"
+    label="Peter on a hill trail, mid-run. Full-bleed, high-contrast action shot.">
     {
       badge.value && (
         <div class="badge">

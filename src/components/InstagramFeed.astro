@@ -1,21 +1,28 @@
 ---
+import type { ImageMetadata } from 'astro';
 import Photo from './Photo.astro';
 import site from '../data/site.json';
 import instagram from '../data/instagram.json';
-import { href } from '../lib/url';
 
 interface Post {
   id: string;
   permalink: string;
+  /** File name in src/assets/instagram/ */
   image: string;
   caption?: string;
 }
+
+// Images downloaded by the fetch script; posts whose image is missing are skipped.
+const images = import.meta.glob<{ default: ImageMetadata }>('../assets/instagram/*.{jpg,jpeg,png,webp}', {
+  eager: true,
+});
+const imageFor = (file: string) => images[`../assets/instagram/${file}`]?.default;
 
 const handle = site.contact.instagram;
 const profile = `https://www.instagram.com/${handle}/`;
 // Filled by scripts/fetch-instagram.mjs at build time. Until a token is set up,
 // show six placeholder tiles.
-const posts = (instagram.posts as Post[]).slice(0, 6);
+const posts = (instagram.posts as Post[]).filter((p) => imageFor(p.image)).slice(0, 6);
 const placeholders = posts.length === 0 ? 6 : 0;
 
 function alt(caption?: string) {
@@ -39,7 +46,7 @@ function alt(caption?: string) {
         posts.map((p) => (
           <li>
             <a href={p.permalink} target="_blank" rel="noopener">
-              <Photo class="tile" src={href(p.image)} alt={alt(p.caption)} />
+              <Photo class="tile" src={imageFor(p.image)} alt={alt(p.caption)} width={400} height={400} />
             </a>
           </li>
         ))
