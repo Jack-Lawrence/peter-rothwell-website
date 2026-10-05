@@ -30,6 +30,9 @@
     "area": "Meadowbank, Edinburgh",
     "place": "Meadowbank Shopping Park",
     "address": "1 Moray Park, Meadowbank, Edinburgh EH7 5TS",
+    "street": "1 Moray Park",
+    "locality": "Edinburgh",
+    "postcode": "EH7 5TS",
     "mapsUrl": "https://www.google.com/maps/search/?api=1&query=1+Moray+Park+Meadowbank+Edinburgh+EH7+5TS"
   }
 }

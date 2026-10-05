@@ -8,17 +8,26 @@ import Header from '../components/Header.astro';
 import PreviewBar from '../components/PreviewBar.astro';
 import ContactFooter from '../components/ContactFooter.astro';
 import site from '../data/site.json';
-import { href } from '../lib/url';
+import { absolute, href } from '../lib/url';
 import { PREVIEW } from 'astro:env/server';
 
 interface Props {
   title?: string;
   description?: string;
+  /** Share image (e.g. a blog post's cover); defaults to public/og-default.png. */
+  image?: { url: string; width: number; height: number; alt: string };
+  type?: 'website' | 'article';
 }
 
-const { title, description = site.description } = Astro.props;
+const { title, description = site.description, image, type = 'website' } = Astro.props;
 const pageTitle = title ? `${title} | ${site.name}` : `${site.name} | Running & strength coaching, Edinburgh`;
 const canonical = new URL(Astro.url.pathname, Astro.site);
+const share = image ?? {
+  url: absolute('/og-default.png'),
+  width: 1200,
+  height: 630,
+  alt: `${site.name}: running & strength coaching in Edinburgh and online`,
+};
 ---
 
 <!doctype html>
@@ -30,11 +39,23 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
     <link rel="icon" type="image/svg+xml" href={href('/favicon.svg')} />
+    <link rel="apple-touch-icon" href={href('/apple-touch-icon.png')} />
+    <link rel="manifest" href={href('/site.webmanifest')} />
+    <link rel="sitemap" href={href('/sitemap-index.xml')} />
     <meta property="og:title" content={pageTitle} />
     <meta property="og:description" content={description} />
-    <meta property="og:type" content="website" />
+    <meta property="og:type" content={type} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:site_name" content={site.name} />
+    <meta property="og:locale" content="en_GB" />
+    <meta property="og:image" content={share.url} />
+    <meta property="og:image:width" content={String(share.width)} />
+    <meta property="og:image:height" content={String(share.height)} />
+    <meta property="og:image:alt" content={share.alt} />
+    <meta name="twitter:card" content="summary_large_image" />
     <meta name="theme-color" content="#1b211e" />
     {PREVIEW && <meta name="robots" content="noindex, nofollow" />}
+    <slot name="head" />
     {
       PREVIEW && (
         <script is:inline>

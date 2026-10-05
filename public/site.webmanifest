@@ -1,0 +1,14 @@
+{
+  "name": "Rothwells Running",
+  "short_name": "Rothwells",
+  "description": "Running and strength coaching in Edinburgh and online.",
+  "start_url": "./",
+  "display": "browser",
+  "background_color": "#1b211e",
+  "theme_color": "#1b211e",
+  "icons": [
+    { "src": "favicon.svg", "type": "image/svg+xml", "sizes": "any" },
+    { "src": "icon-192.png", "type": "image/png", "sizes": "192x192" },
+    { "src": "icon-512.png", "type": "image/png", "sizes": "512x512" }
+  ]
+}

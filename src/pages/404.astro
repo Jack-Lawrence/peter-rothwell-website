@@ -1,0 +1,42 @@
+---
+import Base from '../layouts/Base.astro';
+import { href } from '../lib/url';
+---
+
+<Base title="Page not found" description="This page doesn't exist. Head back to the Rothwells Running home page.">
+  <section class="wrap lost">
+    <span class="mono accent">Error 404 · Page not found</span>
+    <h1 class="display">Wrong turn</h1>
+    <p>This page doesn't exist, or it has moved. Let's get you back on the trail.</p>
+    <div class="ctas">
+      <a class="btn" href={href('/')}>Back to the home page</a>
+      <a class="btn btn--ghost" href={href('/#coaching')}>See coaching plans</a>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .lost {
+    min-height: calc(100svh - var(--header-h) - var(--preview-h));
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 28px;
+    padding-block: 48px 96px;
+  }
+  h1 {
+    font-size: clamp(88px, 18vw, 240px);
+  }
+  p {
+    margin: 0;
+    font-size: 20px;
+    max-width: 30em;
+    color: var(--muted-2);
+  }
+  .ctas {
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+  }
+</style>

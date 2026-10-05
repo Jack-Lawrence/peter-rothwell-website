@@ -1,10 +1,13 @@
 ---
 import type { GetStaticPaths } from 'astro';
 import { render } from 'astro:content';
+import { getImage } from 'astro:assets';
 import Base from '../../layouts/Base.astro';
 import Photo from '../../components/Photo.astro';
 import { getPosts } from '../../lib/journal';
+import JsonLd from '../../components/JsonLd.astro';
 import { href } from '../../lib/url';
+import { postSchema } from '../../lib/schema';
 
 export const getStaticPaths = (async () => {
   const posts = await getPosts();
@@ -14,10 +17,19 @@ export const getStaticPaths = (async () => {
 const { post } = Astro.props;
 const { Content } = await render(post);
 const { title, topic, date, excerpt, cover, coverAlt } = post.data;
+// Share image: the cover, cropped to the 1200×630 social media size.
+const shareImage = cover && (await getImage({ src: cover, width: 1200, height: 630, fit: 'cover', format: 'jpg' }));
+const share = shareImage && {
+  url: new URL(shareImage.src, Astro.site).href,
+  width: 1200,
+  height: 630,
+  alt: coverAlt ?? title,
+};
 const dateLabel = date.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
 ---
 
-<Base title={title} description={excerpt}>
+<Base title={title} description={excerpt} image={share} type="article">
+  <JsonLd slot="head" data={postSchema({ title, excerpt, date, path: `/journal/${post.id}/`, image: share?.url })} />
   <article class="light section">
     <div class="wrap narrow">
       <a class="back" href={href('/journal/')}>← All posts</a>

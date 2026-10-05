@@ -1,5 +1,6 @@
 // @ts-check
 import { defineConfig, envField } from 'astro/config';
+import sitemap from '@astrojs/sitemap';
 
 // SITE_URL and BASE_PATH are set by the GitHub Pages workflow, where the site
 // lives under /<repo>/. On Cloudflare (or locally) the defaults apply.
@@ -9,6 +10,12 @@ const to = (/** @type {string} */ path) => base.replace(/\/$/, '') + path;
 export default defineConfig({
   site: process.env.SITE_URL || 'https://www.rothwellsrunning.com',
   base,
+  integrations: [
+    sitemap({
+      // Leave out the old Wix redirect pages and the admin area.
+      filter: (page) => !/\/(english-[^/]+|accessibility-statement|admin)(\/|$)/.test(new URL(page).pathname),
+    }),
+  ],
   env: {
     schema: {
       // PREVIEW=true (set by the GitHub Pages workflow) hides the site from
