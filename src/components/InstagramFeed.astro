@@ -33,6 +33,17 @@ function alt(caption?: string) {
   const text = caption.split('\n')[0];
   return text.length > 120 ? `${text.slice(0, 117)}…` : text;
 }
+
+// The start of the caption, shown over the photo on hover. Hashtags are dropped
+// (they're usually a block at the end) and the CSS clamps it to a few lines.
+function preview(caption?: string) {
+  if (!caption) return '';
+  const text = caption
+    .replace(/#[\p{L}\p{N}_]+/gu, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+  return text.length > 160 ? `${text.slice(0, 157).trimEnd()}…` : text;
+}
 ---
 
 <section class="section insta" aria-labelledby="insta-title">
@@ -49,59 +60,70 @@ function alt(caption?: string) {
         <span class="visually-hidden"> (opens in a new tab)</span>
       </a>
     </div>
-    <ul class="grid">
-      {posts.map((p) => (
-        <li>
-          <a href={p.permalink} target="_blank" rel="noopener">
-            <Photo class="tile" src={imageFor(p.image)} alt={alt(p.caption)} width={400} height={400} />
-            <span class="visually-hidden"> (opens in a new tab)</span>
-          </a>
-        </li>
-      ))}
-      {demo.map((p) => (
-        <li>
-          <a href={profile} target="_blank" rel="noopener">
-            <Photo class="tile" src={p.image} alt={p.alt} width={400} height={400} />
-            <span class="visually-hidden"> (opens in a new tab)</span>
-          </a>
-        </li>
-      ))}
-      {Array.from({ length: placeholders }, (_, i) => (
-        <li>
-          <a
-            href={profile}
-            target="_blank"
-            rel="noopener"
-            aria-label={`Instagram post ${i + 1} (placeholder, opens in a new tab)`}
-          >
-            <Photo class="tile" />
-          </a>
-        </li>
-      ))}
-    </ul>
-    {demo.length > 0 && (
-      <p class="demo-note">
-        Preview: this grid fills with Peter's latest Instagram posts automatically once connected.
-      </p>
-    )}
   </div>
+  <!-- One full-width row; on phones it scrolls sideways. -->
+  <ul class="grid">
+    {posts.map((p) => (
+      <li>
+        <a href={p.permalink} target="_blank" rel="noopener">
+          <Photo class="tile" src={imageFor(p.image)} alt={alt(p.caption)} width={600} height={600} />
+          {preview(p.caption) && (
+            <span class="caption" aria-hidden="true">
+              {preview(p.caption)}
+            </span>
+          )}
+          <span class="visually-hidden"> (opens in a new tab)</span>
+        </a>
+      </li>
+    ))}
+    {demo.map((p) => (
+      <li>
+        <a href={profile} target="_blank" rel="noopener">
+          <Photo class="tile" src={p.image} alt={p.alt} width={600} height={600} />
+          {/* Stand-in caption so the hover can be reviewed before the feed is connected. */}
+          <span class="caption" aria-hidden="true">
+            {p.alt}
+          </span>
+          <span class="visually-hidden"> (opens in a new tab)</span>
+        </a>
+      </li>
+    ))}
+    {Array.from({ length: placeholders }, (_, i) => (
+      <li>
+        <a
+          href={profile}
+          target="_blank"
+          rel="noopener"
+          aria-label={`Instagram post ${i + 1} (placeholder, opens in a new tab)`}
+        >
+          <Photo class="tile" />
+        </a>
+      </li>
+    ))}
+  </ul>
+  {demo.length > 0 && (
+    <div class="wrap">
+      <p class="demo-note">Preview: this row fills with Peter's latest Instagram posts automatically once connected.</p>
+    </div>
+  )}
 </section>
 
 <style>
   .insta {
-    padding-bottom: 72px;
+    border-top: 1px solid var(--line);
   }
   .head {
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 10px;
   }
   .head .mono {
     color: var(--muted);
   }
   .h2 {
     text-transform: none;
-    font-size: clamp(40px, 5.5vw, 80px);
+    letter-spacing: 0;
+    font-size: clamp(30px, 3.2vw, 44px);
     overflow-wrap: anywhere;
   }
   .grid {
@@ -109,28 +131,86 @@ function alt(caption?: string) {
     margin: 0;
     padding: 0;
     display: grid;
-    grid-template-columns: repeat(6, minmax(0, 1fr));
-    gap: 8px;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(0, 1fr);
+    gap: 6px;
+    padding-inline: 6px;
   }
   .grid a {
+    position: relative;
     display: block;
+    overflow: hidden;
   }
   .grid :global(.tile) {
     aspect-ratio: 1 / 1;
-    border-radius: 2px;
-    transition: opacity 0.15s ease;
   }
-  .grid a:hover :global(.tile) {
-    opacity: 0.85;
+  .grid :global(.tile img) {
+    transition: transform 0.4s ease;
+  }
+  /* The start of the caption fades up over the bottom of the photo. */
+  .caption {
+    position: absolute;
+    inset: auto 0 0;
+    padding: 48px 18px 16px;
+    background: linear-gradient(to top, color-mix(in srgb, var(--ink) 88%, transparent), transparent);
+    color: var(--paper);
+    font-size: 15px;
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+    overflow: hidden;
+    opacity: 0;
+    transform: translateY(8px);
+    transition:
+      opacity 0.2s ease,
+      transform 0.2s ease;
+  }
+  @media (hover: hover) {
+    .grid a:hover .caption {
+      opacity: 1;
+      transform: none;
+    }
+    .grid a:hover :global(.tile img) {
+      transform: scale(1.03);
+    }
+  }
+  .grid a:focus-visible .caption {
+    opacity: 1;
+    transform: none;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .caption,
+    .grid :global(.tile img) {
+      transition: none;
+    }
+    .grid a:hover :global(.tile img) {
+      transform: none;
+    }
   }
   .demo-note {
     margin: 16px 0 0;
     font-size: 14px;
     color: var(--muted);
   }
+  /* Narrower screens: bigger tiles in a row that scrolls sideways (not the page). */
   @media (max-width: 900px) {
     .grid {
-      grid-template-columns: repeat(3, minmax(0, 1fr));
+      grid-auto-columns: 40%;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      scroll-padding-inline: var(--gutter);
+      padding-inline: var(--gutter);
+      scrollbar-width: none;
+    }
+    .grid li {
+      scroll-snap-align: start;
+    }
+  }
+  @media (max-width: 560px) {
+    .grid {
+      grid-auto-columns: 68%;
     }
   }
 </style>

@@ -15,8 +15,6 @@ const icons = {
   insta:
     'M7 3h10a4 4 0 0 1 4 4v10a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V7a4 4 0 0 1 4-4zM12 8.5a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7zM17.3 6.7h.01',
   pin: 'M12 21s-6.5-6-6.5-11a6.5 6.5 0 0 1 13 0c0 5-6.5 11-6.5 11zM12 7.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5z',
-  globe:
-    'M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zM3 12h18M12 3c2.5 2.7 3.8 5.7 3.8 9s-1.3 6.3-3.8 9c-2.5-2.7-3.8-5.7-3.8-9S9.5 5.7 12 3z',
 };
 ---
 
@@ -68,7 +66,7 @@ const icons = {
               <path d={icons.pin}></path>
             </svg>
           </span>
-          <span class="mono label">Train in person</span>
+          <span class="mono label">Train in person or online</span>
           <span class="value">
             {location.address}
             <span class="sub">
@@ -78,16 +76,8 @@ const icons = {
                 Get directions<span class="visually-hidden"> (opens Google Maps in a new tab)</span>
               </a>
             </span>
+            <span class="sub">Or online, wherever you run</span>
           </span>
-        </li>
-        <li>
-          <span class="ico" aria-hidden="true">
-            <svg viewBox="0 0 24 24">
-              <path d={icons.globe}></path>
-            </svg>
-          </span>
-          <span class="mono label">Or train online</span>
-          <span class="value">Anywhere you run</span>
         </li>
       </ul>
     </div>
@@ -124,7 +114,9 @@ const icons = {
     display: grid;
     grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
     gap: clamp(40px, 5vw, 80px);
-    align-items: start;
+    /* Both columns end at the same line: the form stretches to the height of the
+       left column, and the contact list sits at the bottom of the left column. */
+    align-items: stretch;
     padding-bottom: var(--section);
   }
 
@@ -141,14 +133,14 @@ const icons = {
     max-width: 9em;
   }
   .lede {
-    margin: 20px 0 36px;
+    margin: 20px 0 32px;
     font-size: 18px;
     line-height: 1.5;
     max-width: 30em;
   }
   .ways {
     list-style: none;
-    margin: 0;
+    margin: auto 0 0;
     padding: 0;
     border-top: 1.5px solid var(--rule);
   }
@@ -159,14 +151,13 @@ const icons = {
     column-gap: 16px;
     row-gap: 2px;
     align-items: center;
-    padding-block: 16px;
+    padding-block: 12px;
     border-bottom: 1.5px solid var(--rule);
   }
   .ico {
     grid-area: ico;
     width: 44px;
     height: 44px;
-    border-radius: 50%;
     background: var(--ink);
     display: grid;
     place-items: center;

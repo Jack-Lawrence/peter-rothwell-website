@@ -1,0 +1,160 @@
+---
+// A hand-drawn street map of the area around the studio (Meadowbank Shopping
+// Park, London Road), so no map service or API key is needed. The drawing is
+// centred on the studio, so the pin sits in the middle of the box however the
+// box crops it (preserveAspectRatio "slice").
+---
+
+<svg class="location-map" viewBox="-35 -22 880 580" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+  <rect class="land" x="-60" y="-60" width="960" height="680"></rect>
+
+  <!-- Parks and verges -->
+  <g class="green">
+    <path d="M226 -30 L272 -30 L238 212 L218 206 Z"></path>
+    <path d="M470 392 L655 432 L650 442 L466 402 Z"></path>
+  </g>
+
+  <!-- Housing and other buildings -->
+  <g class="building">
+    <path d="M-40 -30 L60 -30 L-10 150 L-40 150 Z"></path>
+    <path d="M80 -30 L140 -30 L70 200 L20 196 Z"></path>
+    <path d="M180 -30 L215 -30 L190 60 L160 52 Z"></path>
+    <path d="M-40 370 L60 380 L80 460 L-40 470 Z"></path>
+    <path d="M250 392 L420 418 L372 456 L262 432 Z"></path>
+    <path d="M432 452 L496 460 L486 570 L420 570 Z"></path>
+    <path d="M530 482 L700 520 L690 580 L520 580 Z"></path>
+    <path d="M730 520 L900 540 L900 600 L720 600 Z"></path>
+    <path d="M220 520 L300 520 L300 600 L210 600 Z"></path>
+    <path d="M700 330 L752 332 L760 392 L708 388 Z"></path>
+    <path d="M845 330 L900 336 L900 385 L845 380 Z"></path>
+    <path d="M850 -30 L900 -30 L900 120 L860 110 Z"></path>
+    <path d="M540 330 L560 322 L566 340 L548 346 Z"></path>
+  </g>
+
+  <!-- Shopping park units and other large buildings -->
+  <g class="unit">
+    <path d="M330 -30 L488 -30 L462 250 L432 330 L322 318 L252 250 L262 118 L328 128 Z"></path>
+    <path d="M150 70 L196 62 L160 242 L104 234 Z"></path>
+    <path d="M226 250 L316 262 L310 300 L222 290 Z"></path>
+    <path d="M186 334 L218 340 L176 500 L124 500 Z"></path>
+    <path d="M578 222 L640 214 L652 268 L590 272 Z"></path>
+    <path d="M746 150 L780 118 L806 160 L772 188 Z"></path>
+    <path d="M770 336 L798 330 L806 414 L776 418 Z"></path>
+  </g>
+  <path class="unit-edge" d="M322 252 L440 266 M262 190 L450 210"></path>
+
+  <!-- Car park lanes and service roads -->
+  <g class="lane">
+    <path d="M476 -30 L470 30 L690 70"></path>
+    <path d="M466 98 L692 132"></path>
+    <path d="M460 152 L630 176"></path>
+    <path d="M455 205 L560 218"></path>
+    <path d="M692 70 L700 250 L640 300 L560 330"></path>
+    <path d="M420 300 L560 330"></path>
+    <path d="M300 -30 L300 30"></path>
+  </g>
+
+  <!-- Roads: a pale casing under each one, then the road itself -->
+  <g class="road-casing">
+    <path class="major" d="M-60 276 L200 298 L450 345 L650 394 L920 452"></path>
+    <path class="major" d="M240 360 L500 420 L700 468 L920 518"></path>
+    <path d="M240 360 L215 440 L150 520 L80 620"></path>
+    <path class="minor" d="M512 432 L470 620"></path>
+    <path class="minor" d="M168 -30 L84 250"></path>
+    <path class="minor" d="M62 -30 L-10 190"></path>
+    <path d="M760 228 L716 186 L692 110 L676 -30"></path>
+    <path d="M808 228 L832 170 L836 -30"></path>
+    <path d="M762 300 L682 372"></path>
+    <path d="M826 290 L920 330"></path>
+    <circle cx="785" cy="265" r="42"></circle>
+  </g>
+  <g class="road">
+    <path class="major" d="M-60 276 L200 298 L450 345 L650 394 L920 452"></path>
+    <path class="major" d="M240 360 L500 420 L700 468 L920 518"></path>
+    <path d="M240 360 L215 440 L150 520 L80 620"></path>
+    <path class="minor" d="M512 432 L470 620"></path>
+    <path class="minor" d="M168 -30 L84 250"></path>
+    <path class="minor" d="M62 -30 L-10 190"></path>
+    <path d="M760 228 L716 186 L692 110 L676 -30"></path>
+    <path d="M808 228 L832 170 L836 -30"></path>
+    <path d="M762 300 L682 372"></path>
+    <path d="M826 290 L920 330"></path>
+    <circle cx="785" cy="265" r="42"></circle>
+  </g>
+
+  <text class="road-name" x="0" y="8" text-anchor="middle" transform="translate(90 288) rotate(4.8)">
+    LONDON RD
+  </text>
+</svg>
+
+<style>
+  .location-map {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+  .land {
+    fill: var(--paper);
+  }
+  .green {
+    fill: color-mix(in srgb, var(--stone) 45%, var(--paper));
+  }
+  .building {
+    fill: var(--chalk-2);
+    stroke: var(--chalk-line);
+    stroke-width: 2;
+  }
+  /* The shopping park units pick up a hint of gorse. */
+  .unit {
+    fill: color-mix(in srgb, var(--gorse) 16%, var(--paper));
+    stroke: color-mix(in srgb, var(--gorse) 30%, var(--chalk-line));
+    stroke-width: 2;
+  }
+  .unit-edge {
+    fill: none;
+    stroke: color-mix(in srgb, var(--gorse) 30%, var(--chalk-line));
+    stroke-width: 2;
+  }
+  .lane {
+    fill: none;
+    stroke: var(--chalk-2);
+    stroke-width: 12;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .road-casing,
+  .road {
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .road-casing {
+    stroke: white;
+    stroke-width: 40;
+  }
+  .road-casing .major {
+    stroke-width: 54;
+  }
+  .road-casing .minor {
+    stroke-width: 30;
+  }
+  .road {
+    stroke: var(--stone-2);
+    stroke-width: 32;
+  }
+  .road .major {
+    stroke-width: 46;
+  }
+  .road .minor {
+    stroke-width: 22;
+  }
+  .road-name {
+    font-family: var(--font-mono);
+    font-size: 22px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    fill: var(--ink-muted);
+  }
+</style>

@@ -1,6 +1,7 @@
 ---
 import services from '../data/services.json';
 import site from '../data/site.json';
+import LocationMap from './LocationMap.astro';
 
 interface Schedule {
   starts: string;
@@ -66,6 +67,7 @@ function scheduleLine(schedule?: Schedule) {
           rel="noopener"
           aria-label={`Get directions to ${site.location.place} on Google Maps (opens in a new tab)`}
         >
+          <LocationMap />
           <span class="map-pin" aria-hidden="true">
             <svg width="30" height="38" viewBox="0 0 34 44">
               <path d="M17 2C9 2 3 8 3 16c0 11 14 26 14 26s14-15 14-26C31 8 25 2 17 2z" fill="#1b211e"></path>
@@ -202,7 +204,6 @@ function scheduleLine(schedule?: Schedule) {
     align-items: center;
     gap: 20px;
     background: #e4e3dd;
-    border-radius: 10px;
     padding: 22px 24px;
   }
   .pin {
@@ -241,41 +242,17 @@ function scheduleLine(schedule?: Schedule) {
     flex: 0 0 42%;
     min-height: 150px;
     display: block;
+    overflow: hidden;
     text-decoration: none;
-    background-color: var(--chalk-2);
-    background-image:
-      linear-gradient(var(--chalk-line) 2px, transparent 2px),
-      linear-gradient(90deg, var(--chalk-line) 2px, transparent 2px);
-    background-size: 40px 40px;
-    background-position: -6px -10px;
-  }
-  /* A couple of "main roads" so it reads as a map rather than a grid. */
-  .map::before,
-  .map::after {
-    content: '';
-    position: absolute;
-    background: #f7f6f2;
-  }
-  .map::before {
-    left: -10%;
-    right: -10%;
-    top: 58%;
-    height: 10px;
-    transform: rotate(-8deg);
-  }
-  .map::after {
-    top: -10%;
-    bottom: -10%;
-    left: 30%;
-    width: 8px;
-    transform: rotate(14deg);
+    background: var(--paper);
   }
   .map-pin {
     position: absolute;
-    left: 52%;
-    top: 46%;
+    /* The map drawing is centred on the studio, so the pin's tip sits at the middle. */
+    left: 50%;
+    top: 50%;
     z-index: 1;
-    transform: translate(-50%, -85%);
+    transform: translate(-50%, -36px);
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -285,7 +262,6 @@ function scheduleLine(schedule?: Schedule) {
     background: var(--granite);
     color: var(--chalk);
     padding: 3px 7px;
-    border-radius: 3px;
     font-size: 10px;
     white-space: nowrap;
   }
@@ -299,7 +275,6 @@ function scheduleLine(schedule?: Schedule) {
     font-weight: 700;
     font-size: 14px;
     padding: 9px 14px;
-    border-radius: 999px;
     transition: background-color 0.15s ease;
   }
   .map:hover .map-cta {
