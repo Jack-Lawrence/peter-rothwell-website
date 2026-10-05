@@ -33,6 +33,14 @@ jobs:
 
       - run: npm ci
 
+      # Resized photos from earlier builds (after npm ci, which clears node_modules).
+      - name: Restore image cache
+        uses: actions/cache@v4
+        with:
+          path: node_modules/.astro
+          key: astro-images-${{ hashFiles('src/assets/**', 'src/content/**', 'package-lock.json') }}
+          restore-keys: astro-images-
+
       - name: Formatting (Prettier)
         run: npm run format:check
 
