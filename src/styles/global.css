@@ -30,7 +30,7 @@
   /* Edges of form fields and outline buttons: at least 3:1 so they're easy to see. */
   --field-edge: color-mix(in srgb, var(--stone) 60%, var(--ink-2));
 
-  --font-display: 'Big Shoulders Display', Impact, 'Arial Narrow', sans-serif;
+  --font-display: 'Sofia Sans Extra Condensed', Impact, 'Arial Narrow', sans-serif;
   --font-body: 'Figtree Variable', Figtree, system-ui, sans-serif;
   --font-mono: 'JetBrains Mono', ui-monospace, Consolas, monospace;
 
@@ -138,7 +138,7 @@ a {
   font-family: var(--font-display);
   text-transform: uppercase;
   line-height: 0.88;
-  letter-spacing: -0.01em;
+  letter-spacing: 0.02em;
   font-weight: 900;
   margin: 0;
   text-wrap: balance;

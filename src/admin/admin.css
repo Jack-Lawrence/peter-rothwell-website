@@ -727,6 +727,7 @@ fieldset.box legend {
 .site-post h2 {
   font-family: var(--font-display);
   text-transform: uppercase;
+  letter-spacing: 0.02em;
   font-size: 30px;
   line-height: 1;
   margin: 32px 0 10px;

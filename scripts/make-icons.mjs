@@ -42,7 +42,7 @@ const og = await satori(
         'div',
         {
           marginTop: 28,
-          fontFamily: 'Big Shoulders Display',
+          fontFamily: 'Sofia Sans Extra Condensed',
           fontWeight: 900,
           fontSize: 168,
           lineHeight: 0.88,
@@ -73,9 +73,9 @@ const og = await satori(
     height: 630,
     fonts: [
       {
-        name: 'Big Shoulders Display',
+        name: 'Sofia Sans Extra Condensed',
         weight: 900,
-        data: font('big-shoulders-display/files/big-shoulders-display-latin-900-normal.woff'),
+        data: font('sofia-sans-extra-condensed/files/sofia-sans-extra-condensed-latin-900-normal.woff'),
       },
       { name: 'JetBrains Mono', weight: 500, data: font('jetbrains-mono/files/jetbrains-mono-latin-500-normal.woff') },
     ],
