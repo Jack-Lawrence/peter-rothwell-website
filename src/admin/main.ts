@@ -26,6 +26,21 @@ import {
 } from './store';
 import { parseDoc, stringifyDoc, markdownToHtml, htmlToMarkdown, wordCount, slugify, type Front } from './markdown';
 import { resizePhoto } from './images';
+import { createRichEditor } from './rich-editor';
+import { cropPhoto, PhotoError } from './cropper';
+import { SLOTS, type Slot } from '../lib/slots';
+import {
+  checkPalette,
+  derivePalette,
+  isHex,
+  mix,
+  paletteFor,
+  DEFAULT_PRESET,
+  PRESETS,
+  type Palette,
+  type ThemeBase,
+  type ThemeFile,
+} from '../lib/theme';
 
 const config = JSON.parse(document.getElementById('admin-config')!.textContent!) as {
   repo: string;
@@ -43,6 +58,8 @@ const PATHS = {
   journal: 'src/content/journal',
   legal: 'src/content/legal',
   journalImages: 'src/assets/journal',
+  photos: 'src/assets/photos',
+  theme: 'src/data/theme.json',
 };
 const MODE_KEY = 'rr-admin-mode';
 
@@ -279,6 +296,8 @@ async function route() {
       policies: policiesList,
       policy: policyEditor,
       instagram: instagramScreen,
+      photos: photosScreen,
+      theme: themeScreen,
       signin: signInScreen,
     };
     const show = screens[name ?? ''] ?? dashboard;
@@ -358,6 +377,9 @@ const icons: Record<string, string> = {
   price: 'M17 6.5A5 5 0 0 0 8 9v4H6m2 0v3a2 2 0 0 1-2 2h11M6 13h7',
   calendar: 'M4 7a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zM4 10h16M9 3v4M15 3v4',
   quote: 'M5 18l-1 3 4-2h9a3 3 0 0 0 3-3V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v11z',
+  photo: 'M4 6h16v12H4zM4 15l4-4 4 4 3-3 5 5M15 9.5h.01',
+  palette:
+    'M12 3a9 9 0 1 0 0 18c1 0 1.5-.8 1.5-1.5 0-.9-.7-1.2-.7-2 0-.8.6-1.5 1.5-1.5H17a4 4 0 0 0 4-4c0-5-4-9-9-9zM7.5 12h.01M10 8h.01M15 8h.01',
 };
 const icon = (name: string) => {
   const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
@@ -392,6 +414,8 @@ async function dashboard() {
       action('#/prices', 'price', 'Change prices', 'Coaching, PT and Run Club'),
       action('#/runclub', 'calendar', 'Set Run Club dates', 'Next block, time, spaces left'),
       action('#/testimonials/new', 'quote', 'Add a testimonial', 'A client’s kind words'),
+      action('#/photos', 'photo', 'Change photos', 'Home page and Meet your coach'),
+      action('#/theme', 'palette', 'Change colours', 'Pick a theme for your website'),
     ),
     h(
       'div',
@@ -574,28 +598,28 @@ async function postEditor(slugArg: string) {
     takeCover(e.dataTransfer?.files[0]);
   });
 
-  // Rich text editor
-  const editor = h('div', {
-    class: 'editor-body',
-    contenteditable: 'true',
-    role: 'textbox',
-    'aria-multiline': 'true',
-    'aria-labelledby': 'body-label',
-    'aria-describedby': 'body-error',
-    id: 'post-body',
+  // Rich text editor (TipTap, see rich-editor.ts). Photos already in the post
+  // get a URL the browser can show before the editor reads them.
+  const startHtml = h('div');
+  startHtml.innerHTML = markdownToHtml(existing?.body ?? '');
+  await showBodyImages(startHtml);
+  const bodyImageInput = h('input', { type: 'file', accept: 'image/*', class: 'visually-hidden', id: 'body-photo' });
+  const rich = createRichEditor({
+    html: startHtml.innerHTML,
+    attrs: {
+      role: 'textbox',
+      'aria-multiline': 'true',
+      'aria-labelledby': 'body-label',
+      'aria-describedby': 'body-error',
+      id: 'post-body',
+    },
+    onChange: () => changed(),
+    onAddPhoto: () => bodyImageInput.click(),
+    onError: (message) => toast(message, 'error'),
   });
-  editor.innerHTML = markdownToHtml(existing?.body ?? '');
-  // New lines make paragraphs (<p>), not <div>s, so the Markdown comes out clean.
-  document.execCommand('defaultParagraphSeparator', false, 'p');
-  await showBodyImages(editor);
+  const editor = rich.dom;
   const bodyError = h('p', { class: 'field-error', id: 'body-error', hidden: true });
 
-  const cmd = (command: string, value?: string) => {
-    editor.focus();
-    document.execCommand(command, false, value);
-    changed();
-  };
-  const bodyImageInput = h('input', { type: 'file', accept: 'image/*', class: 'visually-hidden', id: 'body-photo' });
   bodyImageInput.addEventListener('change', async () => {
     const file = bodyImageInput.files?.[0];
     bodyImageInput.value = '';
@@ -605,78 +629,18 @@ async function postEditor(slugArg: string) {
       const alt = prompt('Describe the photo for people who can’t see it:') ?? '';
       const caption = prompt('Caption to show under the photo (optional):') ?? '';
       const name = `${slug || slugify(title.input.value) || 'post'}-${Date.now().toString(36)}.jpg`;
-      editor.focus();
-      restoreSelection();
-      document.execCommand('insertImage', false, data);
-      const img = [...editor.querySelectorAll('img')].find((i) => i.src === data && !i.dataset.path);
-      if (img) {
-        img.dataset.path = `../../assets/journal/${name}`;
-        img.alt = alt.trim();
-        if (caption.trim()) img.title = caption.trim();
-      }
+      rich.insertPhoto({
+        src: data,
+        alt: alt.trim(),
+        title: caption.trim() || undefined,
+        path: `../../assets/journal/${name}`,
+      });
       changed();
     } catch (err) {
       toast((err as Error).message, 'error');
     }
   });
-  let savedRange: Range | null = null;
-  const rememberSelection = () => {
-    const sel = getSelection();
-    if (sel?.rangeCount && editor.contains(sel.anchorNode)) savedRange = sel.getRangeAt(0).cloneRange();
-  };
-  const restoreSelection = () => {
-    if (!savedRange) return;
-    const sel = getSelection();
-    sel?.removeAllRanges();
-    sel?.addRange(savedRange);
-  };
-  editor.addEventListener('keyup', rememberSelection);
-  editor.addEventListener('mouseup', rememberSelection);
-  editor.addEventListener('input', () => changed());
-  editor.addEventListener('paste', (e) => {
-    // Paste as plain text, so formatting from Word or websites doesn't come along.
-    e.preventDefault();
-    document.execCommand('insertText', false, e.clipboardData?.getData('text/plain') ?? '');
-  });
-
-  const tool = (label: string, onclick: () => void, attrs: Record<string, string> = {}) =>
-    h(
-      'button',
-      {
-        type: 'button',
-        class: 'tool',
-        onmousedown: ((e: Event) => e.preventDefault()) as EventListener,
-        onclick: onclick as EventListener,
-        ...attrs,
-      },
-      label,
-    );
-  const toolbar = h(
-    'div',
-    { class: 'toolbar', role: 'toolbar', 'aria-label': 'Formatting' },
-    tool('Heading', () => {
-      const block = document.queryCommandValue('formatBlock').toLowerCase();
-      cmd('formatBlock', block === 'h2' ? 'p' : 'h2');
-    }),
-    tool('B', () => cmd('bold'), { 'aria-label': 'Bold', class: 'tool tool--b' }),
-    tool('I', () => cmd('italic'), { 'aria-label': 'Italic', class: 'tool tool--i' }),
-    tool('• List', () => cmd('insertUnorderedList')),
-    tool('Link', () => {
-      rememberSelection();
-      const url = prompt('Paste the web address for the link (starting https://):');
-      if (!url) return;
-      if (!/^(https?:\/\/|mailto:|\/|#)/.test(url.trim())) {
-        toast('Links need to start with https://', 'error');
-        return;
-      }
-      restoreSelection();
-      cmd('createLink', url.trim());
-    }),
-    tool('Add photo', () => {
-      rememberSelection();
-      bodyImageInput.click();
-    }),
-  );
+  const toolbar = rich.toolbar;
 
   // Autosave
   const autosaveNote = h('span', { class: 'autosave', 'aria-live': 'polite' });
@@ -686,7 +650,7 @@ async function postEditor(slugArg: string) {
     title: title.input.value,
     topic: topic.input.value,
     excerpt: excerpt.input.value,
-    html: editor.innerHTML,
+    html: rich.getHTML(),
     coverPath,
     coverData,
     coverAlt: coverAlt.input.value,
@@ -728,7 +692,7 @@ async function postEditor(slugArg: string) {
       title.input.value = d.title;
       topic.input.value = d.topic;
       excerpt.input.value = d.excerpt;
-      editor.innerHTML = d.html;
+      rich.setHTML(d.html);
       coverPath = d.coverPath;
       coverData = d.coverData;
       coverAlt.input.value = d.coverAlt;
@@ -767,7 +731,7 @@ async function postEditor(slugArg: string) {
     if (publishing) {
       if (!excerpt.input.value.trim()) errors.add(excerpt, 'Write a short summary (one or two sentences).');
       if (!topic.input.value.trim()) errors.add(topic, 'Choose a topic, for example "Strength".');
-      if (wordCount(htmlToMarkdown(editor.innerHTML)) < 20) {
+      if (wordCount(htmlToMarkdown(rich.getHTML())) < 20) {
         errors.add(editor, 'Your post needs at least a couple of sentences before it can go live.');
       }
     }
@@ -814,7 +778,7 @@ async function postEditor(slugArg: string) {
     if (!draft && front.draft === true) data.date = today();
     changes.push({
       path: `${PATHS.journal}/${finalSlug}.md`,
-      text: stringifyDoc(data, htmlToMarkdown(editor.innerHTML)),
+      text: stringifyDoc(data, htmlToMarkdown(rich.getHTML())),
     });
 
     const verb = draft ? 'Save draft' : isLive ? 'Update post' : 'Publish post';
@@ -993,7 +957,7 @@ async function postEditor(slugArg: string) {
         coverImg.src && !coverImg.hidden && h('img', { class: 'cover', src: coverImg.src, alt: coverAlt.input.value }),
         (() => {
           const body = h('div', { class: 'body' });
-          body.innerHTML = editor.innerHTML;
+          body.innerHTML = rich.getHTML();
           return body;
         })(),
       ),
@@ -1412,6 +1376,433 @@ async function testimonialsScreen(arg: string) {
     form,
   );
   if (arg === 'new') addRow();
+}
+
+// ---------- Photos (hero carousel and Meet your coach) ----------
+
+interface SitePhoto {
+  image: string;
+  alt: string;
+}
+const MAX_HERO_PHOTOS = 6;
+
+async function photosScreen() {
+  const site = await readJson<{
+    hero: { photos?: SitePhoto[] } & Record<string, unknown>;
+    about: { photo?: SitePhoto } & Record<string, unknown>;
+  }>(PATHS.site);
+  const summary = errorSummary();
+
+  // A photo already on the site (path) or a newly cropped one (data), waiting to be saved.
+  type Pic = { path: string; data: string; alt: Field; box: HTMLElement; img: HTMLImageElement };
+
+  const pick = (slot: Slot, onPicked: (data: string) => void) => {
+    const input = h('input', { type: 'file', accept: 'image/*', class: 'visually-hidden' });
+    input.addEventListener('change', async () => {
+      const file = input.files?.[0];
+      input.remove();
+      if (!file) return;
+      try {
+        const data = await cropPhoto(file, slot);
+        if (data) {
+          onPicked(data);
+          setDirty(true);
+        }
+      } catch (err) {
+        await dialog(
+          'That photo can’t be used',
+          [h('p', {}, err instanceof PhotoError ? err.message : 'Something went wrong opening that photo.')],
+          [{ label: 'OK', value: 'ok', primary: true }],
+        );
+      }
+    });
+    document.body.append(input);
+    input.click();
+  };
+
+  const showPic = async (pic: Pic) => {
+    pic.img.src = pic.data || (pic.path ? ((await store!.imageUrl(pic.path)) ?? '') : '');
+  };
+  const makePic = (photo: SitePhoto | undefined, slot: Slot, legend: string, actions: (pic: Pic) => Node[]): Pic => {
+    const img = h('img', { alt: '', style: `aspect-ratio: ${slot.width} / ${slot.height}` });
+    const alt = field(
+      'Describe the photo',
+      textInput(photo?.alt ?? '', { maxlength: 160 }),
+      'For people who can’t see it, e.g. “Peter running up Arthur’s Seat”.',
+    );
+    const pic: Pic = { path: photo?.image ?? '', data: '', alt, img, box: h('fieldset', { class: 'box' }) };
+    pic.box.append(
+      h('legend', {}, legend),
+      h(
+        'div',
+        { class: 'photo-slot' },
+        img,
+        h('div', { class: 'stack' }, alt.wrap, h('div', { class: 'row-actions' }, actions(pic))),
+      ),
+    );
+    showPic(pic);
+    return pic;
+  };
+  const replaceBtn = (pic: Pic, slot: Slot) =>
+    h(
+      'button',
+      {
+        type: 'button',
+        class: 'btn btn--small',
+        onclick: (() =>
+          pick(slot, (data) => {
+            pic.data = data;
+            showPic(pic);
+          })) as EventListener,
+      },
+      'Replace photo',
+    );
+
+  // Hero carousel
+  let heroPics: Pic[] = [];
+  const heroList = h('div', { class: 'stack' });
+  const addHeroBtn = h(
+    'button',
+    {
+      type: 'button',
+      class: 'btn',
+      onclick: (() =>
+        pick(SLOTS.hero, (data) => {
+          const pic = heroPic(undefined);
+          pic.data = data;
+          showPic(pic);
+          heroPics.push(pic);
+          drawHero();
+          pic.alt.input.focus();
+        })) as EventListener,
+    },
+    '+ Add a photo',
+  );
+  const moveHero = (pic: Pic, by: number) => {
+    const i = heroPics.indexOf(pic);
+    const j = i + by;
+    if (j < 0 || j >= heroPics.length) return;
+    [heroPics[i], heroPics[j]] = [heroPics[j], heroPics[i]];
+    drawHero();
+    setDirty(true);
+  };
+  const smallBtn = (label: string, onclick: () => void, extra = '') =>
+    h('button', { type: 'button', class: `btn btn--small ${extra}`.trim(), onclick: onclick as EventListener }, label);
+  const heroPic = (photo: SitePhoto | undefined): Pic =>
+    makePic(photo, SLOTS.hero, 'Photo', (pic) => [
+      replaceBtn(pic, SLOTS.hero),
+      smallBtn('Move up', () => moveHero(pic, -1)),
+      smallBtn('Move down', () => moveHero(pic, 1)),
+      smallBtn(
+        'Remove',
+        () => {
+          heroPics = heroPics.filter((p) => p !== pic);
+          drawHero();
+          setDirty(true);
+        },
+        'btn--danger',
+      ),
+    ]);
+  const drawHero = () => {
+    heroPics.forEach((p, i) => (p.box.querySelector('legend')!.textContent = `Photo ${i + 1}`));
+    heroList.replaceChildren(...(heroPics.length ? heroPics.map((p) => p.box) : [h('p', {}, 'No photos yet.')]));
+    addHeroBtn.hidden = heroPics.length >= MAX_HERO_PHOTOS;
+  };
+  heroPics = (site.hero.photos ?? []).map((p) => heroPic(p));
+  drawHero();
+
+  // Meet your coach
+  const portrait = makePic(site.about.photo, SLOTS.portrait, 'Your photo', (pic) => [replaceBtn(pic, SLOTS.portrait)]);
+
+  const saveBtn = h('button', { type: 'submit', class: 'btn btn--primary btn--big' }, 'Save photos');
+  const form = h(
+    'form',
+    {
+      novalidate: true,
+      class: 'stack',
+      onsubmit: (async (e: Event) => {
+        e.preventDefault();
+        const errors = new Errors(summary);
+        if (!heroPics.length) errors.add(addHeroBtn, 'Add at least one photo for the top of the home page.');
+        heroPics.forEach((p, i) => {
+          if (!p.alt.input.value.trim()) errors.add(p.alt, `Photo ${i + 1}: describe the photo.`);
+        });
+        if (!portrait.path && !portrait.data) errors.add(portrait.box, 'Add a photo for Meet your coach.');
+        else if (!portrait.alt.input.value.trim()) errors.add(portrait.alt, 'Meet your coach: describe the photo.');
+        if (!errors.show()) return;
+
+        // New photos get their own file; uploaded photos no longer used are deleted.
+        const stamp = Date.now().toString(36);
+        const changes: Change[] = [];
+        const keep = (pic: Pic, name: string): SitePhoto => {
+          const alt = pic.alt.input.value.trim();
+          if (!pic.data) return { image: pic.path, alt };
+          const path = `${PATHS.photos}/${name}-${stamp}.jpg`;
+          changes.push({ path, image: pic.data });
+          return { image: path, alt };
+        };
+        const heroPhotos = heroPics.map((p, i) => keep(p, `hero-${i + 1}`));
+        const portraitPhoto = keep(portrait, 'portrait');
+        const used = new Set([...heroPhotos, portraitPhoto].map((p) => p.image));
+        const before = [...(site.hero.photos ?? []), ...(site.about.photo ? [site.about.photo] : [])];
+        for (const old of before) {
+          if (old.image.startsWith(`${PATHS.photos}/`) && !used.has(old.image))
+            changes.push({ path: old.image, remove: true });
+        }
+        const next = {
+          ...site,
+          hero: { ...site.hero, photos: heroPhotos },
+          about: { ...site.about, photo: portraitPhoto },
+        };
+        changes.push({ path: PATHS.site, text: toJson(next) });
+        if (await save(changes, 'Update photos', saveBtn)) {
+          toast(savedMessage());
+          route();
+        }
+      }) as EventListener,
+    },
+    h(
+      'section',
+      { class: 'stack', 'aria-labelledby': 'hero-photos' },
+      h('h2', { id: 'hero-photos' }, 'Top of the home page'),
+      h(
+        'p',
+        { class: 'hint' },
+        `These take turns beside “Run further. Lift stronger.”, in this order. Up to ${MAX_HERO_PHOTOS} photos, ` +
+          `each at least ${SLOTS.hero.width} × ${SLOTS.hero.height} pixels. When you add one, you choose which part shows.`,
+      ),
+      heroList,
+      addHeroBtn,
+    ),
+    h(
+      'section',
+      { class: 'stack', 'aria-labelledby': 'coach-photo' },
+      h('h2', { id: 'coach-photo' }, 'Meet your coach'),
+      h(
+        'p',
+        { class: 'hint' },
+        `A square photo of you, at least ${SLOTS.portrait.width} × ${SLOTS.portrait.height} pixels.`,
+      ),
+      portrait.box,
+    ),
+    h('div', { class: 'save-bar' }, saveBtn),
+  );
+  trackDirty(form);
+  screen(
+    'Photos',
+    heading('Photos', 'The photos at the top of your home page and in the Meet your coach section.'),
+    summary,
+    form,
+  );
+}
+
+// ---------- Colours (theme) ----------
+
+/** A small picture of the site in a palette: a dark section, then a light-mode strip. */
+function themePreview(p: Palette) {
+  const lightBg = mix(p.paper, '#ffffff', 0.45);
+  const lightAccent = mix(p.gorse, p.ink, 0.4);
+  const plan = (bg: string) => h('span', { class: 'tp-plan', style: `background:${bg}` });
+  return h(
+    'div',
+    { class: 'tp', 'aria-hidden': 'true' },
+    h(
+      'div',
+      { class: 'tp-dark', style: `background:${p.ink};color:${p.paper}` },
+      h('span', { class: 'tp-eyebrow', style: `color:${p.gorse}` }, 'Running & strength'),
+      h('span', { class: 'tp-head' }, 'Run further.'),
+      h('span', { class: 'tp-head', style: `color:${p.gorse}` }, 'Go past the wall.'),
+      h('span', { class: 'tp-muted', style: `color:${p.stone}` }, 'Plans built around your life.'),
+      h(
+        'span',
+        { class: 'tp-row' },
+        h('span', { class: 'tp-btn', style: `background:${p.gorse};color:${p.ink}` }, 'Book a chat'),
+        plan(p.loch),
+        plan(p.gorse),
+        plan(p.bracken),
+      ),
+    ),
+    h(
+      'div',
+      { class: 'tp-light', style: `background:${lightBg};color:${p.ink}` },
+      h('span', { class: 'tp-eyebrow', style: `color:${lightAccent}` }, 'Light mode'),
+      h('span', { class: 'tp-muted', style: `color:${p['ink-muted']}` }, 'Text stays easy to read.'),
+    ),
+  );
+}
+
+async function themeScreen() {
+  const raw = await store!.read(PATHS.theme);
+  const saved: ThemeFile = raw ? JSON.parse(raw) : { preset: DEFAULT_PRESET, custom: null };
+  const summary = errorSummary();
+  const defaultBase = PRESETS.find((p) => p.id === DEFAULT_PRESET)!.base;
+
+  // What's chosen right now: a preset id, or "custom" with five colours.
+  let choice = saved.preset;
+  let base: ThemeBase =
+    saved.preset === 'custom' && saved.custom
+      ? { ...saved.custom }
+      : { ...(PRESETS.find((p) => p.id === saved.preset) ?? PRESETS[0]).base };
+  const palette = () => (choice === 'custom' ? derivePalette(base) : paletteFor({ preset: choice }));
+
+  // Preset cards
+  const radios: HTMLInputElement[] = [];
+  const cards = h(
+    'div',
+    { class: 'theme-grid', role: 'radiogroup', 'aria-label': 'Colour themes' },
+    PRESETS.map((preset) => {
+      const radio = h('input', {
+        type: 'radio',
+        name: 'theme-preset',
+        value: preset.id,
+        id: `theme-${preset.id}`,
+        class: 'visually-hidden',
+        checked: preset.id === choice,
+      });
+      radio.addEventListener('change', () => {
+        choice = preset.id;
+        base = { ...preset.base };
+        update(true);
+      });
+      radios.push(radio);
+      return h(
+        'label',
+        { class: 'theme-card', for: radio.id },
+        radio,
+        themePreview(paletteFor({ preset: preset.id })),
+        h(
+          'span',
+          { class: 'theme-name' },
+          preset.name,
+          preset.id === DEFAULT_PRESET && h('span', { class: 'theme-tag' }, 'Default'),
+        ),
+        h('span', { class: 'hint' }, preset.description),
+      );
+    }),
+  );
+
+  // Fine-tuning: the five colours of the chosen theme.
+  const colourFields: [keyof ThemeBase, string][] = [
+    ['background', 'Dark background'],
+    ['light', 'Light background'],
+    ['accent', 'Accent (buttons and highlights)'],
+    ['plan1', 'First coaching plan'],
+    ['plan3', 'Third coaching plan'],
+  ];
+  const inputs = {} as Record<keyof ThemeBase, HTMLInputElement>;
+  const tune = h(
+    'div',
+    { class: 'colour-grid' },
+    colourFields.map(([key, label]) => {
+      const input = h('input', { type: 'color', value: base[key] });
+      input.addEventListener('input', () => {
+        if (!isHex(input.value)) return;
+        base[key] = input.value.toLowerCase();
+        choice = 'custom';
+        update(false);
+      });
+      inputs[key] = input;
+      return field(label, input).wrap;
+    }),
+  );
+
+  const bigPreview = h('div', { class: 'theme-preview' });
+  const report = h('div', { class: 'theme-report', 'aria-live': 'polite' });
+  const status = h('p', { class: 'hint' });
+
+  const update = (fromPreset: boolean) => {
+    radios.forEach((r) => (r.checked = r.value === choice));
+    if (fromPreset) (Object.keys(inputs) as (keyof ThemeBase)[]).forEach((k) => (inputs[k].value = base[k]));
+    const p = palette();
+    bigPreview.replaceChildren(themePreview(p));
+    const failing = checkPalette(p).filter((c) => !c.ok);
+    report.replaceChildren(
+      failing.length
+        ? h(
+            'div',
+            { class: 'theme-fail' },
+            h('b', {}, 'Some text would be hard to read with these colours:'),
+            h(
+              'ul',
+              {},
+              failing.map((c) => h('li', {}, `${c.label} (${c.ratio.toFixed(1)}:1, needs ${c.min}:1)`)),
+            ),
+            h('p', {}, 'Try a lighter accent or plan colour, or a darker background.'),
+          )
+        : h('p', { class: 'theme-ok' }, '✓ All text passes the readability check, in dark and light mode.'),
+    );
+    const name = choice === 'custom' ? 'Your own colours' : PRESETS.find((p) => p.id === choice)?.name;
+    status.textContent = `Chosen: ${name}.`;
+    setDirty(true);
+  };
+
+  const resetBtn = h(
+    'button',
+    {
+      type: 'button',
+      class: 'btn',
+      onclick: (() => {
+        choice = DEFAULT_PRESET;
+        base = { ...defaultBase };
+        update(true);
+      }) as EventListener,
+    },
+    'Reset to default',
+  );
+
+  const saveBtn = h('button', { type: 'submit', class: 'btn btn--primary btn--big' }, 'Save colours');
+  const form = h(
+    'form',
+    {
+      novalidate: true,
+      class: 'stack',
+      onsubmit: (async (e: Event) => {
+        e.preventDefault();
+        const errors = new Errors(summary);
+        if (checkPalette(palette()).some((c) => !c.ok))
+          errors.add(report, 'Some text would be hard to read with these colours. Adjust them, or pick a theme.');
+        if (!errors.show()) return;
+        const next: ThemeFile =
+          choice === 'custom' ? { preset: 'custom', custom: base } : { preset: choice, custom: null };
+        if (await save([{ path: PATHS.theme, text: toJson(next) }], 'Update colours', saveBtn)) {
+          toast(savedMessage());
+          route();
+        }
+      }) as EventListener,
+    },
+    h(
+      'section',
+      { class: 'stack', 'aria-labelledby': 'theme-presets' },
+      h('h2', { id: 'theme-presets' }, 'Choose a theme'),
+      cards,
+      h('div', { class: 'row-actions' }, resetBtn, status),
+    ),
+    h(
+      'section',
+      { class: 'stack', 'aria-labelledby': 'theme-tune' },
+      h('h2', { id: 'theme-tune' }, 'Fine-tune (optional)'),
+      h(
+        'p',
+        { class: 'hint' },
+        'Change any of the five colours. The other shades, and light mode, are worked out from them.',
+      ),
+      h('div', { class: 'theme-tune' }, tune, bigPreview),
+      report,
+    ),
+    h('div', { class: 'save-bar' }, saveBtn),
+  );
+  trackDirty(form);
+  screen(
+    'Colours',
+    heading(
+      'Colours',
+      'Change the colours of your whole website. Pentlands is the original look; "Reset to default" always brings it back.',
+    ),
+    summary,
+    form,
+  );
+  update(true);
+  setDirty(false);
 }
 
 // ---------- Week strip ----------

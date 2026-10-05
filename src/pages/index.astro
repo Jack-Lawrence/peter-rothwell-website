@@ -10,6 +10,7 @@ import InstagramFeed from '../components/InstagramFeed.astro';
 import HowItWorks from '../components/HowItWorks.astro';
 import Faq from '../components/Faq.astro';
 import JsonLd from '../components/JsonLd.astro';
+import ElevationBg from '../components/ElevationBg.astro';
 import { faqSchema, homeSchema } from '../lib/schema';
 
 const faqData = faqSchema();
@@ -21,6 +22,7 @@ const faqData = faqSchema();
   <div class="first-screen">
     <Hero />
     <WeekStrip />
+    <ElevationBg course={2} />
   </div>
   <Services />
   <HowItWorks />
@@ -32,6 +34,28 @@ const faqData = faqSchema();
 </Base>
 
 <style>
+  /* A race elevation profile climbs across the background of the first screen
+     (desktop only). */
+  .first-screen {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+  }
+  /* Layers: the photo, then the line (which ignores clicks), then the text and
+     week strip on top, so the line runs across the photo but behind the words. */
+  .first-screen :global(.elevation) {
+    z-index: 1;
+  }
+  .first-screen :global(.hero .copy),
+  .first-screen > :global(:not(.hero, .elevation)) {
+    position: relative;
+    z-index: 2;
+  }
+  @media (max-width: 900px) {
+    .first-screen :global(.elevation) {
+      display: none;
+    }
+  }
   /* On desktop the hero and week strip fill exactly one screen below the
      header (and the preview bar, if shown); the hero photo takes up whatever height is left. */
   @media (min-width: 901px) {

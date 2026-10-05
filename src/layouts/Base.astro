@@ -1,15 +1,18 @@
 ---
-import '@fontsource/sofia-sans-extra-condensed/800';
-import '@fontsource/sofia-sans-extra-condensed/900';
 import '@fontsource-variable/figtree';
 import '@fontsource/jetbrains-mono/500';
 import '../styles/global.css';
-// The hero headline's font, preloaded so the first screen doesn't wait for it.
-import headlineFont from '@fontsource/sofia-sans-extra-condensed/files/sofia-sans-extra-condensed-latin-900-normal.woff2?url';
+// Fonts on the first screen, preloaded so they arrive with the page.
+import display800 from '@fontsource/sofia-sans-extra-condensed/files/sofia-sans-extra-condensed-latin-800-normal.woff2?url';
+import display900 from '@fontsource/sofia-sans-extra-condensed/files/sofia-sans-extra-condensed-latin-900-normal.woff2?url';
+import bodyFont from '@fontsource-variable/figtree/files/figtree-latin-wght-normal.woff2?url';
+import monoFont from '@fontsource/jetbrains-mono/files/jetbrains-mono-latin-500-normal.woff2?url';
 import Header from '../components/Header.astro';
 import PreviewBar from '../components/PreviewBar.astro';
 import ContactFooter from '../components/ContactFooter.astro';
 import site from '../data/site.json';
+import theme from '../data/theme.json';
+import { mix, paletteCss, paletteFor, type ThemeFile } from '../lib/theme';
 import { absolute, href } from '../lib/url';
 import { PREVIEW } from 'astro:env/server';
 
@@ -26,6 +29,27 @@ const { title, description = site.description, image, type = 'website' } = Astro
 const withName = title ? `${title} | ${site.name}` : `${site.name} | Running & strength coaching, Edinburgh`;
 const pageTitle = title && withName.length > 70 ? title : withName;
 const canonical = new URL(Astro.url.pathname, Astro.site);
+// The heading font is declared here rather than from Fontsource's CSS so it can
+// use font-display: block. With "swap", headings flash up in the much heavier
+// fallback (Impact) for a moment before the real font arrives. It's preloaded,
+// so the wait is normally too short to notice. The site is English only, so
+// only the Latin file is needed.
+const displayFaces = [
+  [800, display800],
+  [900, display900],
+]
+  .map(
+    ([weight, url]) =>
+      `@font-face{font-family:'Sofia Sans Extra Condensed';font-style:normal;font-weight:${weight};font-display:block;src:url(${url}) format('woff2')}`,
+  )
+  .join('');
+const preloads = [display900, display800, bodyFont, monoFont];
+// The colour theme chosen in the admin area (nothing extra for the default).
+const palette = paletteFor(theme as ThemeFile);
+const themeCss = paletteCss(palette);
+// Browser bar colour for each mode (light matches light mode's background).
+const barDark = palette.ink;
+const barLight = mix(palette.paper, '#ffffff', 0.45);
 const share = image ?? {
   url: absolute('/og-default.png'),
   width: 1200,
@@ -40,7 +64,11 @@ const share = image ?? {
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{pageTitle}</title>
-    <link rel="preload" href={headlineFont} as="font" type="font/woff2" crossorigin />
+    {preloads.map((font) => (
+      <link rel="preload" href={font} as="font" type="font/woff2" crossorigin />
+    ))}
+    <style is:inline set:html={displayFaces} />
+    {themeCss && <style is:inline set:html={themeCss} />}
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
     <link rel="icon" type="image/svg+xml" href={href('/favicon.svg')} />
@@ -64,14 +92,15 @@ const share = image ?? {
     <meta property="og:image:height" content={String(share.height)} />
     <meta property="og:image:alt" content={share.alt} />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="theme-color" content="#1b211e" />
+    <meta name="theme-color" content={barDark} data-dark={barDark} data-light={barLight} />
     <script is:inline>
       // Light or dark mode, chosen with the sun/moon button. Set before the page
       // draws so it never flashes the wrong colours. Dark is the default design.
       try {
         if (localStorage.getItem('rr-theme') === 'light') {
           document.documentElement.dataset.theme = 'light';
-          document.querySelector('meta[name="theme-color"]').content = '#f7f7f5';
+          const bar = document.querySelector('meta[name="theme-color"]');
+          bar.content = bar.dataset.light;
         }
       } catch {}
     </script>

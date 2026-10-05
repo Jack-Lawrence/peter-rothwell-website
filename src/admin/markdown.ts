@@ -56,6 +56,8 @@ const turndown = new TurndownService({
   bulletListMarker: '-',
   emDelimiter: '*',
   strongDelimiter: '**',
+  // Line breaks as "\" rather than two trailing spaces, which are easy to lose.
+  br: '\\',
 });
 // Photos keep their path in the repo (data-path); the src is only for showing them here.
 turndown.addRule('photo', {
@@ -74,12 +76,43 @@ turndown.addRule('iTag', { filter: ['i'], replacement: (c) => (c.trim() ? `*${c}
 // Headings in posts are h2 (the page title is h1).
 turndown.addRule('heading', {
   filter: ['h1', 'h2', 'h3'],
-  replacement: (c, node) => `\n\n${node.nodeName === 'H3' ? '###' : '##'} ${c.trim()}\n\n`,
+  // A heading can't become a list, so "1. The back squat" doesn't need its dot escaped.
+  replacement: (c, node) => `\n\n${node.nodeName === 'H3' ? '###' : '##'} ${c.trim().replace(/^(\d+)\\\./, '$1.')}\n\n`,
 });
+
+// List items: "- item" / "1. item", with nested content indented to match.
+turndown.addRule('listItem', {
+  filter: 'li',
+  replacement(content, node) {
+    const parent = node.parentNode as HTMLElement;
+    let prefix = '- ';
+    if (parent.nodeName === 'OL') {
+      const start = Number(parent.getAttribute('start') ?? 1);
+      prefix = `${start + Array.prototype.indexOf.call(parent.children, node)}. `;
+    }
+    const body = content
+      .replace(/^\n+/, '')
+      .replace(/\n+$/, '\n')
+      .replace(/\n/g, `\n${' '.repeat(prefix.length)}`);
+    return prefix + body + (node.nextSibling && !body.endsWith('\n') ? '\n' : '');
+  },
+});
+
+/** The editor wraps each list item's text in a <p>; a plain item doesn't need one. */
+function tidyLists(html: string): string {
+  const t = document.createElement('template');
+  t.innerHTML = html;
+  for (const li of t.content.querySelectorAll('li')) {
+    const first = li.firstElementChild;
+    if (first?.nodeName === 'P') first.replaceWith(...first.childNodes);
+  }
+  return t.innerHTML;
+}
 
 export function htmlToMarkdown(html: string): string {
   return turndown
-    .turndown(html)
+    .turndown(tidyLists(html))
+    .replace(/[ \t]+$/gm, '')
     .replace(/\n{3,}/g, '\n\n')
     .trim();
 }

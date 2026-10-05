@@ -639,6 +639,23 @@ fieldset.box legend {
   font-style: italic;
   font-family: Georgia, serif;
 }
+/* A formatting button that's switched on where the cursor is. */
+.tool[aria-pressed='true'] {
+  background: var(--granite);
+  border-color: var(--granite);
+  color: var(--paper);
+}
+.tool--quiet {
+  color: var(--ink-muted);
+}
+/* TipTap's editing area: keep empty paragraphs visible and photos within the box. */
+.editor-body img {
+  max-width: 100%;
+  height: auto;
+}
+.editor-body img.ProseMirror-selectednode {
+  outline: 3px solid var(--gorse);
+}
 .editor-body {
   border: 1.5px solid color-mix(in srgb, var(--ink-muted) 80%, white);
   border-radius: 10px;
@@ -934,4 +951,199 @@ fieldset.box legend {
   .view {
     padding-top: 24px;
   }
+}
+
+/* ---------- Photo cropper and photo slots ---------- */
+.dlg--crop {
+  width: min(460px, calc(100vw - 32px));
+}
+.crop-frame {
+  position: relative;
+  width: 100%;
+  max-height: 60vh;
+  margin: 8px auto 0;
+  background: var(--granite);
+  overflow: hidden;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+}
+.crop-frame.is-dragging {
+  cursor: grabbing;
+}
+.crop-frame:focus-visible {
+  outline: 3px solid var(--gorse);
+  outline-offset: 3px;
+}
+.crop-canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+/* The middle part of the frame that shows on every screen. */
+.crop-guide {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc((100% - var(--safe)) / 2);
+  height: var(--safe);
+  border-block: 2px dashed var(--paper);
+  box-shadow: 0 0 0 9999px color-mix(in srgb, var(--granite) 35%, transparent);
+  pointer-events: none;
+}
+.crop-guide span {
+  position: absolute;
+  left: 8px;
+  top: 6px;
+  padding: 2px 6px;
+  font-size: 12px;
+  font-weight: 700;
+  background: var(--granite);
+  color: var(--paper);
+}
+.crop-zoom {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 14px;
+}
+.crop-zoom label {
+  font-weight: 700;
+}
+.crop-zoom input {
+  flex: 1 1 200px;
+  accent-color: var(--granite);
+}
+
+.photo-slot {
+  display: flex;
+  gap: 18px;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+.photo-slot img {
+  width: 150px;
+  flex: none;
+  object-fit: cover;
+  background: var(--soft);
+}
+.photo-slot .stack {
+  flex: 1 1 260px;
+  min-width: 0;
+}
+
+/* ---------- Colours (theme) ---------- */
+.theme-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 14px;
+}
+.theme-card {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px;
+  background: var(--paper);
+  border: 2px solid var(--edge);
+  cursor: pointer;
+}
+.theme-card:has(input:checked) {
+  border-color: var(--granite);
+  box-shadow: 0 0 0 2px var(--granite);
+}
+.theme-card:has(input:focus-visible) {
+  outline: 3px solid var(--gorse);
+  outline-offset: 3px;
+}
+.theme-name {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 800;
+}
+.theme-tag {
+  padding: 1px 6px;
+  font-size: 12px;
+  background: var(--granite);
+  color: var(--paper);
+}
+.tp {
+  display: flex;
+  flex-direction: column;
+}
+.tp-dark,
+.tp-light {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 10px 12px;
+}
+.tp-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.tp-head {
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: 20px;
+  line-height: 0.95;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+.tp-muted {
+  font-size: 12px;
+}
+.tp-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 6px;
+}
+.tp-btn {
+  padding: 3px 8px;
+  font-size: 11px;
+  font-weight: 700;
+  margin-right: auto;
+}
+.tp-plan {
+  width: 18px;
+  height: 18px;
+}
+.theme-tune {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+  align-items: flex-start;
+}
+.colour-grid {
+  flex: 1 1 260px;
+  display: grid;
+  gap: 12px;
+}
+.colour-grid input[type='color'] {
+  width: 100%;
+  height: 44px;
+  padding: 2px;
+  cursor: pointer;
+}
+.theme-preview {
+  flex: 1 1 300px;
+}
+.theme-preview .tp-head {
+  font-size: 30px;
+}
+.theme-ok {
+  margin: 0;
+  font-weight: 700;
+}
+.theme-fail {
+  padding: 12px 16px;
+  border: 2px solid var(--error);
+  background: var(--paper);
+}
+.theme-fail ul {
+  margin: 6px 0;
 }

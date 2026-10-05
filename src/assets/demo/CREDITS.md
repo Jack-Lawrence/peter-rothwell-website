@@ -13,10 +13,12 @@ the Instagram squares).
 
 | File | Photographer | Source | Licence |
 | --- | --- | --- | --- |
-| hero.jpg | [Gary Butterfield](https://unsplash.com/@garybpt) | https://unsplash.com/photos/person-in-red-shirt-standing-near-river-during-daytime-XGKSeGYGP0A | Unsplash Licence |
-| portrait.jpg | [David Karp.](https://unsplash.com/@karpic) | https://unsplash.com/photos/a-man-standing-in-a-field-with-a-frisbee-in-his-hand-ViaXblVImZA | Unsplash Licence |
+| hero-1.jpg (cropped to 1080 × 1350) | [Gary Butterfield](https://unsplash.com/@garybpt) | https://unsplash.com/photos/person-in-red-shirt-standing-near-river-during-daytime-XGKSeGYGP0A | Unsplash Licence |
+| portrait.jpg (cropped square, 1200 × 1200) | [David Karp.](https://unsplash.com/@karpic) | https://unsplash.com/photos/a-man-standing-in-a-field-with-a-frisbee-in-his-hand-ViaXblVImZA | Unsplash Licence |
 | cover-strength.jpg | [Putri Ardhia](https://unsplash.com/@putriardhia) | https://unsplash.com/photos/weightlifter-performs-a-deadlift-with-a-heavy-barbell-AeKsg1Uk1ZU | Unsplash Licence |
+| hero-3.jpg (cover-strength.jpg cropped to 1080 × 1350) | [Putri Ardhia](https://unsplash.com/@putriardhia) | https://unsplash.com/photos/weightlifter-performs-a-deadlift-with-a-heavy-barbell-AeKsg1Uk1ZU | Unsplash Licence |
 | cover-ultra.jpg | [Lucas Canino](https://unsplash.com/@lcanino) | https://unsplash.com/photos/a-group-of-people-hiking-up-a-mountain-lUNh8-Zhqo4 | Unsplash Licence |
+| hero-2.jpg (cover-ultra.jpg cropped to 1080 × 1350) | [Lucas Canino](https://unsplash.com/@lcanino) | https://unsplash.com/photos/a-group-of-people-hiking-up-a-mountain-lUNh8-Zhqo4 | Unsplash Licence |
 | cover-fuel.jpg | [Eiliv Aceron](https://unsplash.com/@shootdelicious) | https://unsplash.com/photos/a-bowl-of-cereal-with-milk-and-fruit-NI8MeJiAN3I | Unsplash Licence |
 | insta-1.jpg | [NHP&Co](https://unsplash.com/@nhpandco) | https://unsplash.com/photos/a-couple-of-people-that-are-running-in-the-dirt-UM6oufXjMa8 | Unsplash Licence |
 | insta-2.jpg | [Alessio Soggetti](https://unsplash.com/@asoggetti) | https://unsplash.com/photos/man-running-on-the-mountain-GYr9A2CPMhY | Unsplash Licence |

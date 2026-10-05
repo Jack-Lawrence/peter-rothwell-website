@@ -76,8 +76,8 @@ function scheduleLine(schedule?: Schedule) {
           <LocationMap />
           <span class="map-pin" aria-hidden="true">
             <svg width="30" height="38" viewBox="0 0 34 44">
-              <path d="M17 2C9 2 3 8 3 16c0 11 14 26 14 26s14-15 14-26C31 8 25 2 17 2z" fill="#1b211e"></path>
-              <circle cx="17" cy="16" r="5" fill="#e3b23c"></circle>
+              <path d="M17 2C9 2 3 8 3 16c0 11 14 26 14 26s14-15 14-26C31 8 25 2 17 2z" class="pin-body"></path>
+              <circle cx="17" cy="16" r="5" class="pin-dot"></circle>
             </svg>
             <span class="mono map-tag">Rothwells Running</span>
           </span>
@@ -250,7 +250,7 @@ function scheduleLine(schedule?: Schedule) {
     display: flex;
     align-items: center;
     gap: 20px;
-    background: #e4e3dd;
+    background: color-mix(in srgb, var(--paper) 55%, var(--chalk-2));
     padding: 22px 24px;
   }
   .pin {
@@ -304,6 +304,12 @@ function scheduleLine(schedule?: Schedule) {
     flex-direction: column;
     align-items: center;
     gap: 4px;
+  }
+  .pin-body {
+    fill: var(--ink);
+  }
+  .pin-dot {
+    fill: var(--gorse);
   }
   .map-tag {
     background: var(--granite);

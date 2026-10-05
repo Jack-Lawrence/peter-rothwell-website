@@ -3,9 +3,30 @@
   "description": "Running and strength coaching from Edinburgh ultra runner Peter Rothwell. Online coaching, 1-1 personal training at Meadowbank, and a weekly run club.",
   "hero": {
     "eyebrow": "Running & strength coaching · Meadowbank, Edinburgh & online",
-    "headline": ["Run further.", "Lift stronger.", "Go past the wall."],
+    "headline": [
+      "Run further.",
+      "Lift stronger.",
+      "Go past the wall."
+    ],
     "intro": "I'm Peter, an ultra marathon runner from Edinburgh. I coach runners and lifters of every level with plans built around your life, your body and the race you're chasing.",
-    "badge": { "label": "", "value": "" }
+    "badge": {
+      "label": "",
+      "value": ""
+    },
+    "photos": [
+      {
+        "image": "src/assets/demo/hero-1.jpg",
+        "alt": "A runner in a red top running along a dark riverside path"
+      },
+      {
+        "image": "src/assets/demo/hero-2.jpg",
+        "alt": "Three trail runners heading up a grassy ridge below rocky mountains"
+      },
+      {
+        "image": "src/assets/demo/hero-3.jpg",
+        "alt": "A lifter in a red top holding a loaded barbell at the top of a deadlift"
+      }
+    ]
   },
   "about": {
     "name": "Peter Rothwell",
@@ -13,7 +34,11 @@
       "I found fitness in my early twenties and was obsessed almost straight away. A few years later I made it my career. Now I run ultra marathons and coach athletes from every background.",
       "Most of what I teach is about mental fortitude: giving you the tools, the structure and the push to get past the limits you thought you had."
     ],
-    "stats": []
+    "stats": [],
+    "photo": {
+      "image": "src/assets/demo/portrait.jpg",
+      "alt": "A runner in a white vest looking out over the hills, seen from behind"
+    }
   },
   "contact": {
     "phone": "07367 636632",
@@ -24,7 +49,12 @@
   "enquiries": {
     "accessKey": "",
     "captcha": false,
-    "interests": ["1-1 Online Coaching", "1-1 Personal Training", "Rothwells Run Club", "Something else"]
+    "interests": [
+      "1-1 Online Coaching",
+      "1-1 Personal Training",
+      "Rothwells Run Club",
+      "Something else"
+    ]
   },
   "location": {
     "area": "Meadowbank, Edinburgh",

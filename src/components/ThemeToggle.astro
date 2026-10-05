@@ -47,7 +47,7 @@
       const light = root.dataset.theme !== 'light';
       if (light) root.dataset.theme = 'light';
       else delete root.dataset.theme;
-      if (meta) meta.content = light ? '#f7f7f5' : '#1b211e';
+      if (meta) meta.content = (light ? meta.dataset.light : meta.dataset.dark) ?? meta.content;
       try {
         localStorage.setItem('rr-theme', light ? 'light' : 'dark');
       } catch {

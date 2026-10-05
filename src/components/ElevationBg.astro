@@ -1,0 +1,88 @@
+---
+// Decorative race elevation profile behind the home page's first screen: a
+// jagged line in the accent colour that climbs gradually from the left (about
+// 60% down) to the right (about 30% down), like the profile of an ultra, over a
+// faint fill, with a dot on the summit.
+// Each `course` number gives a different (but fixed) profile.
+//
+// It fills its parent, which needs `position: relative; isolation: isolate`.
+
+interface Props {
+  course?: number;
+}
+const { course = 1 } = Astro.props;
+
+const W = 1200;
+const H = 600;
+const STEPS = 44;
+
+// Small seeded random generator, so the profile is the same on every build.
+let seed = course * 9301 + 49297;
+const random = () => {
+  seed = (seed * 9301 + 49297) % 233280;
+  return seed / 233280;
+};
+
+// The overall climb, plus a wobble of ups and downs and a couple of short
+// descents along the way.
+const points: [number, number][] = [];
+let wobble = 0;
+const dips = [0.3 + random() * 0.15, 0.62 + random() * 0.15].map((f) => Math.round(f * STEPS));
+for (let i = 0; i <= STEPS; i++) {
+  const t = i / STEPS;
+  const trend = H * (0.62 - 0.32 * t);
+  wobble = wobble * 0.55 + (random() - 0.5) * 40;
+  const dip = dips.some((d) => i >= d && i < d + 3) ? 30 : 0;
+  const y = Math.min(H * 0.98, Math.max(H * 0.06, trend + wobble + dip));
+  points.push([Math.round(t * W), Math.round(y)]);
+}
+const line = points.map(([x, py], i) => `${i ? 'L' : 'M'}${x} ${py}`).join(' ');
+const area = `${line} L${W} ${H} L0 ${H} Z`;
+const [peakX, peakY] = points.reduce((a, b) => (b[1] < a[1] ? b : a));
+---
+
+<div class="elevation" aria-hidden="true">
+  <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" focusable="false">
+    <path class="area" d={area} />
+    <path class="line" d={line} />
+  </svg>
+  <span class="peak" style={`--x: ${(peakX / W) * 100}%; --y: ${(peakY / H) * 100}%`}></span>
+</div>
+
+<style>
+  .elevation {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+  }
+  svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+  .area {
+    fill: var(--chalk);
+    fill-opacity: 0.025;
+  }
+  /* Quiet enough that text crossing it stays easy to read. */
+  .line {
+    fill: none;
+    stroke: var(--accent);
+    stroke-opacity: 0.32;
+    stroke-width: 1.5;
+    stroke-linejoin: round;
+    vector-effect: non-scaling-stroke;
+  }
+  /* The summit, drawn in HTML so it stays square when the SVG stretches. */
+  .peak {
+    position: absolute;
+    left: var(--x);
+    top: var(--y);
+    width: 7px;
+    height: 7px;
+    margin: -3.5px 0 0 -3.5px;
+    background: var(--accent);
+    opacity: 0.6;
+  }
+</style>

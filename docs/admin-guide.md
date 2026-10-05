@@ -37,11 +37,16 @@ To sign out (for example on a shared computer), press **Sign out** in the menu.
 2. Type a **title**.
 3. Add a **cover photo**: drag one in, or press **choose from your phone or computer**. Then write a few words to **describe the photo** for people who can't see it.
 4. Write your post in the big box. The buttons above it:
-   - **Heading**: makes the line you're on a heading. Press it again to undo.
-   - **B** and **I**: bold and italic. Select some words first.
-   - **• List**: starts a bullet list.
-   - **Link**: select some words, press Link, and paste a web address.
-   - **Add photo**: puts a photo in the middle of the post. You'll be asked to describe it, and you can add a caption.
+   - **Heading** and **Small heading**: make the line you're on a heading. Press again to undo.
+   - **B** and **I**: bold and italic. Select some words first (or press the button, then type).
+   - **• List** and **1. List**: start a bullet or numbered list. Press Enter twice to finish it.
+   - **Quote**: sets a paragraph apart as a quote.
+   - **Link**: select some words, press Link, and paste a web address. To remove a link, press Link and leave the box empty.
+   - **Add photo**: puts a photo in the post. You'll be asked to describe it, and you can add a caption.
+   - **Undo** and **Redo**: step back or forward through your changes.
+
+   A button stays dark while it's switched on where your cursor is, e.g. **B** inside bold words.
+
 5. On the right (or below, on a phone), choose a **topic** and write a **short summary** of one or two sentences.
 6. Press **Preview** to see how it will look.
 7. Press **Publish now**. It appears on your website in about a minute.
@@ -83,6 +88,30 @@ Only add a client's words if they've said you can.
 4. Press **Save testimonials**.
 
 You can also change the order with **Move up** and **Move down**, or **Remove** one.
+
+If you add the date they started training with you, their review shows how long they've been your client, e.g. "Client for 4 months". Leave **Still training with me** ticked and it keeps counting up by itself. If they've stopped, untick it and choose the date they finished.
+
+## Changing photos
+
+Go to **Photos**. There are two places:
+
+- **Top of the home page**: up to 6 photos that take turns beside "Run further. Lift stronger.". They show in the order listed.
+- **Meet your coach**: one square photo of you.
+
+To add or change one:
+
+1. Press **+ Add a photo** (or **Replace photo**) and choose a photo from your phone or computer.
+2. Drag the photo to move it, and use the **Zoom** slider to zoom in, until the box shows the part you want. For the top of the home page, keep the important part inside the dashed lines: on some screens the very top and bottom are trimmed a little.
+3. Press **Use this photo**, then describe the photo in a few words (for people who can't see it).
+4. Press **Save photos**.
+
+Photos need to be big enough to look sharp: at least 1080 × 1350 pixels for the top of the home page, and 1080 × 1080 for Meet your coach. Photos straight from your phone are fine. If a photo is too small, the editor tells you; try the original rather than a screenshot or one sent in a message.
+
+## Changing your website's colours
+
+Go to **Colours**. Pick one of the themes (each shows a small preview) and press **Save colours**. **Pentlands** is the original look, and **Reset to default** always brings it back.
+
+To fine-tune, change any of the five colours under **Fine-tune**. Every choice is checked so text stays easy to read in both dark and light mode. If a colour is too dark or too light, the editor tells you which part would be hard to read and won't save until it's fixed.
 
 ## Other things you can change
 
