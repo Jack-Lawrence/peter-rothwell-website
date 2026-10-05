@@ -16,6 +16,8 @@ import testimonials from '../data/testimonials.json';
       </div>
     </div>
 
+    <!-- role="list" is deliberate: Safari drops list semantics from unstyled lists. -->
+    <!-- [html-validate-disable-next no-redundant-role] -->
     <ul class="track" data-track role="list" aria-label="Client reviews">
       {
         testimonials.map((t) => (

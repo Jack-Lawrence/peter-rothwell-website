@@ -1,0 +1,61 @@
+# Checks every change (including commits from the admin area) before it goes live.
+# The deploy workflow waits for this to pass on main.
+name: Checks
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: checks-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      # Match the deploy workflow: the preview build is noindex, so Lighthouse
+      # skips SEO. Remove this along with PREVIEW in deploy.yml at launch.
+      PREVIEW: 'true'
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+
+      - run: npm ci
+
+      - name: Formatting (Prettier)
+        run: npm run format:check
+
+      - name: Type check (astro check)
+        run: npm run check
+
+      - name: Build
+        run: npm run build
+
+      - name: Internal links (offline)
+        run: npm run check:links
+
+      - name: HTML validation
+        run: npm run validate:html
+
+      - name: Lighthouse (mobile)
+        run: npm run lhci
+
+      - name: Keep the Lighthouse reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lighthouse-reports
+          path: .lighthouseci
+          if-no-files-found: ignore
+          retention-days: 14

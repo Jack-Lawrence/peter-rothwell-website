@@ -12,7 +12,12 @@
     "astro": "astro",
     "instagram": "node scripts/fetch-instagram.mjs",
     "icons": "node scripts/make-icons.mjs",
-    "check": "astro check"
+    "check": "astro check",
+    "lhci": "lhci autorun",
+    "validate:html": "html-validate \"dist/**/*.html\"",
+    "check:links": "linkinator ./dist --recurse --skip \"^https?://(?!localhost|127\\.0\\.0\\.1)\"",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
   },
   "dependencies": {
     "@astrojs/markdown-satteri": "^0.4.2",
@@ -31,8 +36,13 @@
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.10",
+    "@lhci/cli": "^0.15.1",
     "@resvg/resvg-js": "^2.6.2",
     "@types/turndown": "^5.0.6",
+    "html-validate": "^11.16.2",
+    "linkinator": "^8.1.0",
+    "prettier": "^3.9.9",
+    "prettier-plugin-astro": "^1.1.0",
     "satori": "^0.35.0",
     "schema-dts": "^2.1.0",
     "typescript": "^6.0.3"

@@ -1,9 +1,12 @@
 # Builds the site and publishes it to GitHub Pages.
-# Runs on every push to main, by hand, and hourly so new Instagram posts appear.
+# Runs after the Checks workflow passes on main (so a change that breaks the
+# site never goes live), by hand, and hourly so new Instagram posts appear.
 name: Deploy to GitHub Pages
 
 on:
-  push:
+  workflow_run:
+    workflows: [Checks]
+    types: [completed]
     branches: [main]
   workflow_dispatch:
   schedule:
@@ -20,9 +23,14 @@ concurrency:
 
 jobs:
   build:
+    # After a push, only deploy when the checks passed.
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
+        with:
+          # The exact commit the checks ran on (the latest main for other triggers).
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
 
       - uses: actions/setup-node@v5
         with:

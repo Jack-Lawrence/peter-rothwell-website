@@ -22,7 +22,9 @@ interface Props {
 }
 
 const { title, description = site.description, image, type = 'website' } = Astro.props;
-const pageTitle = title ? `${title} | ${site.name}` : `${site.name} | Running & strength coaching, Edinburgh`;
+// Search results cut titles at about 60–70 characters, so long titles drop the site name.
+const withName = title ? `${title} | ${site.name}` : `${site.name} | Running & strength coaching, Edinburgh`;
+const pageTitle = title && withName.length > 70 ? title : withName;
 const canonical = new URL(Astro.url.pathname, Astro.site);
 const share = image ?? {
   url: absolute('/og-default.png'),

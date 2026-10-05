@@ -15,7 +15,7 @@ const year = new Date().getFullYear();
       <h2 class="display big">Your next<br />start line<br />starts here.</h2>
       <div class="contact">
       <span class="mono">{contact.bookingNote}, or send an enquiry</span>
-      <a class="phone" href={telHref(contact.phone)}>{contact.phone}</a>
+      <a class="phone" href={telHref(contact.phone)}>{contact.phone.replace(/ /g, ' ')}</a>
       <a class="email" href={`mailto:${contact.email}`}>{contact.email}</a>
       <a href={`https://www.instagram.com/${contact.instagram}/`} target="_blank" rel="noopener">Instagram @{contact.instagram}</a>
       <p class="addr">

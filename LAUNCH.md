@@ -89,7 +89,7 @@ Peter's account needs to be a **Business or Creator** account. Check in Instagra
 - [ ] Enquiry form: test message received.
 - [ ] Instagram grid shows real posts.
 - [ ] Old Wix addresses redirect: `/english-privacy-policy`, `/english-terms-conditions`, `/english-refund-policy`, `/accessibility-statement`.
-- [ ] The `noindex` preview setting is off for the live build (remove `PREVIEW: 'true'` from the deploy workflow), and the canonical URLs use `https://www.rothwellsrunning.com`.
+- [ ] The `noindex` preview setting is off for the live build (remove `PREVIEW: 'true'` from `deploy.yml` and `checks.yml`), and the canonical URLs use `https://www.rothwellsrunning.com`.
 - [ ] Check on a real iPhone and Android phone, plus desktop Chrome, Safari and Firefox.
 - [ ] Lighthouse on the live URL (mobile): all four scores 90+.
 

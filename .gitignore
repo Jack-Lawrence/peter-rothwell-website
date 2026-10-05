@@ -25,3 +25,6 @@ pnpm-debug.log*
 
 # images downloaded by scripts/fetch-instagram.mjs
 src/assets/instagram/
+
+# Lighthouse CI reports
+.lighthouseci/

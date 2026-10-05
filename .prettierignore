@@ -1,0 +1,13 @@
+# Generated or third-party
+dist/
+.astro/
+node_modules/
+package-lock.json
+.lighthouseci/
+public/
+src/assets/
+
+# Content the admin area writes. Its output is checked by the build instead;
+# formatting it here would make every save from the admin fail the format check.
+src/data/
+src/content/

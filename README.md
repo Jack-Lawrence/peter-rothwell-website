@@ -51,11 +51,26 @@ The repo it commits to is `ADMIN_REPO` (default `Jack-Lawrence/peter-rothwell-we
 
 To set Peter up: give him a GitHub account with write access to the repo, then follow "Signing in" in the admin guide together.
 
+## Checks
+
+`.github/workflows/checks.yml` runs on pull requests and every push to `main` (including saves from the admin area), and the deploy only goes ahead if it passes. It takes about three minutes:
+
+| Step | Command |
+| --- | --- |
+| Formatting (Prettier) | `npm run format:check` (fix with `npm run format`) |
+| Types | `npm run check` |
+| Build | `npm run build` |
+| Internal links, offline | `npm run check:links` |
+| HTML validation (`.htmlvalidate.mjs`) | `npm run validate:html` |
+| Lighthouse, mobile (`lighthouserc.cjs`) | `npm run lhci`: performance ≥ 90, accessibility 100, best practices ≥ 95 (and SEO when not a preview build) |
+
+The content files the admin area writes (`src/data/`, `src/content/`) aren't formatted by Prettier, so a save from Peter can't fail on style. Run the last three after a build; locally, stop any other `astro preview` first (Astro allows one at a time).
+
 ## Hosting
 
 ### Preview: GitHub Pages
 
-`.github/workflows/deploy.yml` builds and publishes on every push to `main`, and hourly to pick up new Instagram posts. In the repo settings, set **Pages → Source** to **GitHub Actions**. The workflow sets the base path, so the site works at `https://<user>.github.io/<repo>/`.
+`.github/workflows/deploy.yml` builds and publishes after the checks pass on `main`, and hourly to pick up new Instagram posts. In the repo settings, set **Pages → Source** to **GitHub Actions**. The workflow sets the base path, so the site works at `https://<user>.github.io/<repo>/`.
 
 On the free GitHub plan, Pages needs a public repo. GitHub pauses scheduled workflows after 60 days without any repo activity.
 
