@@ -13,15 +13,21 @@
 //  7. Messages full of links are refused; one enquiry per minute per browser.
 //  8. Optional hCaptcha (free with Web3Forms) via enquiries.captcha.
 // Anything caught by 3–5 gets a fake "sent" message so bots don't adapt.
+//
+// Demo mode (preview site with no access key yet): every check still runs,
+// but nothing is sent. A genuine submission shows the success screen plus a
+// sample of the email Peter would receive.
 import site from '../data/site.json';
 import { href } from '../lib/url';
+import { PREVIEW } from 'astro:env/server';
 
 const { accessKey, captcha, interests } = site.enquiries;
 const reversedKey = accessKey.split('').reverse().join('');
+const demo = PREVIEW && !accessKey;
 ---
 
 <div class="enquiry">
-  <form class="form" data-enquiry data-k={reversedKey} novalidate>
+  <form class="form" data-enquiry data-k={reversedKey} data-demo={demo ? '' : undefined} novalidate>
     <div class="row">
       <div class="field">
         <label for="enq-name">Name</label>
@@ -68,8 +74,8 @@ const reversedKey = accessKey.split('').reverse().join('');
     {captcha && <div class="h-captcha" data-captcha="true"></div>}
 
     <p class="note">
-      Please don't include health details here, we'll go through those when we talk. Your details are only used to reply to you. See the
-      <a href={href('/privacy/')}>Privacy Policy</a>.
+      Please don't include health details here, we'll go through those when we talk. Your details are only used to reply to
+      you. See the <a href={href('/privacy/')}>Privacy Policy</a>.
     </p>
 
     <div class="actions">
@@ -85,6 +91,33 @@ const reversedKey = accessKey.split('').reverse().join('');
     </svg>
     <h3 class="display">Message sent</h3>
     <p data-done-text>Thanks. Peter will reply by email as soon as he can.</p>
+    {
+      demo && (
+        <div class="demo" data-demo-note hidden>
+          <p class="demo-note">
+            <strong>Preview only:</strong> this message wasn't sent. When the site is live it goes straight to Peter's
+            email.
+          </p>
+          <figure class="email">
+            <figcaption class="mono">The email Peter would receive</figcaption>
+            <dl>
+              <dt>Subject</dt>
+              <dd data-email="subject" />
+              <dt>Name</dt>
+              <dd data-email="name" />
+              <dt>Email</dt>
+              <dd data-email="email" />
+              <dt>Phone</dt>
+              <dd data-email="phone" />
+              <dt>Interest</dt>
+              <dd data-email="interest" />
+              <dt>Message</dt>
+              <dd data-email="message" class="message" />
+            </dl>
+          </figure>
+        </div>
+      )
+    }
   </div>
 </div>
 
@@ -170,6 +203,27 @@ const reversedKey = accessKey.split('').reverse().join('');
         return;
       }
 
+      const subject = `New enquiry: ${data.get('interest')} from ${name}`;
+
+      // Preview site: show what would have been sent, and send nothing.
+      if (form.dataset.demo !== undefined) {
+        const email: Record<string, string> = {
+          subject,
+          name,
+          email: String(data.get('email')),
+          phone: String(data.get('phone') || 'Not given'),
+          interest: String(data.get('interest')),
+          message,
+        };
+        wrap.querySelectorAll<HTMLElement>('[data-email]').forEach((el) => {
+          el.textContent = email[el.dataset.email!];
+        });
+        wrap.querySelector<HTMLElement>('[data-demo-note]')!.hidden = false;
+        rememberSent();
+        showDone(name);
+        return;
+      }
+
       const key = (form.dataset.k ?? '').split('').reverse().join('');
       if (!key) {
         say('The form is not connected yet. Please text or email Peter instead.');
@@ -178,7 +232,7 @@ const reversedKey = accessKey.split('').reverse().join('');
 
       data.delete('website');
       data.set('access_key', key);
-      data.set('subject', `New enquiry: ${data.get('interest')} from ${name}`);
+      data.set('subject', subject);
       data.set('from_name', 'Rothwells Running website');
 
       button.disabled = true;
@@ -210,6 +264,9 @@ const reversedKey = accessKey.split('').reverse().join('');
     display: flex;
     flex-direction: column;
     gap: 16px;
+  }
+  .form[hidden] {
+    display: none;
   }
   .row {
     display: grid;
@@ -323,6 +380,48 @@ const reversedKey = accessKey.split('').reverse().join('');
   .done p {
     margin: 0;
     color: var(--muted-2);
+  }
+  .demo {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin-top: 8px;
+  }
+  .demo[hidden] {
+    display: none;
+  }
+  .done .demo-note {
+    padding: 12px 14px;
+    border-left: 3px solid var(--gorse);
+    background: var(--granite-2);
+    color: var(--chalk);
+  }
+  .email {
+    margin: 0;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 14px 16px;
+    font-size: 14px;
+  }
+  .email figcaption {
+    color: var(--muted);
+    margin-bottom: 10px;
+  }
+  .email dl {
+    margin: 0;
+    display: grid;
+    grid-template-columns: max-content minmax(0, 1fr);
+    gap: 6px 14px;
+  }
+  .email dt {
+    color: var(--muted);
+  }
+  .email dd {
+    margin: 0;
+    overflow-wrap: anywhere;
+  }
+  .email .message {
+    white-space: pre-line;
   }
   .done:focus {
     outline: none;

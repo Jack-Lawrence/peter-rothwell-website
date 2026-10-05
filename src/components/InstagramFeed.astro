@@ -3,6 +3,8 @@ import type { ImageMetadata } from 'astro';
 import Photo from './Photo.astro';
 import site from '../data/site.json';
 import instagram from '../data/instagram.json';
+import { PREVIEW } from 'astro:env/server';
+import { demoInstagram } from '../lib/demo';
 
 interface Post {
   id: string;
@@ -21,9 +23,10 @@ const imageFor = (file: string) => images[`../assets/instagram/${file}`]?.defaul
 const handle = site.contact.instagram;
 const profile = `https://www.instagram.com/${handle}/`;
 // Filled by scripts/fetch-instagram.mjs at build time. Until a token is set up,
-// show six placeholder tiles.
+// the preview site shows demo photos and the live site six placeholder tiles.
 const posts = (instagram.posts as Post[]).filter((p) => imageFor(p.image)).slice(0, 6);
-const placeholders = posts.length === 0 ? 6 : 0;
+const demo = posts.length === 0 && PREVIEW ? demoInstagram : [];
+const placeholders = posts.length === 0 && demo.length === 0 ? 6 : 0;
 
 function alt(caption?: string) {
   if (!caption) return 'Instagram post';
@@ -52,6 +55,15 @@ function alt(caption?: string) {
         ))
       }
       {
+        demo.map((p) => (
+          <li>
+            <a href={profile} target="_blank" rel="noopener">
+              <Photo class="tile" src={p.image} alt={p.alt} width={400} height={400} />
+            </a>
+          </li>
+        ))
+      }
+      {
         Array.from({ length: placeholders }, (_, i) => (
           <li>
             <a href={profile} target="_blank" rel="noopener" aria-label={`Instagram post ${i + 1} (placeholder)`}>
@@ -61,6 +73,7 @@ function alt(caption?: string) {
         ))
       }
     </ul>
+    {demo.length > 0 && <p class="demo-note">Preview: this grid fills with Peter's latest Instagram posts automatically once connected.</p>}
   </div>
 </section>
 
@@ -99,6 +112,11 @@ function alt(caption?: string) {
   }
   .grid a:hover :global(.tile) {
     opacity: 0.85;
+  }
+  .demo-note {
+    margin: 16px 0 0;
+    font-size: 14px;
+    color: var(--muted);
   }
   @media (max-width: 900px) {
     .grid {
