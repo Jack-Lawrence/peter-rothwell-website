@@ -1,0 +1,38 @@
+[
+  {
+    "id": "online",
+    "label": "Online",
+    "name": "1-1 Online Coaching",
+    "price": "£80",
+    "per": "/ month",
+    "points": [
+      "Run and strength programme written for you",
+      "Weekly check-ins and plan adjustments",
+      "Message support whenever you need it"
+    ]
+  },
+  {
+    "id": "pt",
+    "label": "In person · Meadowbank, Edinburgh",
+    "name": "1-1 Personal Training",
+    "price": "£150",
+    "per": "/ month",
+    "points": [
+      "Coached sessions, technique and lifting form",
+      "Running plan between sessions",
+      "Nutrition and recovery guidance"
+    ]
+  },
+  {
+    "id": "runclub",
+    "label": "Group · Weekly",
+    "name": "Rothwells Run Club",
+    "price": "£80",
+    "per": "/ 8 weeks",
+    "points": [
+      "Weekly group speed sessions",
+      "Intervals, hills and tempo, all paces welcome",
+      "Sociable, hard work, fun"
+    ]
+  }
+]

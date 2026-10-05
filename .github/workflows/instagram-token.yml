@@ -1,0 +1,29 @@
+# Instagram tokens expire after 60 days. This swaps the token for a fresh one
+# every week and saves it back as the IG_ACCESS_TOKEN secret.
+# Needs a GH_SECRETS_TOKEN secret: a fine-grained personal access token for
+# this repo with "Secrets: read and write" permission.
+name: Refresh Instagram token
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 6 * * 1'
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+
+      - name: Refresh and store token
+        env:
+          IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
+          GH_TOKEN: ${{ secrets.GH_SECRETS_TOKEN }}
+        run: |
+          NEW_TOKEN=$(node scripts/fetch-instagram.mjs --refresh)
+          echo "::add-mask::$NEW_TOKEN"
+          gh secret set IG_ACCESS_TOKEN --body "$NEW_TOKEN" --repo "$GITHUB_REPOSITORY"

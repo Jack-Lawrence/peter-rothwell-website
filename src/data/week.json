@@ -1,0 +1,12 @@
+{
+  "title": "A typical week on a hybrid plan",
+  "days": [
+    { "day": "Mon", "session": "Easy 8 km", "note": "Zone 2, conversational" },
+    { "day": "Tue", "session": "6 × 800 m", "note": "Speed, 90 s jog recovery", "highlight": true },
+    { "day": "Wed", "session": "Strength", "note": "Squat, RDL, single-leg" },
+    { "day": "Thu", "session": "Tempo 5 km", "note": "Comfortably hard" },
+    { "day": "Fri", "session": "Rest", "note": "Mobility, sleep, fuel" },
+    { "day": "Sat", "session": "Long 22 km", "note": "Hills, practise fuelling" },
+    { "day": "Sun", "session": "Strength", "note": "Upper body, core" }
+  ]
+}

@@ -1,0 +1,101 @@
+---
+import Photo from './Photo.astro';
+import site from '../data/site.json';
+import instagram from '../data/instagram.json';
+import { href } from '../lib/url';
+
+interface Post {
+  id: string;
+  permalink: string;
+  image: string;
+  caption?: string;
+}
+
+const handle = site.contact.instagram;
+const profile = `https://www.instagram.com/${handle}/`;
+// Filled by scripts/fetch-instagram.mjs at build time. Until a token is set up,
+// show six placeholder tiles.
+const posts = (instagram.posts as Post[]).slice(0, 6);
+const placeholders = posts.length === 0 ? 6 : 0;
+
+function alt(caption?: string) {
+  if (!caption) return 'Instagram post';
+  const text = caption.split('\n')[0];
+  return text.length > 120 ? `${text.slice(0, 117)}…` : text;
+}
+---
+
+<section class="section insta" aria-labelledby="insta-title">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="head">
+        <span class="mono">Latest from Instagram</span>
+        <h2 id="insta-title" class="display h2">@{handle}</h2>
+      </div>
+      <a class="btn btn--ghost" href={profile} target="_blank" rel="noopener">Follow on Instagram</a>
+    </div>
+    <ul class="grid">
+      {
+        posts.map((p) => (
+          <li>
+            <a href={p.permalink} target="_blank" rel="noopener">
+              <Photo class="tile" src={href(p.image)} alt={alt(p.caption)} />
+            </a>
+          </li>
+        ))
+      }
+      {
+        Array.from({ length: placeholders }, (_, i) => (
+          <li>
+            <a href={profile} target="_blank" rel="noopener" aria-label={`Instagram post ${i + 1} (placeholder)`}>
+              <Photo class="tile" />
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</section>
+
+<style>
+  .insta {
+    padding-bottom: 72px;
+  }
+  .head {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .head .mono {
+    color: var(--muted);
+  }
+  .h2 {
+    text-transform: none;
+    font-size: clamp(40px, 5.5vw, 80px);
+    overflow-wrap: anywhere;
+  }
+  .grid {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 8px;
+  }
+  .grid a {
+    display: block;
+  }
+  .grid :global(.tile) {
+    aspect-ratio: 1 / 1;
+    border-radius: 2px;
+    transition: opacity 0.15s ease;
+  }
+  .grid a:hover :global(.tile) {
+    opacity: 0.85;
+  }
+  @media (max-width: 900px) {
+    .grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+</style>

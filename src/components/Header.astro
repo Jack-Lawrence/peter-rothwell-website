@@ -1,0 +1,113 @@
+---
+import Logo from './Logo.astro';
+import { href } from '../lib/url';
+
+const links = [
+  { label: 'Coaching', path: '/#coaching' },
+  { label: 'Run Club', path: '/#runclub' },
+  { label: 'Journal', path: '/journal/' },
+  { label: 'About Peter', path: '/#about' },
+];
+---
+
+<header class="wrap header">
+  <Logo />
+  <nav class="links" aria-label="Main">
+    {links.map((l) => <a href={href(l.path)}>{l.label}</a>)}
+  </nav>
+  <a class="btn cta" href={href('/#contact')}>Book a free chat</a>
+
+  <details class="mobile">
+    <summary aria-label="Open menu">
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <path d="M3 6h18M3 12h18M3 18h18"></path>
+      </svg>
+    </summary>
+    <nav class="sheet" aria-label="Mobile">
+      {links.map((l) => <a href={href(l.path)}>{l.label}</a>)}
+      <a class="btn" href={href('/#contact')}>Book a free chat</a>
+    </nav>
+  </details>
+</header>
+
+<script>
+  // Close the mobile menu after jumping to a section on the same page.
+  document.querySelectorAll<HTMLAnchorElement>('.sheet a').forEach((a) => {
+    a.addEventListener('click', () => {
+      a.closest('details')?.removeAttribute('open');
+    });
+  });
+</script>
+
+<style>
+  .header {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    height: var(--header-h);
+  }
+  .links {
+    display: flex;
+    gap: 28px;
+    font-weight: 500;
+    font-size: 15px;
+  }
+  .links a {
+    color: var(--muted-2);
+    text-decoration: none;
+  }
+  .links a:hover {
+    color: #fff;
+  }
+  .mobile {
+    display: none;
+  }
+  summary {
+    list-style: none;
+    cursor: pointer;
+    display: grid;
+    place-items: center;
+    width: 48px;
+    height: 48px;
+    border-radius: 10px;
+    border: 1.5px solid var(--line);
+  }
+  summary::-webkit-details-marker {
+    display: none;
+  }
+  .sheet {
+    position: absolute;
+    right: var(--gutter);
+    left: var(--gutter);
+    top: calc(100% - 8px);
+    z-index: 5;
+    background: var(--granite-2);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .sheet a:not(.btn) {
+    padding: 12px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 18px;
+  }
+  .sheet .btn {
+    margin-top: 8px;
+  }
+
+  @media (max-width: 900px) {
+    .links,
+    .cta {
+      display: none;
+    }
+    .mobile {
+      display: block;
+    }
+  }
+</style>

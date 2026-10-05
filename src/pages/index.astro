@@ -1,0 +1,38 @@
+---
+import Base from '../layouts/Base.astro';
+import Hero from '../components/Hero.astro';
+import WeekStrip from '../components/WeekStrip.astro';
+import Services from '../components/Services.astro';
+import About from '../components/About.astro';
+import Testimonials from '../components/Testimonials.astro';
+import JournalPreview from '../components/JournalPreview.astro';
+import InstagramFeed from '../components/InstagramFeed.astro';
+---
+
+<Base>
+  <div class="first-screen">
+    <Hero />
+    <WeekStrip />
+  </div>
+  <Services />
+  <About />
+  <Testimonials />
+  <JournalPreview />
+  <InstagramFeed />
+</Base>
+
+<style>
+  /* On desktop the hero and week strip fill exactly one screen below the
+     header; the hero photo takes up whatever height is left. */
+  @media (min-width: 901px) {
+    .first-screen {
+      display: flex;
+      flex-direction: column;
+      min-height: calc(100svh - var(--header-h));
+      padding-bottom: 32px;
+    }
+    .first-screen > :global(.hero) {
+      flex: 1;
+    }
+  }
+</style>

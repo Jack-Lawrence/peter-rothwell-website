@@ -1,0 +1,119 @@
+---
+import EnquiryForm from './EnquiryForm.astro';
+import site from '../data/site.json';
+import { getCollection } from 'astro:content';
+import { href, telHref } from '../lib/url';
+
+const { contact, location } = site;
+const policies = (await getCollection('legal')).sort((a, b) => a.data.order - b.data.order);
+const year = new Date().getFullYear();
+---
+
+<footer id="contact" class="section footer">
+  <div class="wrap grid">
+    <div class="intro">
+      <h2 class="display big">Your next<br />start line<br />starts here.</h2>
+      <div class="contact">
+      <span class="mono">{contact.bookingNote}, or send an enquiry</span>
+      <a class="phone" href={telHref(contact.phone)}>{contact.phone}</a>
+      <a class="email" href={`mailto:${contact.email}`}>{contact.email}</a>
+      <a href={`https://www.instagram.com/${contact.instagram}/`} target="_blank" rel="noopener">Instagram @{contact.instagram}</a>
+      <p class="addr">
+        In person: {location.address}<br />or online, anywhere
+      </p>
+      </div>
+    </div>
+    <EnquiryForm />
+  </div>
+  <div class="wrap legal">
+    <span>© {year} {site.name} · Edinburgh</span>
+    <nav aria-label="Policies">
+      <ul>
+        {policies.map((p) => <li><a href={href(`/${p.id}/`)}>{p.data.title}</a></li>)}
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+<style>
+  .footer {
+    background: var(--gorse);
+    color: var(--granite);
+    padding-bottom: 48px;
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
+    gap: clamp(40px, 5vw, 72px);
+    align-items: start;
+  }
+  .intro {
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+  }
+  .big {
+    font-size: clamp(60px, 7.5vw, 116px);
+  }
+  .contact {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    font-size: 18px;
+  }
+  .contact a {
+    text-decoration: none;
+  }
+  .contact a:hover {
+    text-decoration: underline;
+  }
+  .phone {
+    font-size: 28px;
+    font-weight: 700;
+  }
+  .email {
+    font-size: 22px;
+    font-weight: 600;
+    overflow-wrap: anywhere;
+  }
+  .addr {
+    margin: 0;
+    font-size: 16px;
+    padding-top: 12px;
+    border-top: 1.5px solid rgb(27 33 30 / 0.3);
+  }
+  .legal {
+    margin-top: 72px;
+    padding-top: 20px;
+    border-top: 1.5px solid rgb(27 33 30 / 0.3);
+    font-size: 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px 24px;
+    flex-wrap: wrap;
+  }
+  .legal ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 24px;
+  }
+  .legal a {
+    text-decoration: none;
+    font-weight: 600;
+  }
+  .legal a:hover {
+    text-decoration: underline;
+  }
+  .footer :focus-visible {
+    outline-color: var(--granite);
+  }
+  @media (max-width: 900px) {
+    .grid {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+</style>

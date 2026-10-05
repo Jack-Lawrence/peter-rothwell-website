@@ -1,0 +1,71 @@
+---
+// Shows a real image when one is supplied, otherwise a labelled placeholder
+// so the layout can be reviewed before the photography is ready.
+import { Image } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+
+interface Props {
+  src?: ImageMetadata | string;
+  alt?: string;
+  label?: string;
+  class?: string;
+  tone?: 'dark' | 'light';
+  sizes?: string;
+}
+
+const { src, alt = '', label, class: className = '', tone = 'dark', sizes } = Astro.props;
+---
+
+<div class:list={['photo', `photo--${tone}`, className]}>
+  {
+    src ? (
+      typeof src === 'string' ? (
+        <img src={src} alt={alt} loading="lazy" decoding="async" />
+      ) : (
+        <Image src={src} alt={alt} sizes={sizes} widths={[400, 800, 1200]} />
+      )
+    ) : (
+      label && (
+        <span class="label">
+          <span class="mono">Photo</span>
+          <span>{label}</span>
+        </span>
+      )
+    )
+  }
+  <slot />
+</div>
+
+<style>
+  .photo {
+    position: relative;
+    overflow: hidden;
+    border-radius: 4px;
+    display: flex;
+    align-items: flex-end;
+  }
+  .photo--dark {
+    background-color: var(--panel);
+    background-image: repeating-linear-gradient(135deg, rgb(255 255 255 / 0.04) 0 2px, transparent 2px 14px);
+    color: var(--muted);
+  }
+  .photo--light {
+    background-color: var(--chalk-2);
+    background-image: repeating-linear-gradient(135deg, rgb(27 33 30 / 0.05) 0 2px, transparent 2px 14px);
+    color: var(--ink-muted);
+  }
+  .photo :global(img) {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .label {
+    padding: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    font-size: 14px;
+  }
+</style>

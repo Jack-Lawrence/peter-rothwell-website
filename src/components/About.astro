@@ -1,0 +1,85 @@
+---
+import Photo from './Photo.astro';
+import site from '../data/site.json';
+
+const { name, paragraphs, stats } = site.about as {
+  name: string;
+  paragraphs: string[];
+  stats: { value: string; label: string }[];
+};
+---
+
+<section id="about" class="section">
+  <div class="wrap about">
+    <Photo class="portrait" label="Portrait of Peter, ideally at a race finish or on a summit." />
+    <div class="text">
+      <span class="mono accent">Meet your coach</span>
+      <h2 class="display h2">{name}</h2>
+      {paragraphs.map((p) => <p>{p}</p>)}
+      {
+        stats.length > 0 && (
+          <dl class="stats">
+            {stats.map((s) => (
+              <div>
+                <dt class="mono">{s.label}</dt>
+                <dd class="display">{s.value}</dd>
+              </div>
+            ))}
+          </dl>
+        )
+      }
+    </div>
+  </div>
+</section>
+
+<style>
+  .about {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
+    gap: 72px;
+    align-items: center;
+  }
+  .about :global(.portrait) {
+    aspect-ratio: 1 / 1;
+  }
+  .text {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+  .text p {
+    margin: 0;
+    font-size: 19px;
+    line-height: 1.6;
+    color: var(--muted-2);
+    max-width: 36em;
+  }
+  .stats {
+    margin: 0;
+    display: flex;
+    gap: 40px;
+    flex-wrap: wrap;
+    padding-top: 16px;
+    border-top: 1px solid var(--line);
+  }
+  .stats div {
+    display: flex;
+    flex-direction: column-reverse;
+    gap: 4px;
+  }
+  dt {
+    color: var(--muted);
+  }
+  dd {
+    margin: 0;
+    font-size: 44px;
+    font-weight: 800;
+  }
+
+  @media (max-width: 900px) {
+    .about {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 40px;
+    }
+  }
+</style>

@@ -1,0 +1,35 @@
+{
+  "name": "Rothwells Running",
+  "description": "Running and strength coaching from Edinburgh ultra runner Peter Rothwell. Online coaching, 1-1 personal training at Meadowbank, and a weekly run club.",
+  "hero": {
+    "eyebrow": "Running & strength coaching · Meadowbank, Edinburgh & online",
+    "headline": ["Run further.", "Lift stronger.", "Go past the wall."],
+    "intro": "I'm Peter, an ultra marathon runner from Edinburgh. I coach runners and lifters of every level with plans built around your life, your body and the race you're chasing.",
+    "badge": { "label": "", "value": "" }
+  },
+  "about": {
+    "name": "Peter Rothwell",
+    "paragraphs": [
+      "I found fitness in my early twenties and was obsessed almost straight away. A few years later I made it my career. Now I run ultra marathons and coach athletes from every background.",
+      "Most of what I teach is about mental fortitude: giving you the tools, the structure and the push to get past the limits you thought you had."
+    ],
+    "stats": []
+  },
+  "contact": {
+    "phone": "07367 636632",
+    "email": "Rothwell.pt@gmail.com",
+    "instagram": "peter_rothwell.pt",
+    "bookingNote": "All bookings by text or email"
+  },
+  "enquiries": {
+    "accessKey": "",
+    "captcha": false,
+    "interests": ["1-1 Online Coaching", "1-1 Personal Training", "Rothwells Run Club", "Something else"]
+  },
+  "location": {
+    "area": "Meadowbank, Edinburgh",
+    "place": "Meadowbank Shopping Park",
+    "address": "1 Moray Park, Meadowbank, Edinburgh EH7 5TS",
+    "mapsUrl": "https://www.google.com/maps/search/?api=1&query=1+Moray+Park+Meadowbank+Edinburgh+EH7+5TS"
+  }
+}

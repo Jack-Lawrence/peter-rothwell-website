@@ -1,0 +1,42 @@
+---
+import Base from '../../layouts/Base.astro';
+import PostCard from '../../components/PostCard.astro';
+import { getPosts } from '../../lib/journal';
+
+const posts = await getPosts();
+---
+
+<Base title="Training journal" description="Training tips, race reports and Run Club news from coach Peter Rothwell.">
+  <section class="light section">
+    <div class="wrap">
+      <div class="section-head">
+        <h1 class="display h2">Training journal</h1>
+      </div>
+      {
+        posts.length > 0 ? (
+          <div class="grid">
+            {posts.map((post) => (
+              <PostCard post={post} />
+            ))}
+          </div>
+        ) : (
+          <p>No posts yet. Check back soon.</p>
+        )
+      }
+    </div>
+  </section>
+</Base>
+
+<style>
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 56px 32px;
+  }
+  @media (max-width: 900px) {
+    .grid {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 48px;
+    }
+  }
+</style>

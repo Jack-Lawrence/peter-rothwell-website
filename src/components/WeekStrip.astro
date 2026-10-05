@@ -1,0 +1,70 @@
+---
+import week from '../data/week.json';
+---
+
+<section class="wrap" aria-labelledby="week-title">
+  <h2 id="week-title" class="mono title">{week.title}</h2>
+  <ol class="week">
+    {
+      week.days.map((d) => (
+        <li class="day">
+          <span class="mono">{d.day}</span>
+          <b class:list={['session', { accent: d.highlight }]}>{d.session}</b>
+          <span class="note">{d.note}</span>
+        </li>
+      ))
+    }
+  </ol>
+</section>
+
+<style>
+  .title {
+    margin: 0 0 14px;
+    color: var(--muted);
+  }
+  .week {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    border-block: 1px solid var(--line);
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+  }
+  .day {
+    padding: 18px 16px;
+    border-right: 1px solid var(--line);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .day:last-child {
+    border-right: 0;
+  }
+  .day .mono {
+    color: var(--muted);
+  }
+  .session {
+    font-family: var(--font-display);
+    font-size: 26px;
+    font-weight: 800;
+    text-transform: uppercase;
+    line-height: 1;
+  }
+  .note {
+    font-size: 13px;
+    line-height: 1.4;
+    color: var(--muted);
+  }
+
+  @media (max-width: 900px) {
+    .week {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .day {
+      border-bottom: 1px solid var(--line);
+    }
+    .day:nth-child(2n) {
+      border-right: 0;
+    }
+  }
+</style>

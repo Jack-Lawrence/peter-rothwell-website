@@ -1,0 +1,339 @@
+---
+// Enquiry form. Submissions go to Web3Forms (free plan), which emails Peter.
+// Set the access key in src/data/site.json → enquiries.accessKey.
+//
+// Spam protection, in layers:
+//  1. Web3Forms' own server-side spam filter.
+//  2. "botcheck" honeypot checkbox, enforced by Web3Forms on its server.
+//  3. A second honeypot text field, checked here before sending.
+//  4. Time trap: forms submitted within 4 s of the page loading are dropped.
+//  5. Interaction check: there must have been a real key press or click.
+//  6. No form action in the HTML and the key is stored reversed, so scrapers
+//     looking for an endpoint don't find one.
+//  7. Messages full of links are refused; one enquiry per minute per browser.
+//  8. Optional hCaptcha (free with Web3Forms) via enquiries.captcha.
+// Anything caught by 3–5 gets a fake "sent" message so bots don't adapt.
+import site from '../data/site.json';
+import { href } from '../lib/url';
+
+const { accessKey, captcha, interests } = site.enquiries;
+const reversedKey = accessKey.split('').reverse().join('');
+---
+
+<div class="enquiry">
+  <form class="form" data-enquiry data-k={reversedKey} novalidate>
+    <div class="row">
+      <div class="field">
+        <label for="enq-name">Name</label>
+        <input id="enq-name" name="name" type="text" autocomplete="name" required maxlength="80" />
+      </div>
+      <div class="field">
+        <label for="enq-email">Email</label>
+        <input id="enq-email" name="email" type="email" autocomplete="email" required maxlength="120" />
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="field">
+        <label for="enq-phone">Phone <span class="opt">(optional)</span></label>
+        <input id="enq-phone" name="phone" type="tel" autocomplete="tel" maxlength="30" />
+      </div>
+      <div class="field">
+        <label for="enq-interest">I'm interested in</label>
+        <select id="enq-interest" name="interest" required>
+          <option value="" selected disabled>Choose one</option>
+          {interests.map((i) => <option>{i}</option>)}
+        </select>
+      </div>
+    </div>
+
+    <div class="field">
+      <label for="enq-message">Your message</label>
+      <textarea
+        id="enq-message"
+        name="message"
+        rows="4"
+        required
+        maxlength="2000"
+        placeholder="Your goals, a race you're training for, or any questions."></textarea>
+    </div>
+
+    <!-- Honeypots: hidden from people and screen readers, tempting to bots. -->
+    <div class="hp" aria-hidden="true">
+      <label for="enq-website">Leave this empty</label>
+      <input id="enq-website" name="website" type="text" tabindex="-1" autocomplete="off" />
+      <input id="enq-botcheck" name="botcheck" type="checkbox" tabindex="-1" autocomplete="off" />
+    </div>
+
+    {captcha && <div class="h-captcha" data-captcha="true"></div>}
+
+    <p class="note">
+      Please don't include health details here, we'll go through those when we talk. Your details are only used to reply to you. See the
+      <a href={href('/privacy/')}>Privacy Policy</a>.
+    </p>
+
+    <div class="actions">
+      <button class="send" type="submit">Send enquiry</button>
+      <p class="status" data-status role="status" aria-live="polite"></p>
+    </div>
+  </form>
+
+  <div class="done" data-done hidden tabindex="-1">
+    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true">
+      <circle cx="12" cy="12" r="10"></circle>
+      <path d="M7.5 12.5l3 3 6-6.5"></path>
+    </svg>
+    <h3 class="display">Message sent</h3>
+    <p data-done-text>Thanks. Peter will reply by email as soon as he can.</p>
+  </div>
+</div>
+
+{captcha && <script is:inline src="https://web3forms.com/client/script.js" async defer></script>}
+
+<script>
+  const ENDPOINT = 'https://api.web3forms.com/submit';
+  const MIN_SECONDS = 4;
+  const COOLDOWN_MS = 60_000;
+  const MAX_LINKS = 2;
+  const STORAGE_KEY = 'rr-enquiry-sent';
+
+  document.querySelectorAll<HTMLFormElement>('[data-enquiry]').forEach((form) => {
+    const wrap = form.parentElement!;
+    const status = form.querySelector<HTMLElement>('[data-status]')!;
+    const button = form.querySelector<HTMLButtonElement>('button[type="submit"]')!;
+    const done = wrap.querySelector<HTMLElement>('[data-done]')!;
+    const doneText = wrap.querySelector<HTMLElement>('[data-done-text]')!;
+    const loadedAt = Date.now();
+    let interacted = false;
+
+    const markHuman = () => (interacted = true);
+    form.addEventListener('keydown', markHuman, { once: true });
+    form.addEventListener('pointerdown', markHuman, { once: true });
+
+    const say = (text: string, isError = true) => {
+      status.textContent = text;
+      status.classList.toggle('is-error', isError);
+    };
+
+    const showDone = (name: string) => {
+      const first = name.trim().split(/\s+/)[0];
+      doneText.textContent = `Thanks${first ? `, ${first}` : ''}. Peter will reply by email as soon as he can.`;
+      form.hidden = true;
+      done.hidden = false;
+      done.focus();
+    };
+
+    const lastSent = () => {
+      try {
+        return Number(localStorage.getItem(STORAGE_KEY)) || 0;
+      } catch {
+        return 0;
+      }
+    };
+    const rememberSent = () => {
+      try {
+        localStorage.setItem(STORAGE_KEY, String(Date.now()));
+      } catch {
+        /* storage blocked: skip the cooldown */
+      }
+    };
+
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      say('');
+
+      const data = new FormData(form);
+      const name = String(data.get('name') ?? '');
+      const message = String(data.get('message') ?? '');
+
+      // Bot checks: pretend it worked and send nothing.
+      const tooFast = (Date.now() - loadedAt) / 1000 < MIN_SECONDS;
+      if (data.get('website') || tooFast || !interacted) {
+        showDone(name);
+        return;
+      }
+
+      // Normal validation, with messages a person can act on.
+      if (!form.checkValidity()) {
+        const invalid = form.querySelector<HTMLElement>(':invalid');
+        invalid?.focus();
+        say('Please fill in your name, a valid email, what you are interested in, and a message.');
+        return;
+      }
+      const links = message.match(/https?:\/\/|www\.|\[url|<a\s/gi)?.length ?? 0;
+      if (links > MAX_LINKS) {
+        say('Please remove the links from your message and try again.');
+        return;
+      }
+      if (Date.now() - lastSent() < COOLDOWN_MS) {
+        say('You have just sent an enquiry. Please wait a minute before sending another.');
+        return;
+      }
+
+      const key = (form.dataset.k ?? '').split('').reverse().join('');
+      if (!key) {
+        say('The form is not connected yet. Please text or email Peter instead.');
+        return;
+      }
+
+      data.delete('website');
+      data.set('access_key', key);
+      data.set('subject', `New enquiry: ${data.get('interest')} from ${name}`);
+      data.set('from_name', 'Rothwells Running website');
+
+      button.disabled = true;
+      button.textContent = 'Sending…';
+      try {
+        const res = await fetch(ENDPOINT, { method: 'POST', body: data, headers: { Accept: 'application/json' } });
+        const body = await res.json().catch(() => ({}));
+        if (!res.ok || !body.success) throw new Error(body.message || `HTTP ${res.status}`);
+        rememberSent();
+        showDone(name);
+      } catch {
+        say('Sorry, your message could not be sent. Please try again, or text or email Peter instead.');
+      } finally {
+        button.disabled = false;
+        button.textContent = 'Send enquiry';
+      }
+    });
+  });
+</script>
+
+<style>
+  .enquiry {
+    background: var(--granite);
+    color: var(--chalk);
+    border-radius: 16px;
+    padding: clamp(22px, 3vw, 32px);
+  }
+  .form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .row {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+  }
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 0;
+  }
+  label {
+    font-weight: 600;
+    font-size: 14px;
+  }
+  .opt {
+    font-weight: 400;
+    color: var(--muted);
+  }
+  input,
+  select,
+  textarea {
+    font: 500 16px var(--font-body);
+    color: var(--chalk);
+    background: var(--granite-2);
+    border: 1.5px solid var(--line);
+    border-radius: 8px;
+    padding: 12px 14px;
+    min-height: 48px;
+    width: 100%;
+  }
+  textarea {
+    resize: vertical;
+    min-height: 110px;
+    line-height: 1.5;
+  }
+  textarea::placeholder {
+    color: var(--muted);
+  }
+  input:focus,
+  select:focus,
+  textarea:focus {
+    outline: none;
+    border-color: var(--gorse);
+  }
+  .note {
+    margin: 0;
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--muted);
+  }
+  .note a {
+    color: var(--chalk);
+  }
+  .actions {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .send {
+    min-height: 50px;
+    padding: 0 26px;
+    border: 0;
+    border-radius: 999px;
+    background: var(--gorse);
+    color: var(--granite);
+    font: 700 16px var(--font-body);
+    cursor: pointer;
+  }
+  .send:hover {
+    background: #f0c255;
+  }
+  .send:disabled {
+    opacity: 0.6;
+    cursor: wait;
+  }
+  .status {
+    margin: 0;
+    font-size: 14px;
+    flex: 1 1 220px;
+  }
+  .status.is-error {
+    color: #f3a58f;
+  }
+  /* Off-screen rather than display:none, which some bots skip. */
+  .hp {
+    position: absolute;
+    left: -10000px;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+  }
+  .done {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding-block: 32px;
+    color: var(--chalk);
+  }
+  .done[hidden] {
+    display: none;
+  }
+  .done svg {
+    color: var(--gorse);
+  }
+  .done h3 {
+    font-size: 40px;
+  }
+  .done p {
+    margin: 0;
+    color: var(--muted-2);
+  }
+  .done:focus {
+    outline: none;
+  }
+  .enquiry :focus-visible {
+    outline-color: var(--gorse);
+  }
+
+  @media (max-width: 560px) {
+    .row {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+</style>

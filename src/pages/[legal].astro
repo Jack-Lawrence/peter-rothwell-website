@@ -1,0 +1,103 @@
+---
+import type { GetStaticPaths } from 'astro';
+import { getCollection, render } from 'astro:content';
+import Base from '../layouts/Base.astro';
+
+// One page per file in src/content/legal/: /privacy/, /terms/, /refunds/, /accessibility/.
+export const getStaticPaths = (async () => {
+  const pages = await getCollection('legal');
+  return pages.map((page) => ({ params: { legal: page.id }, props: { page } }));
+}) satisfies GetStaticPaths;
+
+const { page } = Astro.props;
+const { Content } = await render(page);
+const { title, description, updated } = page.data;
+const updatedLabel = updated.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+---
+
+<Base title={title} description={description}>
+  <article class="light section">
+    <div class="wrap narrow">
+      <p class="mono meta">Last updated <time datetime={updated.toISOString()}>{updatedLabel}</time></p>
+      <h1 class="display title">{title}</h1>
+      <div class="body">
+        <Content />
+      </div>
+    </div>
+  </article>
+</Base>
+
+<style>
+  .narrow {
+    max-width: calc(760px + 2 * var(--gutter));
+  }
+  .meta {
+    color: var(--ink-muted);
+    margin: 0 0 16px;
+  }
+  .title {
+    font-size: clamp(44px, 6vw, 80px);
+    margin-bottom: 40px;
+  }
+  .body {
+    font-size: 17px;
+    line-height: 1.7;
+    color: var(--ink-soft);
+  }
+  .body :global(h2) {
+    font-family: var(--font-display);
+    text-transform: uppercase;
+    font-size: 30px;
+    line-height: 1;
+    color: var(--granite);
+    margin: 48px 0 14px;
+  }
+  .body :global(h3) {
+    font-size: 19px;
+    color: var(--granite);
+    margin: 28px 0 8px;
+  }
+  .body :global(p),
+  .body :global(ul) {
+    margin: 0 0 16px;
+  }
+  .body :global(li + li) {
+    margin-top: 6px;
+  }
+  .body :global(strong) {
+    color: var(--granite);
+  }
+  .body :global(a) {
+    color: var(--granite);
+    font-weight: 600;
+  }
+  .body :global(table) {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 0 0 20px;
+    display: block;
+    overflow-x: auto;
+  }
+  .body :global(th),
+  .body :global(td) {
+    text-align: left;
+    padding: 10px 16px 10px 0;
+    border-bottom: 1px solid var(--chalk-line);
+    vertical-align: top;
+  }
+  .body :global(th) {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--ink-muted);
+    border-bottom: 2px solid var(--granite);
+  }
+  /* Placeholders Peter still needs to fill in. */
+  .body :global(mark) {
+    background: #f6dc95;
+    color: var(--granite);
+    padding: 1px 4px;
+    border-radius: 3px;
+  }
+</style>

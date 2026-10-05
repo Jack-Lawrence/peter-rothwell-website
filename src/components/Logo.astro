@@ -1,0 +1,28 @@
+---
+import { href } from '../lib/url';
+---
+
+<a class="logo" href={href('/')} aria-label="Rothwells Running home">
+  <svg width="34" height="34" viewBox="0 0 34 34" fill="none" aria-hidden="true">
+    <path d="M2 28 L11 14 L16 20 L23 8 L32 28 Z" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round"></path>
+  </svg>
+  <span class="display">Rothwells Running</span>
+</a>
+
+<style>
+  .logo {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    text-decoration: none;
+  }
+  svg {
+    color: var(--gorse);
+    flex: none;
+  }
+  .display {
+    font-size: 26px;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+  }
+</style>

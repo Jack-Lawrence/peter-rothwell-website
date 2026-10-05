@@ -1,0 +1,44 @@
+---
+import PostCard from './PostCard.astro';
+import { getPosts } from '../lib/journal';
+import { href } from '../lib/url';
+
+const posts = (await getPosts()).slice(0, 3);
+---
+
+{
+  posts.length > 0 && (
+    <section id="journal" class="light section">
+      <div class="wrap">
+        <div class="section-head">
+          <h2 class="display h2">Training journal</h2>
+          <a class="all" href={href('/journal/')}>
+            All posts →
+          </a>
+        </div>
+        <div class="grid">
+          {posts.map((post) => (
+            <PostCard post={post} />
+          ))}
+        </div>
+      </div>
+    </section>
+  )
+}
+
+<style>
+  .all {
+    font-weight: 700;
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 32px;
+  }
+  @media (max-width: 900px) {
+    .grid {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 48px;
+    }
+  }
+</style>

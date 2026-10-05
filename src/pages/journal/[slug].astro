@@ -1,0 +1,83 @@
+---
+import type { GetStaticPaths } from 'astro';
+import { render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import Photo from '../../components/Photo.astro';
+import { getPosts } from '../../lib/journal';
+import { href } from '../../lib/url';
+
+export const getStaticPaths = (async () => {
+  const posts = await getPosts();
+  return posts.map((post) => ({ params: { slug: post.id }, props: { post } }));
+}) satisfies GetStaticPaths;
+
+const { post } = Astro.props;
+const { Content } = await render(post);
+const { title, topic, date, excerpt, cover, coverAlt } = post.data;
+const dateLabel = date.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+---
+
+<Base title={title} description={excerpt}>
+  <article class="light section">
+    <div class="wrap narrow">
+      <a class="back" href={href('/journal/')}>← All posts</a>
+      <p class="mono meta">{topic} · <time datetime={date.toISOString()}>{dateLabel}</time></p>
+      <h1 class="display title">{title}</h1>
+      <p class="excerpt">{excerpt}</p>
+    </div>
+    {
+      cover && (
+        <div class="wrap">
+          <Photo class="cover" tone="light" src={cover} alt={coverAlt ?? ''} sizes="(max-width: 1240px) 100vw, 1240px" />
+        </div>
+      )
+    }
+    <div class="wrap narrow body">
+      <Content />
+    </div>
+  </article>
+</Base>
+
+<style>
+  .narrow {
+    max-width: calc(720px + 2 * var(--gutter));
+  }
+  .back {
+    font-weight: 700;
+    text-decoration: none;
+  }
+  .meta {
+    color: var(--ink-muted);
+    margin: 32px 0 16px;
+  }
+  .title {
+    font-size: clamp(44px, 6vw, 80px);
+  }
+  .excerpt {
+    font-size: 21px;
+    color: var(--ink-soft);
+    margin: 24px 0 48px;
+  }
+  .wrap :global(.cover) {
+    aspect-ratio: 16 / 9;
+    margin-bottom: 48px;
+  }
+  .body {
+    font-size: 19px;
+    line-height: 1.7;
+  }
+  .body :global(h2) {
+    font-family: var(--font-display);
+    text-transform: uppercase;
+    font-size: 34px;
+    line-height: 1;
+    margin: 48px 0 12px;
+  }
+  .body :global(p) {
+    margin: 0 0 20px;
+  }
+  .body :global(img) {
+    border-radius: 4px;
+    margin-block: 24px;
+  }
+</style>

@@ -1,0 +1,115 @@
+---
+import Photo from './Photo.astro';
+import site from '../data/site.json';
+import { href } from '../lib/url';
+
+const { eyebrow, headline, intro, badge } = site.hero;
+const last = headline.length - 1;
+---
+
+<section class="wrap hero">
+  <div class="copy">
+    <span class="mono accent">{eyebrow}</span>
+    <h1 class="display">
+      {headline.map((line, i) => <span class:list={['line', { accent: i === last }]}>{line}</span>)}
+    </h1>
+    <p class="intro">{intro}</p>
+    <div class="ctas">
+      <a class="btn" href={href('/#coaching')}>See coaching plans</a>
+      <a class="btn btn--ghost" href={href('/#runclub')}>Join the Run Club</a>
+    </div>
+  </div>
+
+  <Photo class="hero-photo" label="Peter on a hill trail, mid-run. Full-bleed, high-contrast action shot.">
+    {
+      badge.value && (
+        <div class="badge">
+          <span class="mono">{badge.label}</span>
+          <span class="display">{badge.value}</span>
+        </div>
+      )
+    }
+  </Photo>
+</section>
+
+<style>
+  .hero {
+    display: grid;
+    grid-template-columns: minmax(0, 1.45fr) minmax(0, 1fr);
+    gap: 48px;
+    align-items: stretch;
+    padding-block: 24px 40px;
+  }
+  .copy {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    gap: 28px;
+  }
+  /* Scales with both width and height so the three lines never wrap
+     and the hero still fits on shorter laptop screens. */
+  h1 {
+    font-size: clamp(52px, min(6.3vw, 10svh), 88px);
+  }
+  .line {
+    display: block;
+  }
+  .intro {
+    margin: 0;
+    font-size: 20px;
+    max-width: 34em;
+    color: var(--muted-2);
+  }
+  .ctas {
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+  }
+  /* The photo stretches to whatever height the first screen leaves it. */
+  .hero :global(.hero-photo) {
+    min-height: 320px;
+  }
+  .badge {
+    position: absolute;
+    top: 18px;
+    right: 18px;
+    background: var(--granite);
+    padding: 10px 14px;
+    border-radius: 4px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .badge .mono {
+    font-size: 10px;
+    color: var(--muted);
+  }
+  .badge .display {
+    font-size: 30px;
+    font-weight: 800;
+    color: var(--chalk);
+  }
+
+  /* Shorter laptop screens (e.g. 1366×768): tighten spacing to stay on one screen. */
+  @media (min-width: 901px) and (max-height: 820px) {
+    .hero {
+      padding-block: 12px 28px;
+    }
+    .copy {
+      gap: 20px;
+    }
+    .intro {
+      font-size: 18px;
+    }
+  }
+
+  @media (max-width: 900px) {
+    .hero {
+      grid-template-columns: minmax(0, 1fr);
+      padding-top: 8px;
+    }
+    .hero :global(.hero-photo) {
+      height: 420px;
+    }
+  }
+</style>

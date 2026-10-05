@@ -1,0 +1,52 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import Photo from './Photo.astro';
+import { href } from '../lib/url';
+
+interface Props {
+  post: CollectionEntry<'journal'>;
+}
+
+const { post } = Astro.props;
+const { title, topic, date, cover, coverAlt, sample } = post.data;
+const dateLabel = date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+---
+
+<a class="post" href={href(`/journal/${post.id}/`)}>
+  <Photo class="cover" tone="light" src={cover} alt={coverAlt ?? ''} sizes="(max-width: 900px) 100vw, 400px">
+    {!cover && <span class="mono ph">Cover image</span>}
+  </Photo>
+  <span class="mono meta">
+    {sample && 'Sample · '}{topic} · <time datetime={date.toISOString()}>{dateLabel}</time>
+  </span>
+  <h3>{title}</h3>
+</a>
+
+<style>
+  .post {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    text-decoration: none;
+  }
+  .post :global(.cover) {
+    aspect-ratio: 3 / 2;
+  }
+  .ph {
+    padding: 14px;
+  }
+  .meta {
+    color: var(--ink-muted);
+  }
+  h3 {
+    margin: 0;
+    font-size: 24px;
+    line-height: 1.25;
+    font-weight: 700;
+    text-wrap: balance;
+  }
+  .post:hover h3 {
+    text-decoration: underline;
+    text-underline-offset: 4px;
+  }
+</style>
