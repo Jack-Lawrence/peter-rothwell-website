@@ -26,6 +26,8 @@
     try {
       sessionStorage.setItem('preview-hidden', '1');
     } catch {}
+    // The button has gone, so move keyboard focus to the next thing: the site logo.
+    document.querySelector<HTMLElement>('header a')?.focus();
   });
 </script>
 
@@ -61,7 +63,7 @@
     width: 28px;
     height: 28px;
     padding: 0;
-    border: 0;
+    border: 1px solid transparent; /* visible in high contrast mode */
     border-radius: 6px;
     background: transparent;
     color: inherit;

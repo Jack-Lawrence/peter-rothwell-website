@@ -12,6 +12,17 @@ body.admin {
   font-size: 17px;
 }
 
+/* Keep whatever has keyboard focus clear of the sticky save bar (and, on
+   phones, the sticky menu bar), so it's never hidden underneath them. */
+html:has(body.admin) {
+  scroll-padding: 16px 0 104px;
+}
+@media (max-width: 860px) {
+  html:has(body.admin) {
+    scroll-padding-top: 96px;
+  }
+}
+
 /* Elements styled with display: flex/grid must still hide when hidden. */
 .admin [hidden] {
   display: none !important;
@@ -75,7 +86,7 @@ body.admin {
   text-decoration: none;
   font: 500 16px var(--font-body);
   background: none;
-  border: 0;
+  border: 1px solid transparent; /* visible in high contrast mode */
   text-align: left;
   cursor: pointer;
 }
@@ -367,7 +378,8 @@ fieldset.box legend {
   font: 500 17px var(--font-body);
   color: var(--ink);
   background: white;
-  border: 1.5px solid var(--chalk-line);
+  /* At least 3:1 against white so each field's edge is easy to see. */
+  border: 1.5px solid color-mix(in srgb, var(--ink-muted) 80%, white);
   border-radius: 10px;
   min-height: 50px;
   padding: 10px 14px;
@@ -382,9 +394,13 @@ fieldset.box legend {
 .admin select:focus,
 .admin textarea:focus,
 .editor-body:focus {
-  outline: 3px solid var(--gorse);
-  outline-offset: 0;
+  outline: 3px solid var(--granite);
+  outline-offset: 2px;
   border-color: var(--granite);
+}
+/* The light editor area needs a dark focus ring (gorse is only 1.8:1 on it). */
+.main-col :focus-visible {
+  outline-color: var(--granite);
 }
 .admin [aria-invalid='true'] {
   border-color: var(--error) !important;
@@ -430,7 +446,7 @@ fieldset.box legend {
   padding: 16px 20px;
 }
 .error-summary:focus {
-  outline: 3px solid var(--gorse);
+  outline: 3px solid var(--granite);
 }
 .error-summary h2 {
   margin: 0 0 8px;
@@ -590,7 +606,7 @@ fieldset.box legend {
   text-decoration: underline;
 }
 .drop:focus-within {
-  outline: 3px solid var(--gorse);
+  outline: 3px solid var(--granite);
 }
 .cover-actions {
   display: flex;
@@ -624,7 +640,7 @@ fieldset.box legend {
   font-family: Georgia, serif;
 }
 .editor-body {
-  border: 1.5px solid var(--chalk-line);
+  border: 1.5px solid color-mix(in srgb, var(--ink-muted) 80%, white);
   border-radius: 10px;
   background: white;
   padding: 20px 22px;

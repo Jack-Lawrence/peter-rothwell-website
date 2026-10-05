@@ -33,4 +33,11 @@ If something on this website doesn't work for you, please let me know by email a
 
 ## How this was checked
 
-<mark>[Before launch: run a full check (keyboard, screen reader, automated tools) and describe it here.]</mark>
+The website was last checked in October 2026 against WCAG 2.2 level AA, on every type of page (home, blog, blog posts, policies and the "page not found" page), on a desktop screen and a phone-sized screen.
+
+- **Keyboard only:** every page was used without a mouse, including the phone menu, the reviews slider, the questions section, the enquiry form and its "message sent" screen. I checked that the order makes sense, that you can always see what's selected, that nothing traps you, and that after each action you land somewhere sensible (for example, after closing the menu you're back on the menu button).
+- **Screen reader information:** I checked what the browser passes to screen readers: headings, the week of training as a list, the price cards, the reviews (with the arrows named and the position read out when you move), form errors and the "message sent" status, and links (named for where they go, and saying when they open a new tab). This was checked in Chrome's accessibility tools. It hasn't yet been tested by someone who uses a screen reader every day, and I'd welcome feedback if you do.
+- **Zoom and text spacing:** pages were checked at 320 pixels wide (the same as 400% zoom on a laptop) with no sideways scrolling, and with extra line, letter and word spacing switched on, without any text being cut off.
+- **Colour contrast:** every text and background pair was measured, including small labels, placeholder text, form error messages, form field edges and the outline that shows what's selected. All meet AA: at least 4.5:1 for text, and 3:1 for large text, field edges and selection outlines.
+- **Motion and high contrast:** pages were checked with "reduce motion" switched on, and in Windows high contrast mode.
+- **Automated checks:** every change to the website runs automated tests before it goes live: Google Lighthouse (the home page, blog and terms all score 100 for accessibility), HTML validation and a broken-link check.

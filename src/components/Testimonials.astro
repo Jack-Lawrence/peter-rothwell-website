@@ -66,6 +66,7 @@ import testimonials from '../data/testimonials.json';
         </li>
       ))}
     </ul>
+    <p class="visually-hidden" data-position aria-live="polite"></p>
   </div>
 </section>
 
@@ -77,26 +78,59 @@ import testimonials from '../data/testimonials.json';
     const controls = section.querySelector<HTMLElement>('[data-controls]')!;
     const prev = section.querySelector<HTMLButtonElement>('[data-prev]')!;
     const next = section.querySelector<HTMLButtonElement>('[data-next]')!;
+    const position = section.querySelector<HTMLElement>('[data-position]')!;
+    const items = track.querySelectorAll<HTMLElement>('.item');
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+    let announce = false;
 
     const step = () => {
-      const item = track.querySelector<HTMLElement>('.item');
       const gap = parseFloat(getComputedStyle(track).columnGap) || 0;
-      return item ? item.offsetWidth + gap : track.clientWidth;
+      return items[0] ? items[0].offsetWidth + gap : track.clientWidth;
     };
 
+    // Which reviews are fully on screen, e.g. "Showing reviews 2 to 3 of 4".
+    const visibleRange = () => {
+      const box = track.getBoundingClientRect();
+      const shown = [...items]
+        .map((item, i) => ({ i, r: item.getBoundingClientRect() }))
+        .filter(({ r }) => r.left >= box.left - 2 && r.right <= box.right + 2)
+        .map(({ i }) => i + 1);
+      if (!shown.length) return '';
+      const [first, last] = [shown[0], shown[shown.length - 1]];
+      return first === last
+        ? `Showing review ${first} of ${items.length}`
+        : `Showing reviews ${first} to ${last} of ${items.length}`;
+    };
+
+    // aria-disabled rather than disabled, so a focused button keeps focus at either end.
+    const setEnabled = (button: HTMLButtonElement, enabled: boolean) =>
+      button.setAttribute('aria-disabled', String(!enabled));
+
+    let settle = 0;
     const update = () => {
       const overflow = track.scrollWidth > track.clientWidth + 1;
       controls.hidden = !overflow;
-      prev.disabled = track.scrollLeft <= 1;
-      next.disabled = track.scrollLeft + track.clientWidth >= track.scrollWidth - 1;
+      // A scrolling row must be reachable with the keyboard (arrow keys scroll it).
+      if (overflow) track.tabIndex = 0;
+      else track.removeAttribute('tabindex');
+      setEnabled(prev, track.scrollLeft > 1);
+      setEnabled(next, track.scrollLeft + track.clientWidth < track.scrollWidth - 1);
+      // Announce the new position once scrolling stops, only after an arrow press.
+      clearTimeout(settle);
+      settle = window.setTimeout(() => {
+        if (announce) position.textContent = visibleRange();
+        announce = false;
+      }, 150);
     };
 
-    const go = (dir: number) =>
+    const go = (button: HTMLButtonElement, dir: number) => {
+      if (button.getAttribute('aria-disabled') === 'true') return;
+      announce = true;
       track.scrollBy({ left: dir * step(), behavior: reduceMotion.matches ? 'auto' : 'smooth' });
+    };
 
-    prev.addEventListener('click', () => go(-1));
-    next.addEventListener('click', () => go(1));
+    prev.addEventListener('click', () => go(prev, -1));
+    next.addEventListener('click', () => go(next, 1));
     track.addEventListener('scroll', update, { passive: true });
     new ResizeObserver(update).observe(track);
     update();
@@ -133,11 +167,11 @@ import testimonials from '../data/testimonials.json';
       color 0.15s ease,
       opacity 0.15s ease;
   }
-  .arrow:hover:not(:disabled) {
+  .arrow:hover:not([aria-disabled='true']) {
     background: var(--gorse);
     color: var(--granite);
   }
-  .arrow:disabled {
+  .arrow[aria-disabled='true'] {
     opacity: 0.3;
     cursor: default;
   }

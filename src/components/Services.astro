@@ -59,7 +59,13 @@ function scheduleLine(schedule?: Schedule) {
             Inside {site.location.place}
           </p>
         </div>
-        <a class="map" href={site.location.mapsUrl} target="_blank" rel="noopener">
+        <a
+          class="map"
+          href={site.location.mapsUrl}
+          target="_blank"
+          rel="noopener"
+          aria-label={`Get directions to ${site.location.place} on Google Maps (opens in a new tab)`}
+        >
           <span class="map-pin" aria-hidden="true">
             <svg width="30" height="38" viewBox="0 0 34 44">
               <path d="M17 2C9 2 3 8 3 16c0 11 14 26 14 26s14-15 14-26C31 8 25 2 17 2z" fill="#1b211e"></path>
@@ -228,6 +234,7 @@ function scheduleLine(schedule?: Schedule) {
   .spot--map .spot-text {
     padding: 22px 24px;
     justify-content: center;
+    overflow-wrap: anywhere;
   }
   .map {
     position: relative;

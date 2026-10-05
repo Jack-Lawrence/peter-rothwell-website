@@ -46,6 +46,7 @@ function alt(caption?: string) {
       </div>
       <a class="btn btn--ghost" href={profile} target="_blank" rel="noopener">
         Follow on Instagram
+        <span class="visually-hidden"> (opens in a new tab)</span>
       </a>
     </div>
     <ul class="grid">
@@ -53,6 +54,7 @@ function alt(caption?: string) {
         <li>
           <a href={p.permalink} target="_blank" rel="noopener">
             <Photo class="tile" src={imageFor(p.image)} alt={alt(p.caption)} width={400} height={400} />
+            <span class="visually-hidden"> (opens in a new tab)</span>
           </a>
         </li>
       ))}
@@ -60,12 +62,18 @@ function alt(caption?: string) {
         <li>
           <a href={profile} target="_blank" rel="noopener">
             <Photo class="tile" src={p.image} alt={p.alt} width={400} height={400} />
+            <span class="visually-hidden"> (opens in a new tab)</span>
           </a>
         </li>
       ))}
       {Array.from({ length: placeholders }, (_, i) => (
         <li>
-          <a href={profile} target="_blank" rel="noopener" aria-label={`Instagram post ${i + 1} (placeholder)`}>
+          <a
+            href={profile}
+            target="_blank"
+            rel="noopener"
+            aria-label={`Instagram post ${i + 1} (placeholder, opens in a new tab)`}
+          >
             <Photo class="tile" />
           </a>
         </li>

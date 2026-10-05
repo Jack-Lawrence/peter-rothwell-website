@@ -6,7 +6,7 @@ import week from '../data/week.json';
   <h2 id="week-title" class="mono title">
     {week.title}
   </h2>
-  <ol class="week">
+  <ol class="week" aria-labelledby="week-title">
     {week.days.map((d) => (
       <li class="day">
         <span class="mono">{d.day}</span>

@@ -89,7 +89,7 @@ const demo = PREVIEW && !accessKey;
       <button class="send" type="submit">
         Send enquiry
       </button>
-      <p class="status" data-status role="status" aria-live="polite"></p>
+      <p class="status" id="enq-status" data-status role="status" aria-live="polite"></p>
     </div>
   </form>
 
@@ -158,6 +158,30 @@ const demo = PREVIEW && !accessKey;
     form.addEventListener('keydown', markHuman, { once: true });
     form.addEventListener('pointerdown', markHuman, { once: true });
 
+    // Flag each field that needs fixing for screen readers (aria-invalid) and
+    // link it to the message, then clear the flag as soon as it's fixed.
+    const fields = form.querySelectorAll<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>(
+      '.field input, .field select, .field textarea',
+    );
+    const markInvalid = () =>
+      fields.forEach((f) => {
+        if (f.checkValidity()) {
+          f.removeAttribute('aria-invalid');
+          f.removeAttribute('aria-errormessage');
+        } else {
+          f.setAttribute('aria-invalid', 'true');
+          f.setAttribute('aria-errormessage', status.id);
+        }
+      });
+    fields.forEach((f) =>
+      f.addEventListener('input', () => {
+        if (f.hasAttribute('aria-invalid') && f.checkValidity()) {
+          f.removeAttribute('aria-invalid');
+          f.removeAttribute('aria-errormessage');
+        }
+      }),
+    );
+
     const say = (text: string, isError = true) => {
       status.textContent = text;
       status.classList.toggle('is-error', isError);
@@ -202,10 +226,20 @@ const demo = PREVIEW && !accessKey;
       }
 
       // Normal validation, with messages a person can act on.
+      markInvalid();
       if (!form.checkValidity()) {
         const invalid = form.querySelector<HTMLElement>(':invalid');
         invalid?.focus();
-        say('Please fill in your name, a valid email, what you are interested in, and a message.');
+        // Name only the fields that still need something.
+        const needs: Record<string, string> = {
+          name: 'your name',
+          email: 'a valid email address',
+          interest: 'what you are interested in',
+          message: 'a message',
+        };
+        const missing = [...fields].filter((f) => !f.checkValidity()).map((f) => needs[f.name] ?? f.name);
+        const list = missing.length > 1 ? `${missing.slice(0, -1).join(', ')} and ${missing.at(-1)}` : missing[0];
+        say(`Please add ${list}.`);
         return;
       }
       const links = message.match(/https?:\/\/|www\.|\[url|<a\s/gi)?.length ?? 0;
@@ -308,7 +342,7 @@ const demo = PREVIEW && !accessKey;
     font: 500 16px var(--font-body);
     color: var(--chalk);
     background: var(--granite-2);
-    border: 1.5px solid var(--line);
+    border: 1.5px solid var(--field-edge);
     border-radius: 8px;
     padding: 12px 14px;
     min-height: 48px;
@@ -325,8 +359,15 @@ const demo = PREVIEW && !accessKey;
   input:focus,
   select:focus,
   textarea:focus {
-    outline: none;
+    outline: 3px solid var(--gorse);
+    outline-offset: 2px;
     border-color: var(--gorse);
+  }
+  input[aria-invalid='true'],
+  select[aria-invalid='true'],
+  textarea[aria-invalid='true'] {
+    border-color: #f3a58f;
+    border-width: 2px;
   }
   .note {
     margin: 0;
@@ -346,7 +387,7 @@ const demo = PREVIEW && !accessKey;
   .send {
     min-height: 50px;
     padding: 0 26px;
-    border: 0;
+    border: 2px solid transparent; /* visible in high contrast mode */
     border-radius: 999px;
     background: var(--gorse);
     color: var(--granite);

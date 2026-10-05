@@ -14,6 +14,8 @@
   --ink-muted: #5c6862;
   --gorse: #e3b23c;
   --error: #a3341b; /* form errors on light backgrounds */
+  /* Edges of form fields on dark backgrounds: at least 3:1 so the field is easy to see. */
+  --field-edge: color-mix(in srgb, var(--muted) 60%, var(--granite-2));
 
   --font-display: 'Big Shoulders Display', Impact, 'Arial Narrow', sans-serif;
   --font-body: 'Figtree Variable', Figtree, system-ui, sans-serif;
@@ -67,6 +69,11 @@ a {
 :focus-visible {
   outline: 3px solid var(--gorse);
   outline-offset: 3px;
+}
+
+/* Gorse doesn't stand out on light backgrounds (1.7:1), so use granite there. */
+.light :focus-visible {
+  outline-color: var(--granite);
 }
 
 .wrap {
@@ -137,7 +144,7 @@ a {
 .btn--ghost {
   background: transparent;
   color: var(--chalk);
-  border-color: #5c6862;
+  border-color: var(--field-edge);
 }
 
 .btn--ghost:hover {

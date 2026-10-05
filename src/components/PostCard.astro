@@ -12,26 +12,31 @@ interface Props {
 
 const { post, level: Heading = 'h3' } = Astro.props;
 const minutes = readingTime(post);
-const { title, topic, date, cover, coverAlt, sample } = post.data;
+// The link is named by the title alone; the date and topic are its description.
+const titleId = `post-${post.id}-title`;
+const metaId = `post-${post.id}-meta`;
+const { title, topic, date, cover, sample } = post.data;
 const dateLabel = date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
 ---
 
-<a class="post" href={href(`/journal/${post.id}/`)}>
+<a class="post" href={href(`/journal/${post.id}/`)} aria-labelledby={titleId} aria-describedby={metaId}>
   <Photo
     class="cover"
     tone="light"
     src={cover}
-    alt={coverAlt ?? ''}
+    alt=""
     sizes="(max-width: 900px) 100vw, min(31vw, 365px)"
     widths={[400, 800, 1100]}
   >
     {!cover && <span class="mono ph">Cover image</span>}
   </Photo>
-  <span class="mono meta">
+  <span class="mono meta" id={metaId}>
     {sample && 'Sample · '}
     {topic} · <time datetime={date.toISOString()}>{dateLabel}</time> · {minutes}
   </span>
-  <Heading class="post-title">{title}</Heading>
+  <Heading class="post-title" id={titleId}>
+    {title}
+  </Heading>
 </a>
 
 <style>

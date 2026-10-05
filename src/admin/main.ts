@@ -1822,6 +1822,15 @@ menuBtn.addEventListener('click', () => {
   const open = document.querySelector('.side')!.classList.toggle('is-open');
   menuBtn.setAttribute('aria-expanded', String(open));
 });
+// Escape closes the phone menu and returns focus to its button.
+document.querySelector('.side')!.addEventListener('keydown', (event) => {
+  const side = event.currentTarget as HTMLElement;
+  if ((event as KeyboardEvent).key === 'Escape' && side.classList.contains('is-open')) {
+    side.classList.remove('is-open');
+    menuBtn.setAttribute('aria-expanded', 'false');
+    menuBtn.focus();
+  }
+});
 
 store = startStore();
 route();

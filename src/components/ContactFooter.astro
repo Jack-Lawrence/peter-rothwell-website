@@ -29,6 +29,7 @@ const year = new Date().getFullYear();
         </a>
         <a href={`https://www.instagram.com/${contact.instagram}/`} target="_blank" rel="noopener">
           Instagram @{contact.instagram}
+          <span class="visually-hidden"> (opens in a new tab)</span>
         </a>
         <p class="addr">
           In person: {location.address}
@@ -122,6 +123,9 @@ const year = new Date().getFullYear();
     gap: 8px 24px;
   }
   .legal a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 24px;
     text-decoration: none;
     font-weight: 600;
   }
