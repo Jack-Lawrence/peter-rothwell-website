@@ -1,0 +1,19 @@
+---
+// /journal/topic/strength/ etc.: posts on one topic.
+import type { GetStaticPaths } from 'astro';
+import JournalList from '../../../../components/JournalList.astro';
+import { getPosts, getTopics, paginate, topicSlug } from '../../../../lib/journal';
+
+export const getStaticPaths = (async () => {
+  const posts = await getPosts();
+  const topics = getTopics(posts);
+  return topics.map((t) => {
+    const pages = paginate(posts.filter((p) => topicSlug(p.data.topic) === t.slug));
+    return { params: { topic: t.slug }, props: { pagePosts: pages[0], totalPages: pages.length, topics } };
+  });
+}) satisfies GetStaticPaths;
+
+const { pagePosts, totalPages, topics } = Astro.props;
+---
+
+<JournalList posts={pagePosts} page={1} totalPages={totalPages} topics={topics} topic={Astro.params.topic} />

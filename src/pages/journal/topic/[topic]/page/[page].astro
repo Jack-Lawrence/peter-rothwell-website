@@ -1,0 +1,22 @@
+---
+// /journal/topic/strength/page/2/ and on.
+import type { GetStaticPaths } from 'astro';
+import JournalList from '../../../../../components/JournalList.astro';
+import { getPosts, getTopics, paginate, topicSlug } from '../../../../../lib/journal';
+
+export const getStaticPaths = (async () => {
+  const posts = await getPosts();
+  const topics = getTopics(posts);
+  return topics.flatMap((t) => {
+    const pages = paginate(posts.filter((p) => topicSlug(p.data.topic) === t.slug));
+    return pages.slice(1).map((pagePosts, i) => ({
+      params: { topic: t.slug, page: String(i + 2) },
+      props: { pagePosts, page: i + 2, totalPages: pages.length, topics },
+    }));
+  });
+}) satisfies GetStaticPaths;
+
+const { pagePosts, page, totalPages, topics } = Astro.props;
+---
+
+<JournalList posts={pagePosts} page={page} totalPages={totalPages} topics={topics} topic={Astro.params.topic} />

@@ -1,0 +1,20 @@
+---
+// /journal/page/2/ and on, once there are more posts than fit on one page.
+import type { GetStaticPaths } from 'astro';
+import JournalList from '../../../components/JournalList.astro';
+import { getPosts, getTopics, paginate } from '../../../lib/journal';
+
+export const getStaticPaths = (async () => {
+  const posts = await getPosts();
+  const pages = paginate(posts);
+  const topics = getTopics(posts);
+  return pages.slice(1).map((pagePosts, i) => ({
+    params: { page: String(i + 2) },
+    props: { pagePosts, page: i + 2, totalPages: pages.length, topics },
+  }));
+}) satisfies GetStaticPaths;
+
+const { pagePosts, page, totalPages, topics } = Astro.props;
+---
+
+<JournalList posts={pagePosts} page={page} totalPages={totalPages} topics={topics} />

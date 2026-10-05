@@ -1,6 +1,8 @@
 // @ts-check
 import { defineConfig, envField } from 'astro/config';
 import sitemap from '@astrojs/sitemap';
+import { satteri } from '@astrojs/markdown-satteri';
+import figures from './src/lib/markdown-figures.mjs';
 
 // SITE_URL and BASE_PATH are set by the GitHub Pages workflow, where the site
 // lives under /<repo>/. On Cloudflare (or locally) the defaults apply.
@@ -13,6 +15,15 @@ export default defineConfig({
   // Inline the (small) CSS into each page so it doesn't block the first paint.
   build: {
     inlineStylesheets: 'always',
+  },
+  // Images in blog posts get a srcset, so phones don't download the full-size photo.
+  image: {
+    layout: 'constrained',
+    responsiveStyles: false,
+  },
+  markdown: {
+    // Blog images with a title get a caption.
+    processor: satteri({ hastPlugins: [figures] }),
   },
   integrations: [
     sitemap({

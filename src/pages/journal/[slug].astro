@@ -4,17 +4,21 @@ import { render } from 'astro:content';
 import { getImage } from 'astro:assets';
 import Base from '../../layouts/Base.astro';
 import Photo from '../../components/Photo.astro';
-import { getPosts } from '../../lib/journal';
+import { getPosts, readingTime, topicSlug } from '../../lib/journal';
 import JsonLd from '../../components/JsonLd.astro';
 import { href } from '../../lib/url';
 import { postSchema } from '../../lib/schema';
 
 export const getStaticPaths = (async () => {
   const posts = await getPosts();
-  return posts.map((post) => ({ params: { slug: post.id }, props: { post } }));
+  // Posts are newest first: the "newer" post is the one before, "older" the one after.
+  return posts.map((post, i) => ({
+    params: { slug: post.id },
+    props: { post, newer: posts[i - 1], older: posts[i + 1] },
+  }));
 }) satisfies GetStaticPaths;
 
-const { post } = Astro.props;
+const { post, newer, older } = Astro.props;
 const { Content } = await render(post);
 const { title, topic, date, excerpt, cover, coverAlt } = post.data;
 // Share image: the cover, cropped to the 1200×630 social media size.
@@ -33,7 +37,10 @@ const dateLabel = date.toLocaleDateString('en-GB', { day: 'numeric', month: 'lon
   <article class="light section">
     <div class="wrap narrow">
       <a class="back" href={href('/journal/')}>← All posts</a>
-      <p class="mono meta">{topic} · <time datetime={date.toISOString()}>{dateLabel}</time></p>
+      <p class="mono meta">
+        <a href={href(`/journal/topic/${topicSlug(topic)}/`)}>{topic}</a> · <time datetime={date.toISOString()}>{dateLabel}</time>
+        {` · ${readingTime(post)}`}
+      </p>
       <h1 class="display title">{title}</h1>
       <p class="excerpt">{excerpt}</p>
     </div>
@@ -55,6 +62,38 @@ const dateLabel = date.toLocaleDateString('en-GB', { day: 'numeric', month: 'lon
     <div class="wrap narrow body">
       <Content />
     </div>
+
+    <div class="wrap narrow">
+      <aside class="cta" aria-labelledby="cta-title">
+        <h2 id="cta-title" class="display">Want a plan like this?</h2>
+        <p>Every plan starts with a free 15-minute chat about where you are and where you want to get to.</p>
+        <div class="cta-links">
+          <a class="btn" href={href('/#contact')}>Book a free chat</a>
+          <a class="btn btn--ghost" href={href('/#coaching')}>See coaching plans</a>
+        </div>
+      </aside>
+
+      {
+        (newer || older) && (
+          <nav class="more" aria-label="More posts">
+            {older ? (
+              <a class="more-link" href={href(`/journal/${older.id}/`)} rel="prev">
+                <span class="mono">← Previous post</span>
+                <span class="more-title">{older.data.title}</span>
+              </a>
+            ) : (
+              <span />
+            )}
+            {newer && (
+              <a class="more-link more-link--next" href={href(`/journal/${newer.id}/`)} rel="next">
+                <span class="mono">Next post →</span>
+                <span class="more-title">{newer.data.title}</span>
+              </a>
+            )}
+          </nav>
+        )
+      }
+    </div>
   </article>
 </Base>
 
@@ -70,6 +109,9 @@ const dateLabel = date.toLocaleDateString('en-GB', { day: 'numeric', month: 'lon
     color: var(--ink-muted);
     margin: 32px 0 16px;
   }
+  .meta a {
+    color: var(--granite);
+  }
   .title {
     font-size: clamp(44px, 6vw, 80px);
   }
@@ -82,6 +124,8 @@ const dateLabel = date.toLocaleDateString('en-GB', { day: 'numeric', month: 'lon
     aspect-ratio: 16 / 9;
     margin-bottom: 48px;
   }
+
+  /* ---------- Post body ---------- */
   .body {
     font-size: 19px;
     line-height: 1.7;
@@ -93,11 +137,193 @@ const dateLabel = date.toLocaleDateString('en-GB', { day: 'numeric', month: 'lon
     line-height: 1;
     margin: 48px 0 12px;
   }
+  .body :global(h3) {
+    font-size: 22px;
+    line-height: 1.3;
+    margin: 32px 0 8px;
+  }
   .body :global(p) {
     margin: 0 0 20px;
+  }
+  .body :global(a) {
+    color: var(--granite);
+    font-weight: 600;
+    text-decoration-color: var(--gorse);
+    text-decoration-thickness: 2px;
+    text-underline-offset: 3px;
   }
   .body :global(img) {
     border-radius: 4px;
     margin-block: 24px;
+    height: auto;
+  }
+
+  /* Lists: gorse markers, comfortable spacing. */
+  .body :global(ul),
+  .body :global(ol) {
+    margin: 0 0 24px;
+    padding-left: 28px;
+  }
+  .body :global(li) {
+    padding-left: 6px;
+    margin-bottom: 8px;
+  }
+  .body :global(li::marker) {
+    color: var(--gorse);
+    font-weight: 800;
+  }
+  .body :global(ul li::marker) {
+    font-size: 1.1em;
+  }
+  .body :global(ol li::marker) {
+    font-family: var(--font-display);
+    font-size: 1.15em;
+    color: var(--granite);
+  }
+
+  /* Pull quotes: wider than the text and set in the display face. */
+  .body :global(blockquote) {
+    margin: 40px 0;
+    padding: 8px 0 8px 28px;
+    border-left: 6px solid var(--gorse);
+    font-family: var(--font-display);
+    text-transform: uppercase;
+    font-weight: 800;
+    font-size: clamp(28px, 3.4vw, 40px);
+    line-height: 1.05;
+    color: var(--granite);
+  }
+  .body :global(blockquote p) {
+    margin: 0;
+  }
+  .body :global(blockquote p + p) {
+    margin-top: 12px;
+  }
+
+  /* Images with a caption (Markdown image title). */
+  .body :global(figure) {
+    margin: 36px 0;
+  }
+  .body :global(figure img) {
+    margin: 0;
+    width: 100%;
+  }
+  .body :global(figcaption) {
+    margin-top: 10px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+  }
+
+  /* Tables: scroll sideways on phones rather than squash. */
+  .body :global(table) {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 0 0 28px;
+    font-size: 17px;
+  }
+  @media (max-width: 700px) {
+    .body :global(table) {
+      display: block;
+      overflow-x: auto;
+    }
+  }
+  .body :global(th),
+  .body :global(td) {
+    text-align: left;
+    padding: 10px 16px 10px 0;
+    border-bottom: 1px solid var(--chalk-line);
+    vertical-align: top;
+  }
+  .body :global(th) {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 500;
+    color: var(--ink-muted);
+    border-bottom: 2px solid var(--granite);
+  }
+  .body :global(hr) {
+    border: 0;
+    border-top: 1px solid var(--chalk-line);
+    margin: 40px 0;
+  }
+
+  @media (min-width: 1000px) {
+    .body :global(blockquote),
+    .body :global(figure) {
+      margin-inline: -64px;
+    }
+    .body :global(blockquote) {
+      padding-left: 58px;
+    }
+  }
+
+  /* ---------- End of post ---------- */
+  .cta {
+    margin-top: 56px;
+    padding: clamp(24px, 4vw, 40px);
+    background: var(--granite);
+    color: var(--chalk);
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .cta h2 {
+    font-size: clamp(36px, 4.5vw, 52px);
+  }
+  .cta p {
+    margin: 0;
+    color: var(--muted-2);
+    font-size: 18px;
+  }
+  .cta-links {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-top: 6px;
+  }
+  .more {
+    margin-top: 48px;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+  }
+  .more-link {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 18px 0;
+    border-top: 2px solid var(--granite);
+    text-decoration: none;
+  }
+  .more-link--next {
+    text-align: right;
+    grid-column: 2;
+  }
+  .more-link .mono {
+    color: var(--ink-muted);
+  }
+  .more-title {
+    font-weight: 700;
+    font-size: 18px;
+    line-height: 1.3;
+  }
+  .more-link:hover .more-title {
+    text-decoration: underline;
+    text-underline-offset: 4px;
+  }
+  @media (max-width: 600px) {
+    .more {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .more-link--next {
+      grid-column: 1;
+      text-align: left;
+    }
   }
 </style>
