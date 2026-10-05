@@ -57,7 +57,9 @@ const nav = [
     <meta name="theme-color" content="#1b211e" />
   </head>
   <body class="admin">
-    <a class="skip" href="#view">Skip to content</a>
+    <a class="skip" href="#view">
+      Skip to content
+    </a>
     <div class="shell">
       <aside class="side" aria-label="Editor menu">
         <div class="side-top">
@@ -65,11 +67,17 @@ const nav = [
             Rothwells Running
             <span>Website editor</span>
           </div>
-          <button id="menu-btn" class="menu-btn" type="button" aria-controls="side-nav">Menu</button>
+          <button id="menu-btn" class="menu-btn" type="button" aria-controls="side-nav">
+            Menu
+          </button>
         </div>
         <nav class="side-nav" id="side-nav" aria-label="Editor">
-          {nav.map(([to, label]) => <a href={to}>{label}</a>)}
-          <a href={href('/')} target="_blank" rel="noopener">View my website ↗</a>
+          {nav.map(([to, label]) => (
+            <a href={to}>{label}</a>
+          ))}
+          <a href={href('/')} target="_blank" rel="noopener">
+            View my website ↗
+          </a>
           <div class="side-foot" id="side-foot"></div>
         </nav>
       </aside>
@@ -81,7 +89,9 @@ const nav = [
       </div>
     </div>
     <div id="toasts" class="toasts" role="status" aria-live="polite"></div>
-    <noscript><p class="noscript">The website editor needs JavaScript. Please turn it on and reload.</p></noscript>
+    <noscript>
+      <p class="noscript">The website editor needs JavaScript. Please turn it on and reload.</p>
+    </noscript>
     <script id="admin-config" type="application/json" set:html={json} />
     <script>
       import '../../admin/main';

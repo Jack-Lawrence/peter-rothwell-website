@@ -13,19 +13,35 @@ const links = [
 <header class="wrap header">
   <Logo />
   <nav class="links" aria-label="Main">
-    {links.map((l) => <a href={href(l.path)}>{l.label}</a>)}
+    {links.map((l) => (
+      <a href={href(l.path)}>{l.label}</a>
+    ))}
   </nav>
-  <a class="btn cta" href={href('/#contact')}>Book a free chat</a>
+  <a class="btn cta" href={href('/#contact')}>
+    Book a free chat
+  </a>
 
   <details class="mobile">
     <summary aria-label="Open menu">
-      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+      <svg
+        width="26"
+        height="26"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        aria-hidden="true"
+      >
         <path d="M3 6h18M3 12h18M3 18h18"></path>
       </svg>
     </summary>
     <nav class="sheet" aria-label="Mobile">
-      {links.map((l) => <a href={href(l.path)}>{l.label}</a>)}
-      <a class="btn" href={href('/#contact')}>Book a free chat</a>
+      {links.map((l) => (
+        <a href={href(l.path)}>{l.label}</a>
+      ))}
+      <a class="btn" href={href('/#contact')}>
+        Book a free chat
+      </a>
     </nav>
   </details>
 </header>

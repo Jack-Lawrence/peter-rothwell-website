@@ -98,7 +98,11 @@ export class Errors {
       );
     });
     this.summary.append(
-      h('h2', {}, this.list.length === 1 ? 'Please fix this first:' : `Please fix these ${this.list.length} things first:`),
+      h(
+        'h2',
+        {},
+        this.list.length === 1 ? 'Please fix this first:' : `Please fix these ${this.list.length} things first:`,
+      ),
       h('ul', {}, items),
     );
     this.summary.focus();
@@ -119,7 +123,11 @@ export function toast(message: string, kind: 'ok' | 'error' = 'ok') {
 }
 
 /** Simple modal dialog. Resolves with the value of the button pressed (or '' if closed). */
-export function dialog(title: string, body: (Node | string)[], buttons: { label: string; value: string; primary?: boolean }[]) {
+export function dialog(
+  title: string,
+  body: (Node | string)[],
+  buttons: { label: string; value: string; primary?: boolean }[],
+) {
   return new Promise<string>((resolve) => {
     const dlg = h(
       'dialog',

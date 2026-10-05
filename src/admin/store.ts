@@ -143,7 +143,8 @@ export function liveStore(repo: string, token: string): Store {
       throw new SaveError("Couldn't reach GitHub. Check your internet connection and try again.");
     }
     if (res.status === 401) throw new SaveError('Your access key has expired or was removed. Please sign in again.');
-    if (res.status === 403) throw new SaveError("Your access key isn't allowed to change the website. Please sign in again with a new one.");
+    if (res.status === 403)
+      throw new SaveError("Your access key isn't allowed to change the website. Please sign in again with a new one.");
     return res;
   };
   const json = async (path: string, init?: RequestInit) => {
@@ -184,7 +185,10 @@ export function liveStore(repo: string, token: string): Store {
           continue;
         }
         const content = c.image ? c.image.slice(c.image.indexOf(',') + 1) : utf8ToBase64(c.text ?? '');
-        const blob = await json('/git/blobs', { method: 'POST', body: JSON.stringify({ content, encoding: 'base64' }) });
+        const blob = await json('/git/blobs', {
+          method: 'POST',
+          body: JSON.stringify({ content, encoding: 'base64' }),
+        });
         tree.push({ path: c.path, mode: '100644', type: 'blob', sha: blob.sha });
       }
       const newTree = await json('/git/trees', {
@@ -213,7 +217,8 @@ export async function checkToken(repo: string, token: string): Promise<string | 
       headers: { Accept: 'application/vnd.github+json', Authorization: `Bearer ${token}` },
     });
     if (res.status === 401) return "That access key wasn't recognised. Check you copied all of it.";
-    if (res.status === 404) return "That access key can't see the website's files. Make sure you chose the right repository.";
+    if (res.status === 404)
+      return "That access key can't see the website's files. Make sure you chose the right repository.";
     if (!res.ok) return `GitHub said no (${res.status}). Please try again.`;
     const body = await res.json();
     if (!body.permissions?.push) return 'That access key can only read. It needs "Contents: Read and write".';

@@ -6,15 +6,15 @@ Pre-launch audit of the Astro rebuild of rothwellsrunning.com, in its current st
 
 The build itself is fast, accessible and cleanly structured. The score is held back by things a visitor would notice straight away (no photos, sample blog posts, placeholder text in the policies) and by features that are built but not connected yet (enquiry form, Instagram feed), plus missing SEO groundwork.
 
-| Area | Score | Weight | Notes |
-| --- | --- | --- | --- |
-| Performance | 95 | 15% | Lighthouse 100 (mobile and desktop), but measured without real photos |
-| Accessibility | 92 | 15% | Lighthouse 100; manual checks good; no screen reader test yet |
-| SEO | 62 | 15% | No sitemap, robots.txt, share image, structured data or 404 page; the preview would be indexable |
-| Content | 45 | 20% | No photos; three sample posts; 11 placeholders in policies; plan details unconfirmed |
-| Features | 60 | 15% | Form and Instagram built but not connected; admin area not built |
-| Code quality | 82 | 10% | Clear components, content in data files; no type checking or CI checks; nothing committed |
-| Security & privacy | 80 | 10% | No trackers or cookies, layered spam traps; no security headers until Cloudflare |
+| Area               | Score | Weight | Notes                                                                                            |
+| ------------------ | ----- | ------ | ------------------------------------------------------------------------------------------------ |
+| Performance        | 95    | 15%    | Lighthouse 100 (mobile and desktop), but measured without real photos                            |
+| Accessibility      | 92    | 15%    | Lighthouse 100; manual checks good; no screen reader test yet                                    |
+| SEO                | 62    | 15%    | No sitemap, robots.txt, share image, structured data or 404 page; the preview would be indexable |
+| Content            | 45    | 20%    | No photos; three sample posts; 11 placeholders in policies; plan details unconfirmed             |
+| Features           | 60    | 15%    | Form and Instagram built but not connected; admin area not built                                 |
+| Code quality       | 82    | 10%    | Clear components, content in data files; no type checking or CI checks; nothing committed        |
+| Security & privacy | 80    | 10%    | No trackers or cookies, layered spam traps; no security headers until Cloudflare                 |
 
 Weighted total: 71.6, rounded to 72.
 

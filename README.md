@@ -15,16 +15,16 @@ Open http://localhost:4321.
 
 Everything Peter can change is a plain file, so the admin area at `/admin` can edit it by committing to this repo.
 
-| What | File |
-| --- | --- |
-| Hero text, About, contact details, location | `src/data/site.json` |
-| Coaching plans and prices | `src/data/services.json` |
-| Testimonials | `src/data/testimonials.json` |
-| "Typical week" strip | `src/data/week.json` |
-| Blog posts | `src/content/journal/*.md` |
-| Privacy, terms, refunds, accessibility | `src/content/legal/*.md` |
-| Instagram feed (generated) | `src/data/instagram.json` |
-| Photos uploaded in the admin area | `src/assets/journal/` |
+| What                                        | File                         |
+| ------------------------------------------- | ---------------------------- |
+| Hero text, About, contact details, location | `src/data/site.json`         |
+| Coaching plans and prices                   | `src/data/services.json`     |
+| Testimonials                                | `src/data/testimonials.json` |
+| "Typical week" strip                        | `src/data/week.json`         |
+| Blog posts                                  | `src/content/journal/*.md`   |
+| Privacy, terms, refunds, accessibility      | `src/content/legal/*.md`     |
+| Instagram feed (generated)                  | `src/data/instagram.json`    |
+| Photos uploaded in the admin area           | `src/assets/journal/`        |
 
 Optional fields that are left empty are hidden: `hero.badge` (e.g. "Longest run / 100 km") and `about.stats` (e.g. `[{ "value": "12", "label": "Ultras finished" }]`).
 
@@ -47,7 +47,7 @@ It has two modes:
 
 The repo it commits to is `ADMIN_REPO` (default `Jack-Lawrence/peter-rothwell-website`; set it as an environment variable at build time if the repo moves).
 
-**Why a pasted token, not "Sign in with GitHub" (OAuth)?** GitHub's OAuth flow needs a server to swap the login code for a token while keeping a client secret hidden, and this site deliberately has no server. A fine-grained token can be limited to this one repository and to *Contents: read and write*, expires on a date Peter chooses, and can be revoked at any time on GitHub. It's stored only in Peter's browser (localStorage) and sent only to api.github.com. "Sign out" deletes it. If the site moves to Cloudflare, a small Worker could do the OAuth swap instead, and the admin would need only a new sign-in screen.
+**Why a pasted token, not "Sign in with GitHub" (OAuth)?** GitHub's OAuth flow needs a server to swap the login code for a token while keeping a client secret hidden, and this site deliberately has no server. A fine-grained token can be limited to this one repository and to _Contents: read and write_, expires on a date Peter chooses, and can be revoked at any time on GitHub. It's stored only in Peter's browser (localStorage) and sent only to api.github.com. "Sign out" deletes it. If the site moves to Cloudflare, a small Worker could do the OAuth swap instead, and the admin would need only a new sign-in screen.
 
 To set Peter up: give him a GitHub account with write access to the repo, then follow "Signing in" in the admin guide together.
 
@@ -55,13 +55,13 @@ To set Peter up: give him a GitHub account with write access to the repo, then f
 
 `.github/workflows/checks.yml` runs on pull requests and every push to `main` (including saves from the admin area), and the deploy only goes ahead if it passes. It takes about three minutes:
 
-| Step | Command |
-| --- | --- |
-| Formatting (Prettier) | `npm run format:check` (fix with `npm run format`) |
-| Types | `npm run check` |
-| Build | `npm run build` |
-| Internal links, offline | `npm run check:links` |
-| HTML validation (`.htmlvalidate.mjs`) | `npm run validate:html` |
+| Step                                    | Command                                                                                                     |
+| --------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| Formatting (Prettier)                   | `npm run format:check` (fix with `npm run format`)                                                          |
+| Types                                   | `npm run check`                                                                                             |
+| Build                                   | `npm run build`                                                                                             |
+| Internal links, offline                 | `npm run check:links`                                                                                       |
+| HTML validation (`.htmlvalidate.mjs`)   | `npm run validate:html`                                                                                     |
 | Lighthouse, mobile (`lighthouserc.cjs`) | `npm run lhci`: performance ≥ 90, accessibility 100, best practices ≥ 95 (and SEO when not a preview build) |
 
 The content files the admin area writes (`src/data/`, `src/content/`) aren't formatted by Prettier, so a save from Peter can't fail on style. Run the last three after a build; locally, stop any other `astro preview` first (Astro allows one at a time).

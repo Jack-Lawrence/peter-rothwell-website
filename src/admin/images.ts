@@ -4,7 +4,8 @@
 export const MAX_SIDE = 2000;
 
 export async function resizePhoto(file: File, maxSide = MAX_SIDE): Promise<string> {
-  if (!file.type.startsWith('image/')) throw new Error("That file isn't a photo. Please choose a JPG, PNG or HEIC image.");
+  if (!file.type.startsWith('image/'))
+    throw new Error("That file isn't a photo. Please choose a JPG, PNG or HEIC image.");
   let bitmap: ImageBitmap;
   try {
     bitmap = await createImageBitmap(file, { imageOrientation: 'from-image' });

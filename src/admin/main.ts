@@ -1,6 +1,29 @@
 // The admin app: a few simple screens over the website's content files.
-import { h, field, textInput, textArea, Errors, errorSummary, toast, dialog, relativeTime, formatDate, today, type Field } from './ui';
-import { demoStore, liveStore, resetDemo, checkToken, SaveError, TOKEN_KEY, type Baked, type Store, type Change } from './store';
+import {
+  h,
+  field,
+  textInput,
+  textArea,
+  Errors,
+  errorSummary,
+  toast,
+  dialog,
+  relativeTime,
+  formatDate,
+  today,
+  type Field,
+} from './ui';
+import {
+  demoStore,
+  liveStore,
+  resetDemo,
+  checkToken,
+  SaveError,
+  TOKEN_KEY,
+  type Baked,
+  type Store,
+  type Change,
+} from './store';
 import { parseDoc, stringifyDoc, markdownToHtml, htmlToMarkdown, wordCount, slugify, type Front } from './markdown';
 import { resizePhoto } from './images';
 
@@ -196,7 +219,8 @@ function renderChrome() {
 function markNav(hash: string) {
   document.querySelectorAll<HTMLAnchorElement>('.side-nav a').forEach((a) => {
     const target = a.getAttribute('href')!;
-    const on = target === '#/' ? hash === '#/' : hash.startsWith(target) || (target === '#/posts' && hash.startsWith('#/post/'));
+    const on =
+      target === '#/' ? hash === '#/' : hash.startsWith(target) || (target === '#/posts' && hash.startsWith('#/post/'));
     if (on) a.setAttribute('aria-current', 'page');
     else a.removeAttribute('aria-current');
   });
@@ -259,7 +283,11 @@ async function route() {
     screen(
       'Problem',
       heading('Something went wrong'),
-      h('p', {}, err instanceof SaveError ? err.message : 'This page could not be loaded. Please reload and try again.'),
+      h(
+        'p',
+        {},
+        err instanceof SaveError ? err.message : 'This page could not be loaded. Please reload and try again.',
+      ),
       h('a', { class: 'btn', href: '#/' }, 'Back to home'),
     );
     console.error(err);
@@ -343,7 +371,10 @@ function greeting() {
 }
 
 async function dashboard() {
-  const [posts, insta] = await Promise.all([loadPosts(), readJson<{ updated: string | null; posts: unknown[] }>(PATHS.instagram)]);
+  const [posts, insta] = await Promise.all([
+    loadPosts(),
+    readJson<{ updated: string | null; posts: unknown[] }>(PATHS.instagram),
+  ]);
   const action = (href: string, ic: string, title: string, sub: string) =>
     h('a', { class: 'act', href }, icon(ic), h('b', {}, title), h('span', {}, sub));
 
@@ -364,7 +395,12 @@ async function dashboard() {
       h(
         'section',
         { class: 'box box--posts', 'aria-labelledby': 'posts-h' },
-        h('div', { class: 'box-head' }, h('h2', { id: 'posts-h' }, 'Your posts'), h('a', { href: '#/post/new' }, '+ New post')),
+        h(
+          'div',
+          { class: 'box-head' },
+          h('h2', { id: 'posts-h' }, 'Your posts'),
+          h('a', { href: '#/post/new' }, '+ New post'),
+        ),
         posts.length
           ? h('ul', { class: 'rows' }, posts.slice(0, 6).map(postRow))
           : h('p', {}, 'No posts yet. Your first one is a click away.'),
@@ -405,7 +441,11 @@ async function postsList() {
     'Blog posts',
     heading('Blog posts', 'Write a new post, or tap one to edit it.'),
     h('p', {}, h('a', { class: 'btn btn--primary', href: '#/post/new' }, 'Write a blog post')),
-    h('section', { class: 'box' }, posts.length ? h('ul', { class: 'rows' }, posts.map(postRow)) : h('p', {}, 'No posts yet.')),
+    h(
+      'section',
+      { class: 'box' },
+      posts.length ? h('ul', { class: 'rows' }, posts.map(postRow)) : h('p', {}, 'No posts yet.'),
+    ),
   );
 }
 
@@ -431,7 +471,11 @@ async function postEditor(slugArg: string) {
   const posts = await loadPosts();
   const existing = posts.find((p) => p.slug === slug);
   if (!isNew && !existing) {
-    screen('Not found', heading('Post not found', undefined, ['#/posts', 'All posts']), h('p', {}, 'This post may have been deleted.'));
+    screen(
+      'Not found',
+      heading('Post not found', undefined, ['#/posts', 'All posts']),
+      h('p', {}, 'This post may have been deleted.'),
+    );
     return;
   }
   const front: Front = { ...(existing?.data ?? {}) };
@@ -464,7 +508,12 @@ async function postEditor(slugArg: string) {
   const dropText = h(
     'div',
     { class: 'drop-text' },
-    h('b', {}, 'Drag a photo here, or ', h('label', { for: 'cover-file', class: 'link' }, 'choose from your phone or computer')),
+    h(
+      'b',
+      {},
+      'Drag a photo here, or ',
+      h('label', { for: 'cover-file', class: 'link' }, 'choose from your phone or computer'),
+    ),
     h('span', { class: 'hint' }, 'We resize it for you. Landscape photos work best.'),
   );
   const coverActions = h(
@@ -587,7 +636,17 @@ async function postEditor(slugArg: string) {
   });
 
   const tool = (label: string, onclick: () => void, attrs: Record<string, string> = {}) =>
-    h('button', { type: 'button', class: 'tool', onmousedown: ((e: Event) => e.preventDefault()) as EventListener, onclick: onclick as EventListener, ...attrs }, label);
+    h(
+      'button',
+      {
+        type: 'button',
+        class: 'tool',
+        onmousedown: ((e: Event) => e.preventDefault()) as EventListener,
+        onclick: onclick as EventListener,
+        ...attrs,
+      },
+      label,
+    );
   const toolbar = h(
     'div',
     { class: 'toolbar', role: 'toolbar', 'aria-label': 'Formatting' },
@@ -638,7 +697,10 @@ async function postEditor(slugArg: string) {
         localStorage.setItem(autosaveKey, JSON.stringify(draft));
       } catch {
         // Photos can be too big for storage: keep the text at least.
-        storage.set(autosaveKey, JSON.stringify({ ...draft, coverData: '', html: draft.html.replace(/src="data:[^"]*"/g, 'src=""') }));
+        storage.set(
+          autosaveKey,
+          JSON.stringify({ ...draft, coverData: '', html: draft.html.replace(/src="data:[^"]*"/g, 'src=""') }),
+        );
       }
       autosavedAt = draft.savedAt;
       updateAutosaveNote();
@@ -705,9 +767,13 @@ async function postEditor(slugArg: string) {
         errors.add(editor, 'Your post needs at least a couple of sentences before it can go live.');
       }
     }
-    if ((coverPath || coverData) && !coverAlt.input.value.trim()) errors.add(coverAlt, 'Describe the cover photo in a few words.');
+    if ((coverPath || coverData) && !coverAlt.input.value.trim())
+      errors.add(coverAlt, 'Describe the cover photo in a few words.');
     if (editor.querySelector('img:not([alt]), img[alt=""]')) {
-      errors.add(editor, 'One of the photos in your post has no description. Delete it and add it again with a description.');
+      errors.add(
+        editor,
+        'One of the photos in your post has no description. Delete it and add it again with a description.',
+      );
     }
     const ok = errors.show();
     const bodyProblem = errors.messageFor(editor);
@@ -742,7 +808,10 @@ async function postEditor(slugArg: string) {
     };
     // A draft published for the first time gets today's date.
     if (!draft && front.draft === true) data.date = today();
-    changes.push({ path: `${PATHS.journal}/${finalSlug}.md`, text: stringifyDoc(data, htmlToMarkdown(editor.innerHTML)) });
+    changes.push({
+      path: `${PATHS.journal}/${finalSlug}.md`,
+      text: stringifyDoc(data, htmlToMarkdown(editor.innerHTML)),
+    });
 
     const verb = draft ? 'Save draft' : isLive ? 'Update post' : 'Publish post';
     if (!(await save(changes, `${verb}: ${data.title}`, button))) return;
@@ -750,7 +819,11 @@ async function postEditor(slugArg: string) {
     storage.remove(autosaveKey);
 
     if (draft) {
-      toast(isDemo() ? 'Draft saved in this demo. It isn’t on the website.' : 'Draft saved. It isn’t on the website until you publish it.');
+      toast(
+        isDemo()
+          ? 'Draft saved in this demo. It isn’t on the website.'
+          : 'Draft saved. It isn’t on the website until you publish it.',
+      );
       location.hash = `#/post/${finalSlug}`;
       if (finalSlug === slug) route();
       return;
@@ -807,15 +880,27 @@ async function postEditor(slugArg: string) {
         { class: 'box' },
         h(
           'button',
-          { type: 'button', class: 'btn btn--primary btn--big', onclick: ((e: Event) => submit(false, e.currentTarget as HTMLButtonElement)) as EventListener },
+          {
+            type: 'button',
+            class: 'btn btn--primary btn--big',
+            onclick: ((e: Event) => submit(false, e.currentTarget as HTMLButtonElement)) as EventListener,
+          },
           isLive ? 'Update post' : 'Publish now',
         ),
         h(
           'button',
-          { type: 'button', class: 'btn btn--big', onclick: ((e: Event) => submit(true, e.currentTarget as HTMLButtonElement)) as EventListener },
+          {
+            type: 'button',
+            class: 'btn btn--big',
+            onclick: ((e: Event) => submit(true, e.currentTarget as HTMLButtonElement)) as EventListener,
+          },
           isLive ? 'Move back to drafts' : 'Save as draft',
         ),
-        h('button', { type: 'button', class: 'btn btn--big', id: 'preview-btn', onclick: (() => previewPost()) as EventListener }, 'Preview'),
+        h(
+          'button',
+          { type: 'button', class: 'btn btn--big', id: 'preview-btn', onclick: (() => previewPost()) as EventListener },
+          'Preview',
+        ),
         h(
           'p',
           { class: 'hint' },
@@ -824,7 +909,17 @@ async function postEditor(slugArg: string) {
             : 'Publishing puts it on your website. You can edit it or move it back to drafts later.',
         ),
       ),
-      h('div', { class: 'box' }, topic.wrap, excerpt.wrap, h('datalist', { id: 'topics' }, topics.map((t) => h('option', { value: t })))),
+      h(
+        'div',
+        { class: 'box' },
+        topic.wrap,
+        excerpt.wrap,
+        h(
+          'datalist',
+          { id: 'topics' },
+          topics.map((t) => h('option', { value: t })),
+        ),
+      ),
       !isNew &&
         h(
           'div',
@@ -844,9 +939,19 @@ async function postEditor(slugArg: string) {
                   ],
                 );
                 if (answer !== 'delete') return;
-                if (await save([{ path: `${PATHS.journal}/${slug}.md`, remove: true }], `Delete post: ${front.title}`, e.currentTarget as HTMLButtonElement)) {
+                if (
+                  await save(
+                    [{ path: `${PATHS.journal}/${slug}.md`, remove: true }],
+                    `Delete post: ${front.title}`,
+                    e.currentTarget as HTMLButtonElement,
+                  )
+                ) {
                   storage.remove(autosaveKey);
-                  toast(isDemo() ? 'Post deleted in this demo.' : 'Post deleted. It will disappear from your website in about a minute.');
+                  toast(
+                    isDemo()
+                      ? 'Post deleted in this demo.'
+                      : 'Post deleted. It will disappear from your website in about a minute.',
+                  );
                   location.hash = '#/posts';
                 }
               }) as EventListener,
@@ -865,12 +970,20 @@ async function postEditor(slugArg: string) {
         'div',
         { class: 'preview-bar' },
         h('span', {}, 'Preview: this is how your post will look'),
-        h('button', { type: 'button', class: 'btn btn--small', onclick: (() => dlg.close()) as EventListener }, 'Close preview'),
+        h(
+          'button',
+          { type: 'button', class: 'btn btn--small', onclick: (() => dlg.close()) as EventListener },
+          'Close preview',
+        ),
       ),
       h(
         'article',
         { class: 'site-post' },
-        h('p', { class: 'mono' }, `${topic.input.value || 'Topic'} · ${formatDate(String(front.date ?? '') || today())}`),
+        h(
+          'p',
+          { class: 'mono' },
+          `${topic.input.value || 'Topic'} · ${formatDate(String(front.date ?? '') || today())}`,
+        ),
         h('h1', { class: 'display' }, title.input.value || 'Your title'),
         h('p', { class: 'excerpt' }, excerpt.input.value),
         coverImg.src && !coverImg.hidden && h('img', { class: 'cover', src: coverImg.src, alt: coverAlt.input.value }),
@@ -930,7 +1043,11 @@ async function pricesScreen() {
   const summary = errorSummary();
   const rows = services.map((s) => {
     const name = field('Name', textInput(s.name, { maxlength: 40 }));
-    const label = field('Small label above the name', textInput(s.label, { maxlength: 40 }), 'e.g. "Online" or "Group · Weekly"');
+    const label = field(
+      'Small label above the name',
+      textInput(s.label, { maxlength: 40 }),
+      'e.g. "Online" or "Group · Weekly"',
+    );
     const price = field(
       'Price (£)',
       textInput(s.price.replace(/^£/, ''), { inputmode: 'decimal', maxlength: 8, class: 'price-input' }),
@@ -968,7 +1085,10 @@ async function pricesScreen() {
           if (!/^\d+(\.\d{1,2})?$/.test(r.price.input.value.trim()))
             errors.add(r.price, `${n}: the price should be a number, like 80 or 79.50.`);
           if (!r.per.input.value.trim()) errors.add(r.per, `${n}: say what the price is per, like "month".`);
-          const pts = r.points.input.value.split('\n').map((p) => p.trim()).filter(Boolean);
+          const pts = r.points.input.value
+            .split('\n')
+            .map((p) => p.trim())
+            .filter(Boolean);
           if (pts.length === 0) errors.add(r.points, `${n}: add at least one thing that’s included.`);
           else if (pts.length > 6) errors.add(r.points, `${n}: keep it to 6 points or fewer so the cards stay tidy.`);
           else if (pts.some((p) => p.length > 70)) errors.add(r.points, `${n}: keep each point under 70 characters.`);
@@ -980,7 +1100,10 @@ async function pricesScreen() {
           name: r.name.input.value.trim(),
           price: `£${r.price.input.value.trim()}`,
           per: `/ ${r.per.input.value.trim()}`,
-          points: r.points.input.value.split('\n').map((p) => p.trim()).filter(Boolean),
+          points: r.points.input.value
+            .split('\n')
+            .map((p) => p.trim())
+            .filter(Boolean),
         }));
         if (await save([{ path: PATHS.services, text: toJson(next) }], 'Update prices', saveBtn)) toast(savedMessage());
       }) as EventListener,
@@ -989,7 +1112,12 @@ async function pricesScreen() {
     h('div', { class: 'save-bar' }, saveBtn),
   );
   trackDirty(form);
-  screen('Services & prices', heading('Services & prices', 'Change what each plan costs and what’s included.'), summary, form);
+  screen(
+    'Services & prices',
+    heading('Services & prices', 'Change what each plan costs and what’s included.'),
+    summary,
+    form,
+  );
 }
 
 // ---------- Run Club dates ----------
@@ -1005,7 +1133,11 @@ async function runClubScreen() {
   const summary = errorSummary();
   const starts = field('Next block starts', h('input', { type: 'date', value: sched.starts }));
   const when = field('Day and time', textInput(sched.when, { maxlength: 40 }), 'e.g. "Tuesdays, 6:30pm"');
-  const spaces = field('Spaces left (optional)', textInput(sched.spaces, { inputmode: 'numeric', maxlength: 3 }), 'Leave empty to hide it.');
+  const spaces = field(
+    'Spaces left (optional)',
+    textInput(sched.spaces, { inputmode: 'numeric', maxlength: 3 }),
+    'Leave empty to hide it.',
+  );
   const saveBtn = h('button', { type: 'submit', class: 'btn btn--primary btn--big' }, 'Save dates');
 
   const persist = async (schedule: Service['schedule'], message: string, button: HTMLButtonElement) => {
@@ -1028,7 +1160,11 @@ async function runClubScreen() {
         if (spaces.input.value.trim() && !/^\d{1,3}$/.test(spaces.input.value.trim()))
           errors.add(spaces, 'Spaces left should be a number, like 6. Or leave it empty.');
         if (!errors.show()) return;
-        await persist({ starts: date, when: when.input.value.trim(), spaces: spaces.input.value.trim() }, 'Update Run Club dates', saveBtn);
+        await persist(
+          { starts: date, when: when.input.value.trim(), spaces: spaces.input.value.trim() },
+          'Update Run Club dates',
+          saveBtn,
+        );
       }) as EventListener,
     },
     h('div', { class: 'box' }, starts.wrap, when.wrap, spaces.wrap),
@@ -1067,7 +1203,14 @@ async function testimonialsScreen(arg: string) {
   const services = await readJson<Service[]>(PATHS.services);
   const summary = errorSummary();
   const list = h('div', { class: 'stack' });
-  type Row = { name: Field; service: Field; quote: Field; consent: HTMLInputElement; consentWrap: HTMLElement; box: HTMLElement };
+  type Row = {
+    name: Field;
+    service: Field;
+    quote: Field;
+    consent: HTMLInputElement;
+    consentWrap: HTMLElement;
+    box: HTMLElement;
+  };
   let rows: Row[] = [];
 
   const makeRow = (t: Testimonial, isNew = false): Row => {
@@ -1080,11 +1223,20 @@ async function testimonialsScreen(arg: string) {
         .filter((v, i, a) => a.indexOf(v) === i)
         .map((n) => h('option', { value: n }, n)),
     );
-    if (t.service && ![...select.options].some((o) => o.value === t.service)) select.append(h('option', { value: t.service }, t.service));
+    if (t.service && ![...select.options].some((o) => o.value === t.service))
+      select.append(h('option', { value: t.service }, t.service));
     select.value = t.service;
     const service = field('What they did with you', select);
-    const quote = field('What they said', textArea(t.quote, { rows: 4, maxlength: 600 }), 'Paste their words exactly as they wrote them.');
-    const consent = h('input', { type: 'checkbox', id: `consent-${Math.random().toString(36).slice(2)}`, checked: !!t.consent });
+    const quote = field(
+      'What they said',
+      textArea(t.quote, { rows: 4, maxlength: 600 }),
+      'Paste their words exactly as they wrote them.',
+    );
+    const consent = h('input', {
+      type: 'checkbox',
+      id: `consent-${Math.random().toString(36).slice(2)}`,
+      checked: !!t.consent,
+    });
     const consentWrap = h(
       'label',
       { class: 'check', for: consent.id },
@@ -1102,8 +1254,16 @@ async function testimonialsScreen(arg: string) {
       h(
         'div',
         { class: 'row-actions' },
-        h('button', { type: 'button', class: 'btn btn--small', onclick: (() => move(row, -1)) as EventListener }, 'Move up'),
-        h('button', { type: 'button', class: 'btn btn--small', onclick: (() => move(row, 1)) as EventListener }, 'Move down'),
+        h(
+          'button',
+          { type: 'button', class: 'btn btn--small', onclick: (() => move(row, -1)) as EventListener },
+          'Move up',
+        ),
+        h(
+          'button',
+          { type: 'button', class: 'btn btn--small', onclick: (() => move(row, 1)) as EventListener },
+          'Move down',
+        ),
         h(
           'button',
           {
@@ -1131,7 +1291,8 @@ async function testimonialsScreen(arg: string) {
     setDirty(true);
     row.box.querySelector('button')?.focus();
   };
-  const draw = () => list.replaceChildren(...(rows.length ? rows.map((r) => r.box) : [h('p', {}, 'No testimonials yet.')]));
+  const draw = () =>
+    list.replaceChildren(...(rows.length ? rows.map((r) => r.box) : [h('p', {}, 'No testimonials yet.')]));
 
   rows = items.map((t) => makeRow(t));
   draw();
@@ -1156,8 +1317,10 @@ async function testimonialsScreen(arg: string) {
           const who = r.name.input.value.trim() || `Testimonial ${i + 1}`;
           if (!r.name.input.value.trim()) errors.add(r.name, `Testimonial ${i + 1}: add the client’s first name.`);
           if (!r.service.input.value) errors.add(r.service, `${who}: choose what they did with you.`);
-          if (r.quote.input.value.trim().length < 20) errors.add(r.quote, `${who}: paste what they said (at least a sentence).`);
-          if (!r.consent.checked) errors.add(r.consent, `${who}: tick the box to confirm they agreed to it being published.`);
+          if (r.quote.input.value.trim().length < 20)
+            errors.add(r.quote, `${who}: paste what they said (at least a sentence).`);
+          if (!r.consent.checked)
+            errors.add(r.consent, `${who}: tick the box to confirm they agreed to it being published.`);
         });
         if (!errors.show()) return;
         const next: Testimonial[] = rows.map((r) => ({
@@ -1193,7 +1356,10 @@ async function testimonialsScreen(arg: string) {
   trackDirty(form);
   screen(
     'Testimonials',
-    heading('Testimonials', 'Kind words from clients, shown on your home page. Only add ones the client has agreed to share.'),
+    heading(
+      'Testimonials',
+      'Kind words from clients, shown on your home page. Only add ones the client has agreed to share.',
+    ),
     summary,
     form,
   );
@@ -1237,8 +1403,10 @@ async function weekScreen() {
         if (!title.input.value.trim()) errors.add(title, 'Add a heading for the week.');
         for (const r of days) {
           if (!r.session.input.value.trim()) errors.add(r.session, `${r.d.day}: add a session, or "Rest".`);
-          else if (r.session.input.value.trim().length > 14) errors.add(r.session, `${r.d.day}: keep the session to 14 characters so it fits.`);
-          if (r.note.input.value.trim().length > 30) errors.add(r.note, `${r.d.day}: keep the note to 30 characters so it fits.`);
+          else if (r.session.input.value.trim().length > 14)
+            errors.add(r.session, `${r.d.day}: keep the session to 14 characters so it fits.`);
+          if (r.note.input.value.trim().length > 30)
+            errors.add(r.note, `${r.d.day}: keep the note to 30 characters so it fits.`);
         }
         if (!errors.show()) return;
         const next: Week = {
@@ -1250,15 +1418,25 @@ async function weekScreen() {
             ...(r.highlight.checked ? { highlight: true } : {}),
           })),
         };
-        if (await save([{ path: PATHS.week, text: toJson(next) }], 'Update typical week', saveBtn)) toast(savedMessage());
+        if (await save([{ path: PATHS.week, text: toJson(next) }], 'Update typical week', saveBtn))
+          toast(savedMessage());
       }) as EventListener,
     },
     h('div', { class: 'box' }, title.wrap),
-    h('div', { class: 'days' }, days.map((r) => r.box)),
+    h(
+      'div',
+      { class: 'days' },
+      days.map((r) => r.box),
+    ),
     h('div', { class: 'save-bar' }, saveBtn),
   );
   trackDirty(form);
-  screen('Typical week', heading('Typical week', 'The week of training shown under the big headline on your home page.'), summary, form);
+  screen(
+    'Typical week',
+    heading('Typical week', 'The week of training shown under the big headline on your home page.'),
+    summary,
+    form,
+  );
 }
 
 // ---------- Contact details ----------
@@ -1269,11 +1447,23 @@ async function contactScreen() {
   const summary = errorSummary();
   const phone = field('Phone', textInput(contact.phone, { type: 'tel', maxlength: 20, autocomplete: 'off' }));
   const email = field('Email', textInput(contact.email, { type: 'email', maxlength: 80, autocomplete: 'off' }));
-  const insta = field('Instagram name', textInput(contact.instagram, { maxlength: 30 }), 'Without the @, e.g. peter_rothwell.pt');
-  const note = field('How people book', textInput(contact.bookingNote, { maxlength: 60 }), 'Shown above your prices, e.g. "All bookings by text or email"');
+  const insta = field(
+    'Instagram name',
+    textInput(contact.instagram, { maxlength: 30 }),
+    'Without the @, e.g. peter_rothwell.pt',
+  );
+  const note = field(
+    'How people book',
+    textInput(contact.bookingNote, { maxlength: 60 }),
+    'Shown above your prices, e.g. "All bookings by text or email"',
+  );
   const place = field('Venue', textInput(loc.place, { maxlength: 60 }), 'e.g. "Meadowbank Shopping Park"');
   const street = field('Street address', textInput(loc.street, { maxlength: 60 }));
-  const district = field('Area', textInput((loc.area ?? '').split(',')[0].trim(), { maxlength: 40 }), 'e.g. "Meadowbank"');
+  const district = field(
+    'Area',
+    textInput((loc.area ?? '').split(',')[0].trim(), { maxlength: 40 }),
+    'e.g. "Meadowbank"',
+  );
   const town = field('Town or city', textInput(loc.locality, { maxlength: 40 }));
   const postcode = field('Postcode', textInput(loc.postcode, { maxlength: 10 }));
   const saveBtn = h('button', { type: 'submit', class: 'btn btn--primary btn--big' }, 'Save contact details');
@@ -1288,21 +1478,38 @@ async function contactScreen() {
         const errors = new Errors(summary);
         const digits = phone.input.value.replace(/[\s()-]/g, '');
         if (!/^(\+44|0)\d{9,10}$/.test(digits)) errors.add(phone, 'Enter a UK phone number, like 07367 636632.');
-        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.input.value.trim())) errors.add(email, 'Enter an email address, like name@gmail.com.');
-        const handle = insta.input.value.trim().replace(/^@/, '').replace(/^https?:\/\/(www\.)?instagram\.com\//, '').replace(/\/$/, '');
-        if (!/^[A-Za-z0-9._]{1,30}$/.test(handle)) errors.add(insta, 'Enter your Instagram name using only letters, numbers, dots and underscores.');
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.input.value.trim()))
+          errors.add(email, 'Enter an email address, like name@gmail.com.');
+        const handle = insta.input.value
+          .trim()
+          .replace(/^@/, '')
+          .replace(/^https?:\/\/(www\.)?instagram\.com\//, '')
+          .replace(/\/$/, '');
+        if (!/^[A-Za-z0-9._]{1,30}$/.test(handle))
+          errors.add(insta, 'Enter your Instagram name using only letters, numbers, dots and underscores.');
         if (!note.input.value.trim()) errors.add(note, 'Say how people book, e.g. "All bookings by text or email".');
         if (!street.input.value.trim()) errors.add(street, 'Add the street address.');
         if (!town.input.value.trim()) errors.add(town, 'Add the town or city.');
-        if (!/^[A-Z]{1,2}\d[A-Z\d]? ?\d[A-Z]{2}$/i.test(postcode.input.value.trim())) errors.add(postcode, 'Enter a UK postcode, like EH7 5TS.');
+        if (!/^[A-Z]{1,2}\d[A-Z\d]? ?\d[A-Z]{2}$/i.test(postcode.input.value.trim()))
+          errors.add(postcode, 'Enter a UK postcode, like EH7 5TS.');
         if (!errors.show()) return;
 
-        const pc = postcode.input.value.trim().toUpperCase().replace(/^(.+?)(\d[A-Z]{2})$/, '$1 $2').replace(/\s+/g, ' ');
+        const pc = postcode.input.value
+          .trim()
+          .toUpperCase()
+          .replace(/^(.+?)(\d[A-Z]{2})$/, '$1 $2')
+          .replace(/\s+/g, ' ');
         const area = [district.input.value.trim(), town.input.value.trim()].filter(Boolean).join(', ');
         const address = `${[street.input.value.trim(), district.input.value.trim(), town.input.value.trim()].filter(Boolean).join(', ')} ${pc}`;
         const next = {
           ...site,
-          contact: { ...contact, phone: phone.input.value.trim(), email: email.input.value.trim(), instagram: handle, bookingNote: note.input.value.trim() },
+          contact: {
+            ...contact,
+            phone: phone.input.value.trim(),
+            email: email.input.value.trim(),
+            instagram: handle,
+            bookingNote: note.input.value.trim(),
+          },
           location: {
             ...loc,
             area,
@@ -1314,15 +1521,37 @@ async function contactScreen() {
             mapsUrl: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address).replace(/%20/g, '+')}`,
           },
         };
-        if (await save([{ path: PATHS.site, text: toJson(next) }], 'Update contact details', saveBtn)) toast(savedMessage());
+        if (await save([{ path: PATHS.site, text: toJson(next) }], 'Update contact details', saveBtn))
+          toast(savedMessage());
       }) as EventListener,
     },
-    h('fieldset', { class: 'box' }, h('legend', {}, 'How people reach you'), phone.wrap, email.wrap, insta.wrap, note.wrap),
-    h('fieldset', { class: 'box' }, h('legend', {}, 'Where you train people in person'), place.wrap, street.wrap, district.wrap, h('div', { class: 'pair' }, town.wrap, postcode.wrap)),
+    h(
+      'fieldset',
+      { class: 'box' },
+      h('legend', {}, 'How people reach you'),
+      phone.wrap,
+      email.wrap,
+      insta.wrap,
+      note.wrap,
+    ),
+    h(
+      'fieldset',
+      { class: 'box' },
+      h('legend', {}, 'Where you train people in person'),
+      place.wrap,
+      street.wrap,
+      district.wrap,
+      h('div', { class: 'pair' }, town.wrap, postcode.wrap),
+    ),
     h('div', { class: 'save-bar' }, saveBtn),
   );
   trackDirty(form);
-  screen('Contact details', heading('Contact details', 'Shown at the bottom of every page and on your policies.'), summary, form);
+  screen(
+    'Contact details',
+    heading('Contact details', 'Shown at the bottom of every page and on your policies.'),
+    summary,
+    form,
+  );
 }
 
 // ---------- Policies ----------
@@ -1354,7 +1583,12 @@ async function policiesList() {
             h(
               'a',
               { class: 'row', href: `#/policy/${d.id}` },
-              h('span', { class: 'row-text' }, h('b', {}, String(d.data.title)), h('span', { class: 'sub' }, `Last updated ${formatDate(String(d.data.updated))}`)),
+              h(
+                'span',
+                { class: 'row-text' },
+                h('b', {}, String(d.data.title)),
+                h('span', { class: 'sub' }, `Last updated ${formatDate(String(d.data.updated))}`),
+              ),
               d.todo
                 ? h('span', { class: 'pill pill--draft' }, `${d.todo} to fill in`)
                 : h('span', { class: 'pill pill--live' }, 'Complete'),
@@ -1376,7 +1610,11 @@ async function policyEditor(id: string) {
   const { data, body } = parseDoc(text);
   const summary = errorSummary();
   const area = textArea(body, { rows: 24, spellcheck: true, class: 'md-input' });
-  const editorField = field('Page text', area, 'Written in Markdown: ## for a heading, - for a bullet point, **bold**.');
+  const editorField = field(
+    'Page text',
+    area,
+    'Written in Markdown: ## for a heading, - for a bullet point, **bold**.',
+  );
   const preview = h('div', { class: 'site-post site-post--legal', 'aria-live': 'off' });
   const todo = h('div', { class: 'todo' });
 
@@ -1389,7 +1627,11 @@ async function policyEditor(id: string) {
       return;
     }
     todo.append(
-      h('p', {}, h('b', {}, marks.length === 1 ? '1 thing still to fill in:' : `${marks.length} things still to fill in:`)),
+      h(
+        'p',
+        {},
+        h('b', {}, marks.length === 1 ? '1 thing still to fill in:' : `${marks.length} things still to fill in:`),
+      ),
       h(
         'ul',
         {},
@@ -1415,7 +1657,11 @@ async function policyEditor(id: string) {
           ),
         ),
       ),
-      h('p', { class: 'hint' }, 'Tap one to jump to it, then replace the whole highlighted part (including <mark> and </mark>) with the real details.'),
+      h(
+        'p',
+        { class: 'hint' },
+        'Tap one to jump to it, then replace the whole highlighted part (including <mark> and </mark>) with the real details.',
+      ),
     );
   };
   area.addEventListener('input', refresh);
@@ -1430,20 +1676,37 @@ async function policyEditor(id: string) {
       onsubmit: (async (e: Event) => {
         e.preventDefault();
         const errors = new Errors(summary);
-        if (area.value.trim().length < 100) errors.add(editorField, 'This page looks almost empty. Undo your changes or add the text back.');
+        if (area.value.trim().length < 100)
+          errors.add(editorField, 'This page looks almost empty. Undo your changes or add the text back.');
         const opens = (area.value.match(/<mark>/g) ?? []).length;
         const closes = (area.value.match(/<\/mark>/g) ?? []).length;
-        if (opens !== closes) errors.add(editorField, 'A highlight is only half removed. Delete both <mark> and </mark> around the text you filled in.');
+        if (opens !== closes)
+          errors.add(
+            editorField,
+            'A highlight is only half removed. Delete both <mark> and </mark> around the text you filled in.',
+          );
         if (!errors.show()) return;
         const next = stringifyDoc({ ...data, updated: today() }, area.value);
-        if (await save([{ path, text: next }], `Update ${String(data.title).toLowerCase()}`, saveBtn)) toast(savedMessage());
+        if (await save([{ path, text: next }], `Update ${String(data.title).toLowerCase()}`, saveBtn))
+          toast(savedMessage());
       }) as EventListener,
     },
-    h('div', { class: 'split' }, h('div', { class: 'box' }, editorField.wrap), h('div', { class: 'box' }, h('span', { class: 'label' }, 'Preview'), preview)),
+    h(
+      'div',
+      { class: 'split' },
+      h('div', { class: 'box' }, editorField.wrap),
+      h('div', { class: 'box' }, h('span', { class: 'label' }, 'Preview'), preview),
+    ),
     h('div', { class: 'save-bar' }, saveBtn),
   );
   trackDirty(form);
-  screen(String(data.title), heading(String(data.title), String(data.description ?? ''), ['#/policies', 'All policies']), summary, todo, form);
+  screen(
+    String(data.title),
+    heading(String(data.title), String(data.description ?? ''), ['#/policies', 'All policies']),
+    summary,
+    todo,
+    form,
+  );
 }
 
 // ---------- Instagram ----------
@@ -1511,7 +1774,11 @@ async function signInScreen() {
           'li',
           {},
           'Open ',
-          h('a', { href: 'https://github.com/settings/personal-access-tokens/new', target: '_blank', rel: 'noopener' }, 'new access key'),
+          h(
+            'a',
+            { href: 'https://github.com/settings/personal-access-tokens/new', target: '_blank', rel: 'noopener' },
+            'new access key',
+          ),
           `. Name it "Website editor", choose the repository ${config.repo.split('/')[1]}, and under Permissions → Contents choose "Read and write".`,
         ),
         h('li', {}, 'Press "Generate token", copy it, and paste it below.'),

@@ -124,7 +124,9 @@ a {
   background: var(--gorse);
   color: var(--granite);
   border: 1.5px solid var(--gorse);
-  transition: transform 0.15s ease, background-color 0.15s ease;
+  transition:
+    transform 0.15s ease,
+    background-color 0.15s ease;
 }
 
 .btn:hover {

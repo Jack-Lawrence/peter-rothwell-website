@@ -3,17 +3,17 @@ import week from '../data/week.json';
 ---
 
 <section class="wrap" aria-labelledby="week-title">
-  <h2 id="week-title" class="mono title">{week.title}</h2>
+  <h2 id="week-title" class="mono title">
+    {week.title}
+  </h2>
   <ol class="week">
-    {
-      week.days.map((d) => (
-        <li class="day">
-          <span class="mono">{d.day}</span>
-          <b class:list={['session', { accent: d.highlight }]}>{d.session}</b>
-          <span class="note">{d.note}</span>
-        </li>
-      ))
-    }
+    {week.days.map((d) => (
+      <li class="day">
+        <span class="mono">{d.day}</span>
+        <b class:list={['session', { accent: d.highlight }]}>{d.session}</b>
+        <span class="note">{d.note}</span>
+      </li>
+    ))}
   </ol>
 </section>
 

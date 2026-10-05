@@ -13,22 +13,24 @@ const steps = [
   <div class="wrap inner">
     <div class="head">
       <span class="mono accent">How it works</span>
-      <h2 id="how-title" class="display title">Three steps to start</h2>
+      <h2 id="how-title" class="display title">
+        Three steps to start
+      </h2>
     </div>
     <ol class="steps">
-      {
-        steps.map((s, i) => (
-          <li>
-            <span class="display num" aria-hidden="true">
-              {String(i + 1).padStart(2, '0')}
-            </span>
-            <h3>{s.title}</h3>
-            <p>{s.text}</p>
-          </li>
-        ))
-      }
+      {steps.map((s, i) => (
+        <li>
+          <span class="display num" aria-hidden="true">
+            {String(i + 1).padStart(2, '0')}
+          </span>
+          <h3>{s.title}</h3>
+          <p>{s.text}</p>
+        </li>
+      ))}
     </ol>
-    <a class="btn" href={href('/#contact')}>Book a free chat</a>
+    <a class="btn" href={href('/#contact')}>
+      Book a free chat
+    </a>
   </div>
 </section>
 

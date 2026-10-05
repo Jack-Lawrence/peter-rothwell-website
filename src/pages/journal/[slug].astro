@@ -36,63 +36,68 @@ const dateLabel = date.toLocaleDateString('en-GB', { day: 'numeric', month: 'lon
   <JsonLd slot="head" data={postSchema({ title, excerpt, date, path: `/journal/${post.id}/`, image: share?.url })} />
   <article class="light section">
     <div class="wrap narrow">
-      <a class="back" href={href('/journal/')}>← All posts</a>
+      <a class="back" href={href('/journal/')}>
+        ← All posts
+      </a>
       <p class="mono meta">
-        <a href={href(`/journal/topic/${topicSlug(topic)}/`)}>{topic}</a> · <time datetime={date.toISOString()}>{dateLabel}</time>
+        <a href={href(`/journal/topic/${topicSlug(topic)}/`)}>{topic}</a> ·{' '}
+        <time datetime={date.toISOString()}>{dateLabel}</time>
         {` · ${readingTime(post)}`}
       </p>
       <h1 class="display title">{title}</h1>
       <p class="excerpt">{excerpt}</p>
     </div>
-    {
-      cover && (
-        <div class="wrap">
-          <Photo
-            class="cover"
-            tone="light"
-            src={cover}
-            alt={coverAlt ?? ''}
-            priority
-            sizes="(max-width: 1240px) 100vw, 1240px"
-            widths={[640, 960, 1240, 1860, 2480]}
-          />
-        </div>
-      )
-    }
+    {cover && (
+      <div class="wrap">
+        <Photo
+          class="cover"
+          tone="light"
+          src={cover}
+          alt={coverAlt ?? ''}
+          priority
+          sizes="(max-width: 1240px) 100vw, 1240px"
+          widths={[640, 960, 1240, 1860, 2480]}
+        />
+      </div>
+    )}
     <div class="wrap narrow body">
       <Content />
     </div>
 
     <div class="wrap narrow">
       <aside class="cta" aria-labelledby="cta-title">
-        <h2 id="cta-title" class="display">Want a plan like this?</h2>
+        <h2 id="cta-title" class="display">
+          Want a plan like this?
+        </h2>
         <p>Every plan starts with a free 15-minute chat about where you are and where you want to get to.</p>
         <div class="cta-links">
-          <a class="btn" href={href('/#contact')}>Book a free chat</a>
-          <a class="btn btn--ghost" href={href('/#coaching')}>See coaching plans</a>
+          <a class="btn" href={href('/#contact')}>
+            Book a free chat
+          </a>
+          <a class="btn btn--ghost" href={href('/#coaching')}>
+            See coaching plans
+          </a>
         </div>
       </aside>
 
-      {
-        (newer || older) && (
-          <nav class="more" aria-label="More posts">
-            {older ? (
-              <a class="more-link" href={href(`/journal/${older.id}/`)} rel="prev">
-                <span class="mono">← Previous post</span>
-                <span class="more-title">{older.data.title}</span>
-              </a>
-            ) : (
-              <span />
-            )}
-            {newer && (
-              <a class="more-link more-link--next" href={href(`/journal/${newer.id}/`)} rel="next">
-                <span class="mono">Next post →</span>
-                <span class="more-title">{newer.data.title}</span>
-              </a>
-            )}
-          </nav>
-        )
-      }
+      {(newer || older) && (
+        <nav class="more" aria-label="More posts">
+          {older ? (
+            <a class="more-link" href={href(`/journal/${older.id}/`)} rel="prev">
+              <span class="mono">← Previous post</span>
+              <span class="more-title">{older.data.title}</span>
+            </a>
+          ) : (
+            <span />
+          )}
+          {newer && (
+            <a class="more-link more-link--next" href={href(`/journal/${newer.id}/`)} rel="next">
+              <span class="mono">Next post →</span>
+              <span class="more-title">{newer.data.title}</span>
+            </a>
+          )}
+        </nav>
+      )}
     </div>
   </article>
 </Base>

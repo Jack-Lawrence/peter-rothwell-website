@@ -18,7 +18,9 @@ const updatedLabel = updated.toLocaleDateString('en-GB', { day: 'numeric', month
 <Base title={title} description={description}>
   <article class="light section">
     <div class="wrap narrow">
-      <p class="mono meta">Last updated <time datetime={updated.toISOString()}>{updatedLabel}</time></p>
+      <p class="mono meta">
+        Last updated <time datetime={updated.toISOString()}>{updatedLabel}</time>
+      </p>
       <h1 class="display title">{title}</h1>
       <div class="body">
         <Content />

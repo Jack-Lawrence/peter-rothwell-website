@@ -48,26 +48,24 @@ const size = width && height ? { width, height, fit: 'cover' as const } : { widt
 ---
 
 <div class:list={['photo', `photo--${tone}`, className]} style={position && `--position: ${position}`}>
-  {
-    src ? (
-      <Picture
-        src={src}
-        alt={alt}
-        formats={['avif', 'webp']}
-        {...size}
-        loading={priority ? 'eager' : 'lazy'}
-        fetchpriority={priority ? 'high' : 'auto'}
-        decoding={priority ? 'sync' : 'async'}
-      />
-    ) : (
-      label && (
-        <span class="label">
-          <span class="mono">Photo</span>
-          <span>{label}</span>
-        </span>
-      )
+  {src ? (
+    <Picture
+      src={src}
+      alt={alt}
+      formats={['avif', 'webp']}
+      {...size}
+      loading={priority ? 'eager' : 'lazy'}
+      fetchpriority={priority ? 'high' : 'auto'}
+      decoding={priority ? 'sync' : 'async'}
+    />
+  ) : (
+    label && (
+      <span class="label">
+        <span class="mono">Photo</span>
+        <span>{label}</span>
+      </span>
     )
-  }
+  )}
   {PREVIEW && src && demo && <span class="mono demo">Demo photo</span>}
   <slot />
 </div>

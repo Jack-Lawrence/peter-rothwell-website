@@ -37,7 +37,11 @@ export default defineConfig({
       // search engines and shows a "not live yet" bar on every page.
       PREVIEW: envField.boolean({ context: 'server', access: 'public', default: false }),
       // The GitHub repo the admin area commits to (owner/name).
-      ADMIN_REPO: envField.string({ context: 'server', access: 'public', default: 'Jack-Lawrence/peter-rothwell-website' }),
+      ADMIN_REPO: envField.string({
+        context: 'server',
+        access: 'public',
+        default: 'Jack-Lawrence/peter-rothwell-website',
+      }),
     },
   },
   // Old Wix addresses, so existing links and search results still work.

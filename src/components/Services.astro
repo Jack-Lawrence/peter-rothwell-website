@@ -22,31 +22,30 @@ function scheduleLine(schedule?: Schedule) {
     <div class="head">
       <h2 class="display title">Ways to train with me</h2>
       <p class="lede">
-        {site.contact.bookingNote}. Every plan starts with a free 15-minute chat about where you are and where you want to get to.
+        {site.contact.bookingNote}. Every plan starts with a free 15-minute chat about where you are and where you want
+        to get to.
       </p>
     </div>
 
     <div class="cards">
-      {
-        services.map((s) => (
-          <article class="card" id={s.id}>
-            <span class="mono label">{s.label}</span>
-            <h3 class="display name">{s.name}</h3>
-            <p class="price">
-              <span class="display amount">{s.price}</span>
-              <span class="per">{s.per}</span>
-            </p>
-            {scheduleLine((s as { schedule?: Schedule }).schedule) && (
-              <p class="mono schedule">{scheduleLine((s as { schedule?: Schedule }).schedule)}</p>
-            )}
-            <ul>
-              {s.points.map((p) => (
-                <li>{p}</li>
-              ))}
-            </ul>
-          </article>
-        ))
-      }
+      {services.map((s) => (
+        <article class="card" id={s.id}>
+          <span class="mono label">{s.label}</span>
+          <h3 class="display name">{s.name}</h3>
+          <p class="price">
+            <span class="display amount">{s.price}</span>
+            <span class="per">{s.per}</span>
+          </p>
+          {scheduleLine((s as { schedule?: Schedule }).schedule) && (
+            <p class="mono schedule">{scheduleLine((s as { schedule?: Schedule }).schedule)}</p>
+          )}
+          <ul>
+            {s.points.map((p) => (
+              <li>{p}</li>
+            ))}
+          </ul>
+        </article>
+      ))}
     </div>
 
     <div class="where">
@@ -54,7 +53,11 @@ function scheduleLine(schedule?: Schedule) {
         <div class="spot-text">
           <span class="mono label">Train in person</span>
           <h3 class="display where-title">{site.location.area}</h3>
-          <p>{site.location.address}<br />Inside {site.location.place}</p>
+          <p>
+            {site.location.address}
+            <br />
+            Inside {site.location.place}
+          </p>
         </div>
         <a class="map" href={site.location.mapsUrl} target="_blank" rel="noopener">
           <span class="map-pin" aria-hidden="true">
@@ -69,7 +72,16 @@ function scheduleLine(schedule?: Schedule) {
       </div>
 
       <div class="spot">
-        <svg class="pin" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <svg
+          class="pin"
+          width="28"
+          height="28"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          aria-hidden="true"
+        >
           <circle cx="12" cy="12" r="9"></circle>
           <path d="M3 12h18M12 3c2.5 2.7 3.8 5.7 3.8 9s-1.3 6.3-3.8 9c-2.5-2.7-3.8-5.7-3.8-9S9.5 5.7 12 3z"></path>
         </svg>

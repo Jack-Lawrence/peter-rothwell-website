@@ -22,7 +22,12 @@ export default defineHastPlugin({
         properties: {},
         children: [
           { ...img, properties },
-          { type: 'element', tagName: 'figcaption', properties: {}, children: [{ type: 'text', value: String(title) }] },
+          {
+            type: 'element',
+            tagName: 'figcaption',
+            properties: {},
+            children: [{ type: 'text', value: String(title) }],
+          },
         ],
       });
     },

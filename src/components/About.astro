@@ -18,23 +18,24 @@ const { name, paragraphs, stats } = site.about as {
       alt="A runner in a white vest looking out over the hills, seen from behind"
       position="50% 35%"
       sizes="(max-width: 900px) 100vw, min(42vw, 510px)"
-      label="Portrait of Peter, ideally at a race finish or on a summit." />
+      label="Portrait of Peter, ideally at a race finish or on a summit."
+    />
     <div class="text">
       <span class="mono accent">Meet your coach</span>
       <h2 class="display h2">{name}</h2>
-      {paragraphs.map((p) => <p>{p}</p>)}
-      {
-        stats.length > 0 && (
-          <dl class="stats">
-            {stats.map((s) => (
-              <div>
-                <dt class="mono">{s.label}</dt>
-                <dd class="display">{s.value}</dd>
-              </div>
-            ))}
-          </dl>
-        )
-      }
+      {paragraphs.map((p) => (
+        <p>{p}</p>
+      ))}
+      {stats.length > 0 && (
+        <dl class="stats">
+          {stats.map((s) => (
+            <div>
+              <dt class="mono">{s.label}</dt>
+              <dd class="display">{s.value}</dd>
+            </div>
+          ))}
+        </dl>
+      )}
     </div>
   </div>
 </section>

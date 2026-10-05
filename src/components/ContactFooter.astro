@@ -12,24 +12,44 @@ const year = new Date().getFullYear();
 <footer id="contact" class="section footer">
   <div class="wrap grid">
     <div class="intro">
-      <h2 class="display big">Your next<br />start line<br />starts here.</h2>
+      <h2 class="display big">
+        Your next
+        <br />
+        start line
+        <br />
+        starts here.
+      </h2>
       <div class="contact">
-      <span class="mono">{contact.bookingNote}, or send an enquiry</span>
-      <a class="phone" href={telHref(contact.phone)}>{contact.phone.replace(/ /g, ' ')}</a>
-      <a class="email" href={`mailto:${contact.email}`}>{contact.email}</a>
-      <a href={`https://www.instagram.com/${contact.instagram}/`} target="_blank" rel="noopener">Instagram @{contact.instagram}</a>
-      <p class="addr">
-        In person: {location.address}<br />or online, anywhere
-      </p>
+        <span class="mono">{contact.bookingNote}, or send an enquiry</span>
+        <a class="phone" href={telHref(contact.phone)}>
+          {contact.phone.replace(/ /g, ' ')}
+        </a>
+        <a class="email" href={`mailto:${contact.email}`}>
+          {contact.email}
+        </a>
+        <a href={`https://www.instagram.com/${contact.instagram}/`} target="_blank" rel="noopener">
+          Instagram @{contact.instagram}
+        </a>
+        <p class="addr">
+          In person: {location.address}
+          <br />
+          or online, anywhere
+        </p>
       </div>
     </div>
     <EnquiryForm />
   </div>
   <div class="wrap legal">
-    <span>© {year} {site.name} · Edinburgh</span>
+    <span>
+      © {year} {site.name} · Edinburgh
+    </span>
     <nav aria-label="Policies">
       <ul>
-        {policies.map((p) => <li><a href={href(`/${p.id}/`)}>{p.data.title}</a></li>)}
+        {policies.map((p) => (
+          <li>
+            <a href={href(`/${p.id}/`)}>{p.data.title}</a>
+          </li>
+        ))}
       </ul>
     </nav>
   </div>

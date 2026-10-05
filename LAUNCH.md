@@ -111,13 +111,13 @@ Peter's account needs to be a **Business or Creator** account. Check in Instagra
 
 ## Keys and accounts summary
 
-| What | Where it's used | Owner | Expires |
-| --- | --- | --- | --- |
-| GitHub repo | Code, preview hosting, admin | Jack (Peter as collaborator) | No |
-| Web3Forms access key | `src/data/site.json` | Peter's email | No |
-| Meta developer app | Instagram API | Jack | No |
-| `IG_ACCESS_TOKEN` | GitHub secret, Cloudflare env var | Peter's Instagram | 60 days, auto-refreshed weekly |
-| `GH_SECRETS_TOKEN` | GitHub secret | Jack | When set (max 1 year) |
-| Cloudflare account | DNS, hosting, optional Turnstile/Email Routing/Analytics | Jack or Peter | No |
-| Domain registration | rothwellsrunning.com | Peter | Yearly |
-| ICO registration | Privacy policy | Peter | Yearly |
+| What                 | Where it's used                                          | Owner                        | Expires                        |
+| -------------------- | -------------------------------------------------------- | ---------------------------- | ------------------------------ |
+| GitHub repo          | Code, preview hosting, admin                             | Jack (Peter as collaborator) | No                             |
+| Web3Forms access key | `src/data/site.json`                                     | Peter's email                | No                             |
+| Meta developer app   | Instagram API                                            | Jack                         | No                             |
+| `IG_ACCESS_TOKEN`    | GitHub secret, Cloudflare env var                        | Peter's Instagram            | 60 days, auto-refreshed weekly |
+| `GH_SECRETS_TOKEN`   | GitHub secret                                            | Jack                         | When set (max 1 year)          |
+| Cloudflare account   | DNS, hosting, optional Turnstile/Email Routing/Analytics | Jack or Peter                | No                             |
+| Domain registration  | rothwellsrunning.com                                     | Peter                        | Yearly                         |
+| ICO registration     | Privacy policy                                           | Peter                        | Yearly                         |

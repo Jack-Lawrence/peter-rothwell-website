@@ -47,7 +47,12 @@ const share = image ?? {
     <link rel="apple-touch-icon" href={href('/apple-touch-icon.png')} />
     <link rel="manifest" href={href('/site.webmanifest')} />
     <link rel="sitemap" href={href('/sitemap-index.xml')} />
-    <link rel="alternate" type="application/rss+xml" title={`${site.name}: training journal`} href={href('/journal/rss.xml')} />
+    <link
+      rel="alternate"
+      type="application/rss+xml"
+      title={`${site.name}: training journal`}
+      href={href('/journal/rss.xml')}
+    />
     <meta property="og:title" content={pageTitle} />
     <meta property="og:description" content={description} />
     <meta property="og:type" content={type} />
@@ -62,18 +67,16 @@ const share = image ?? {
     <meta name="theme-color" content="#1b211e" />
     {PREVIEW && <meta name="robots" content="noindex, nofollow" />}
     <slot name="head" />
-    {
-      PREVIEW && (
-        <script is:inline>
-          try {
-            if (sessionStorage.getItem('preview-hidden')) document.documentElement.classList.add('preview-hidden');
-          } catch {}
-        </script>
-      )
-    }
+    {PREVIEW && <script is:inline>
+      try {
+        if (sessionStorage.getItem('preview-hidden')) document.documentElement.classList.add('preview-hidden');
+      } catch {}
+    </script>}
   </head>
   <body>
-    <a class="skip" href="#main">Skip to content</a>
+    <a class="skip" href="#main">
+      Skip to content
+    </a>
     {PREVIEW && <PreviewBar />}
     <Header />
     <main id="main">

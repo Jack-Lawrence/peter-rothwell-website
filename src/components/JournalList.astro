@@ -32,59 +32,57 @@ const description = topicName
     <div class="wrap">
       <div class="section-head">
         <h1 class="display h2">{heading}</h1>
-        {page > 1 && <p class="mono pageno">Page {page} of {totalPages}</p>}
+        {page > 1 && (
+          <p class="mono pageno">
+            Page {page} of {totalPages}
+          </p>
+        )}
       </div>
 
-      {
-        topics.length > 1 && (
-          <nav class="topics" aria-label="Topics">
-            <a href={href('/journal/')} aria-current={!topic ? 'page' : undefined}>
-              All posts
+      {topics.length > 1 && (
+        <nav class="topics" aria-label="Topics">
+          <a href={href('/journal/')} aria-current={!topic ? 'page' : undefined}>
+            All posts
+          </a>
+          {topics.map((t) => (
+            <a href={href(`/journal/topic/${t.slug}/`)} aria-current={t.slug === topic ? 'page' : undefined}>
+              {t.name}
             </a>
-            {topics.map((t) => (
-              <a href={href(`/journal/topic/${t.slug}/`)} aria-current={t.slug === topic ? 'page' : undefined}>
-                {t.name}
-              </a>
-            ))}
-          </nav>
-        )
-      }
+          ))}
+        </nav>
+      )}
 
-      {
-        posts.length > 0 ? (
-          <div class="grid">
-            {posts.map((post) => (
-              <PostCard post={post} level="h2" />
-            ))}
-          </div>
-        ) : (
-          <p>No posts yet. Check back soon.</p>
-        )
-      }
+      {posts.length > 0 ? (
+        <div class="grid">
+          {posts.map((post) => (
+            <PostCard post={post} level="h2" />
+          ))}
+        </div>
+      ) : (
+        <p>No posts yet. Check back soon.</p>
+      )}
 
-      {
-        totalPages > 1 && (
-          <nav class="pager" aria-label="More posts">
-            {page > 1 ? (
-              <a class="btn btn--ghost" href={href(pagePath(page - 1))} rel="prev">
-                ← Newer posts
-              </a>
-            ) : (
-              <span />
-            )}
-            <span class="mono">
-              Page {page} of {totalPages}
-            </span>
-            {page < totalPages ? (
-              <a class="btn btn--ghost" href={href(pagePath(page + 1))} rel="next">
-                Older posts →
-              </a>
-            ) : (
-              <span />
-            )}
-          </nav>
-        )
-      }
+      {totalPages > 1 && (
+        <nav class="pager" aria-label="More posts">
+          {page > 1 ? (
+            <a class="btn btn--ghost" href={href(pagePath(page - 1))} rel="prev">
+              ← Newer posts
+            </a>
+          ) : (
+            <span />
+          )}
+          <span class="mono">
+            Page {page} of {totalPages}
+          </span>
+          {page < totalPages ? (
+            <a class="btn btn--ghost" href={href(pagePath(page + 1))} rel="next">
+              Older posts →
+            </a>
+          ) : (
+            <span />
+          )}
+        </nav>
+      )}
     </div>
   </section>
 </Base>

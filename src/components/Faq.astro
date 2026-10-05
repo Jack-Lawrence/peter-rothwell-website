@@ -11,22 +11,31 @@ const items = faq.map((f) => ({ ...f, html: baseLinks(marked.parseInline(f.answe
   <div class="wrap inner">
     <div class="head">
       <span class="mono accent">Before you get in touch</span>
-      <h2 id="faq-title" class="display h2">Questions</h2>
+      <h2 id="faq-title" class="display h2">
+        Questions
+      </h2>
     </div>
     <div class="list">
-      {
-        items.map((f) => (
-          <details>
-            <summary>
-              <span>{f.question}</span>
-              <svg class="chev" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true">
-                <path d="M6 9l6 6 6-6" />
-              </svg>
-            </summary>
-            <p set:html={f.html} />
-          </details>
-        ))
-      }
+      {items.map((f) => (
+        <details>
+          <summary>
+            <span>{f.question}</span>
+            <svg
+              class="chev"
+              width="22"
+              height="22"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.2"
+              aria-hidden="true"
+            >
+              <path d="M6 9l6 6 6-6" />
+            </svg>
+          </summary>
+          <p set:html={f.html} />
+        </details>
+      ))}
     </div>
   </div>
 </section>

@@ -40,40 +40,42 @@ function alt(caption?: string) {
     <div class="section-head">
       <div class="head">
         <span class="mono">Latest from Instagram</span>
-        <h2 id="insta-title" class="display h2">@{handle}</h2>
+        <h2 id="insta-title" class="display h2">
+          @{handle}
+        </h2>
       </div>
-      <a class="btn btn--ghost" href={profile} target="_blank" rel="noopener">Follow on Instagram</a>
+      <a class="btn btn--ghost" href={profile} target="_blank" rel="noopener">
+        Follow on Instagram
+      </a>
     </div>
     <ul class="grid">
-      {
-        posts.map((p) => (
-          <li>
-            <a href={p.permalink} target="_blank" rel="noopener">
-              <Photo class="tile" src={imageFor(p.image)} alt={alt(p.caption)} width={400} height={400} />
-            </a>
-          </li>
-        ))
-      }
-      {
-        demo.map((p) => (
-          <li>
-            <a href={profile} target="_blank" rel="noopener">
-              <Photo class="tile" src={p.image} alt={p.alt} width={400} height={400} />
-            </a>
-          </li>
-        ))
-      }
-      {
-        Array.from({ length: placeholders }, (_, i) => (
-          <li>
-            <a href={profile} target="_blank" rel="noopener" aria-label={`Instagram post ${i + 1} (placeholder)`}>
-              <Photo class="tile" />
-            </a>
-          </li>
-        ))
-      }
+      {posts.map((p) => (
+        <li>
+          <a href={p.permalink} target="_blank" rel="noopener">
+            <Photo class="tile" src={imageFor(p.image)} alt={alt(p.caption)} width={400} height={400} />
+          </a>
+        </li>
+      ))}
+      {demo.map((p) => (
+        <li>
+          <a href={profile} target="_blank" rel="noopener">
+            <Photo class="tile" src={p.image} alt={p.alt} width={400} height={400} />
+          </a>
+        </li>
+      ))}
+      {Array.from({ length: placeholders }, (_, i) => (
+        <li>
+          <a href={profile} target="_blank" rel="noopener" aria-label={`Instagram post ${i + 1} (placeholder)`}>
+            <Photo class="tile" />
+          </a>
+        </li>
+      ))}
     </ul>
-    {demo.length > 0 && <p class="demo-note">Preview: this grid fills with Peter's latest Instagram posts automatically once connected.</p>}
+    {demo.length > 0 && (
+      <p class="demo-note">
+        Preview: this grid fills with Peter's latest Instagram posts automatically once connected.
+      </p>
+    )}
   </div>
 </section>
 

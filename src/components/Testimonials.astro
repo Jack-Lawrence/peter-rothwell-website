@@ -5,13 +5,35 @@ import testimonials from '../data/testimonials.json';
 <section class="section reviews" aria-labelledby="reviews-title">
   <div class="wrap">
     <div class="section-head">
-      <h2 id="reviews-title" class="display h2">From the athletes</h2>
+      <h2 id="reviews-title" class="display h2">
+        From the athletes
+      </h2>
       <div class="controls" data-controls hidden>
         <button class="arrow" type="button" data-prev aria-label="Previous reviews">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M15 5l-7 7 7 7"></path></svg>
+          <svg
+            width="22"
+            height="22"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.2"
+            aria-hidden="true"
+          >
+            <path d="M15 5l-7 7 7 7"></path>
+          </svg>
         </button>
         <button class="arrow" type="button" data-next aria-label="Next reviews">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M9 5l7 7-7 7"></path></svg>
+          <svg
+            width="22"
+            height="22"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.2"
+            aria-hidden="true"
+          >
+            <path d="M9 5l7 7-7 7"></path>
+          </svg>
         </button>
       </div>
     </div>
@@ -19,27 +41,30 @@ import testimonials from '../data/testimonials.json';
     <!-- role="list" is deliberate: Safari drops list semantics from unstyled lists. -->
     <!-- [html-validate-disable-next no-redundant-role] -->
     <ul class="track" data-track role="list" aria-label="Client reviews">
-      {
-        testimonials.map((t) => (
-          <li class="item">
-            <figure>
-              <blockquote class="bubble">
-                <svg class="quote-mark" width="34" height="26" viewBox="0 0 34 26" aria-hidden="true">
-                  <path d="M0 26V15C0 6.7 4.4 1.7 13.2 0l1.6 3.6C9.9 5.1 7.6 8 7.4 12H14v14H0zm19 0V15C19 6.7 23.4 1.7 32.2 0l1.6 3.6c-4.9 1.5-7.2 4.4-7.4 8.4H33v14H19z" fill="currentColor"></path>
-                </svg>
-                <p>{t.quote}</p>
-              </blockquote>
-              <figcaption class="who">
-                <span class="avatar" aria-hidden="true">{t.name.charAt(0)}</span>
-                <span class="who-text">
-                  <b>{t.name}</b>
-                  <span class="mono">{t.service}</span>
-                </span>
-              </figcaption>
-            </figure>
-          </li>
-        ))
-      }
+      {testimonials.map((t) => (
+        <li class="item">
+          <figure>
+            <blockquote class="bubble">
+              <svg class="quote-mark" width="34" height="26" viewBox="0 0 34 26" aria-hidden="true">
+                <path
+                  d="M0 26V15C0 6.7 4.4 1.7 13.2 0l1.6 3.6C9.9 5.1 7.6 8 7.4 12H14v14H0zm19 0V15C19 6.7 23.4 1.7 32.2 0l1.6 3.6c-4.9 1.5-7.2 4.4-7.4 8.4H33v14H19z"
+                  fill="currentColor"
+                ></path>
+              </svg>
+              <p>{t.quote}</p>
+            </blockquote>
+            <figcaption class="who">
+              <span class="avatar" aria-hidden="true">
+                {t.name.charAt(0)}
+              </span>
+              <span class="who-text">
+                <b>{t.name}</b>
+                <span class="mono">{t.service}</span>
+              </span>
+            </figcaption>
+          </figure>
+        </li>
+      ))}
     </ul>
   </div>
 </section>
@@ -103,7 +128,10 @@ import testimonials from '../data/testimonials.json';
     display: grid;
     place-items: center;
     cursor: pointer;
-    transition: background-color 0.15s ease, color 0.15s ease, opacity 0.15s ease;
+    transition:
+      background-color 0.15s ease,
+      color 0.15s ease,
+      opacity 0.15s ease;
   }
   .arrow:hover:not(:disabled) {
     background: var(--gorse);

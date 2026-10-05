@@ -6,18 +6,18 @@ Paste one prompt into a new Claude Code session opened in this folder. Project c
 
 Run them in this order: later prompts assume earlier ones are done. Prompts 7 to 9 can run in any order.
 
-| # | Prompt | Why it matters for the client demo |
-| --- | --- | --- |
-| 1 | GitHub preview with preview protection | Gives Peter a link to look at |
-| 2 | SEO foundations | Proper share previews when the link is sent on WhatsApp |
-| 3 | Image pipeline | Photos won't slow the site down |
-| 4 | Demo photos | The site looks finished instead of full of grey boxes |
-| 5 | Preview demo modes | The form and Instagram grid can be tried out |
-| 6 | Admin area with demo mode | Peter can try editing his own site |
-| 7 | "How it works" and FAQ | Answers questions before people enquire |
-| 8 | Journal improvements | The blog feels complete |
-| 9 | Automated checks | Nothing breaks unnoticed as changes are made |
-| 10 | Accessibility review | Final pass once everything above is in |
+| #   | Prompt                                 | Why it matters for the client demo                      |
+| --- | -------------------------------------- | ------------------------------------------------------- |
+| 1   | GitHub preview with preview protection | Gives Peter a link to look at                           |
+| 2   | SEO foundations                        | Proper share previews when the link is sent on WhatsApp |
+| 3   | Image pipeline                         | Photos won't slow the site down                         |
+| 4   | Demo photos                            | The site looks finished instead of full of grey boxes   |
+| 5   | Preview demo modes                     | The form and Instagram grid can be tried out            |
+| 6   | Admin area with demo mode              | Peter can try editing his own site                      |
+| 7   | "How it works" and FAQ                 | Answers questions before people enquire                 |
+| 8   | Journal improvements                   | The blog feels complete                                 |
+| 9   | Automated checks                       | Nothing breaks unnoticed as changes are made            |
+| 10  | Accessibility review                   | Final pass once everything above is in                  |
 
 Still for after launch (see AUDIT.md prompt 5 and LAUNCH.md): connecting Web3Forms, the Instagram token, the move to Cloudflare, Turnstile, Email Routing and analytics.
 

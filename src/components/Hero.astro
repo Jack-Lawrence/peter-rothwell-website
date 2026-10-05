@@ -12,12 +12,18 @@ const last = headline.length - 1;
   <div class="copy">
     <span class="mono accent">{eyebrow}</span>
     <h1 class="display">
-      {headline.map((line, i) => <span class:list={['line', { accent: i === last }]}>{line}</span>)}
+      {headline.map((line, i) => (
+        <span class:list={['line', { accent: i === last }]}>{line}</span>
+      ))}
     </h1>
     <p class="intro">{intro}</p>
     <div class="ctas">
-      <a class="btn" href={href('/#coaching')}>See coaching plans</a>
-      <a class="btn btn--ghost" href={href('/#runclub')}>Join the Run Club</a>
+      <a class="btn" href={href('/#coaching')}>
+        See coaching plans
+      </a>
+      <a class="btn btn--ghost" href={href('/#runclub')}>
+        Join the Run Club
+      </a>
     </div>
   </div>
 
@@ -28,15 +34,14 @@ const last = headline.length - 1;
     position="80% 50%"
     priority
     sizes="(max-width: 900px) 100vw, min(37vw, 450px)"
-    label="Peter on a hill trail, mid-run. Full-bleed, high-contrast action shot.">
-    {
-      badge.value && (
-        <div class="badge">
-          <span class="mono">{badge.label}</span>
-          <span class="display">{badge.value}</span>
-        </div>
-      )
-    }
+    label="Peter on a hill trail, mid-run. Full-bleed, high-contrast action shot."
+  >
+    {badge.value && (
+      <div class="badge">
+        <span class="mono">{badge.label}</span>
+        <span class="display">{badge.value}</span>
+      </div>
+    )}
   </Photo>
 </section>
 
