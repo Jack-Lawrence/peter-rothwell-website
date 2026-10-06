@@ -20,9 +20,3 @@ the Instagram squares).
 | cover-ultra.jpg | [Lucas Canino](https://unsplash.com/@lcanino) | https://unsplash.com/photos/a-group-of-people-hiking-up-a-mountain-lUNh8-Zhqo4 | Unsplash Licence |
 | hero-2.jpg (cover-ultra.jpg cropped to 1080 × 1350) | [Lucas Canino](https://unsplash.com/@lcanino) | https://unsplash.com/photos/a-group-of-people-hiking-up-a-mountain-lUNh8-Zhqo4 | Unsplash Licence |
 | cover-fuel.jpg | [Eiliv Aceron](https://unsplash.com/@shootdelicious) | https://unsplash.com/photos/a-bowl-of-cereal-with-milk-and-fruit-NI8MeJiAN3I | Unsplash Licence |
-| insta-1.jpg | [NHP&Co](https://unsplash.com/@nhpandco) | https://unsplash.com/photos/a-couple-of-people-that-are-running-in-the-dirt-UM6oufXjMa8 | Unsplash Licence |
-| insta-2.jpg | [Alessio Soggetti](https://unsplash.com/@asoggetti) | https://unsplash.com/photos/man-running-on-the-mountain-GYr9A2CPMhY | Unsplash Licence |
-| insta-3.jpg | [Nathan Dumlao](https://unsplash.com/@nate_dumlao) | https://unsplash.com/photos/red-and-silver-dumbbell-on-black-surface-jlf9QyI250Y | Unsplash Licence |
-| insta-4.jpg | [Michael Oldach](https://unsplash.com/@mcoldach) | https://unsplash.com/photos/a-man-running-on-a-trail-in-the-mountains-T3Mj9MRLB8M | Unsplash Licence |
-| insta-5.jpg | [Sergio Kian](https://unsplash.com/@sergiokian) | https://unsplash.com/photos/a-man-and-a-woman-working-out-in-a-gym-G6svDyPVRrc | Unsplash Licence |
-| insta-6.jpg | [Miguel A Amutio](https://unsplash.com/@amutiomi) | https://unsplash.com/photos/people-running-on-gray-asphalt-road-during-daytime-QDv-uBc-poY | Unsplash Licence |

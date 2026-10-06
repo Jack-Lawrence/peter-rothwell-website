@@ -15,7 +15,7 @@ const minutes = readingTime(post);
 // The link is named by the title alone; the date and topic are its description.
 const titleId = `post-${post.id}-title`;
 const metaId = `post-${post.id}-meta`;
-const { title, topic, date, cover, sample } = post.data;
+const { title, topic, date, cover } = post.data;
 const dateLabel = date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
 ---
 
@@ -31,7 +31,6 @@ const dateLabel = date.toLocaleDateString('en-GB', { day: 'numeric', month: 'sho
     {!cover && <span class="mono ph">Cover image</span>}
   </Photo>
   <span class="mono meta" id={metaId}>
-    {sample && 'Sample · '}
     {topic} · <time datetime={date.toISOString()}>{dateLabel}</time> · {minutes}
   </span>
   <Heading class="post-title" id={titleId}>
