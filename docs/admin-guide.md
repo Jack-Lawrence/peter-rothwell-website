@@ -35,7 +35,7 @@ To sign out (for example on a shared computer), press **Sign out** in the menu.
 
 1. On the home screen, press **Write a blog post**.
 2. Type a **title**.
-3. Add a **cover photo**: drag one in, or press **choose from your phone or computer**. Then write a few words to **describe the photo** for people who can't see it.
+3. Add a **cover photo**: drag one in, or press **choose a photo** and pick one of your photos (or **Upload a new photo** from your phone or computer). Then write a few words to **describe the photo** for people who can't see it.
 4. Write your post in the big box. The buttons above it:
    - **Heading** and **Small heading**: make the line you're on a heading. Press again to undo.
    - **B** and **I**: bold and italic. Select some words first (or press the button, then type).
@@ -100,7 +100,7 @@ Go to **Photos**. There are two places:
 
 To add or change one:
 
-1. Press **+ Add a photo** (or **Replace photo**) and choose a photo from your phone or computer.
+1. Press **+ Add a photo** (or **Replace photo**). Pick one of your photos, or press **Upload a new photo** to choose one from your phone or computer. Photos you upload are kept with your photos, so you can use them again later.
 2. Drag the photo to move it, and use the **Zoom** slider to zoom in, until the box shows the part you want. For the top of the home page, keep the important part inside the dashed lines: on some screens the very top and bottom are trimmed a little.
 3. Press **Use this photo**, then describe the photo in a few words (for people who can't see it).
 4. Press **Save photos**.

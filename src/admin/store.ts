@@ -20,8 +20,8 @@ export interface Store {
   read(path: string): Promise<string | null>;
   /** Names of the files in a folder. */
   list(dir: string): Promise<string[]>;
-  /** A URL the browser can show for an image in the repo, or null. */
-  imageUrl(path: string): Promise<string | null>;
+  /** A URL the browser can show for an image in the repo, or null. `full` asks for the full-size photo, not a preview. */
+  imageUrl(path: string, full?: boolean): Promise<string | null>;
   commit(changes: Change[], message: string): Promise<void>;
 }
 
@@ -29,6 +29,8 @@ export interface Baked {
   files: Record<string, string>;
   /** Built preview URLs for images already in the repo. */
   images: Record<string, string>;
+  /** Built full-size URLs for the photo library. */
+  originals: Record<string, string>;
 }
 
 /** Friendly error for the UI. */
@@ -74,6 +76,14 @@ export function demoStore(baked: Baked): Store {
     }
     return all;
   };
+  const images = () => {
+    const all: Record<string, string> = { ...baked.images };
+    for (const [path, url] of Object.entries(overlay.images)) {
+      if (url === null) delete all[path];
+      else all[path] = url;
+    }
+    return all;
+  };
 
   return {
     mode: 'demo',
@@ -82,13 +92,13 @@ export function demoStore(baked: Baked): Store {
     },
     async list(dir) {
       const prefix = dir.replace(/\/?$/, '/');
-      return Object.keys(files())
+      return [...Object.keys(files()), ...Object.keys(images())]
         .filter((p) => p.startsWith(prefix) && !p.slice(prefix.length).includes('/'))
         .map((p) => p.slice(prefix.length));
     },
-    async imageUrl(path) {
+    async imageUrl(path, full = false) {
       if (path in overlay.images) return overlay.images[path];
-      return baked.images[path] ?? null;
+      return (full && baked.originals[path]) || baked.images[path] || null;
     },
     async commit(changes) {
       const next: DemoOverlay = structuredClone(overlay);

@@ -15,16 +15,20 @@
     },
     "photos": [
       {
-        "image": "src/assets/demo/hero-1.jpg",
-        "alt": "A runner in a red top running along a dark riverside path"
+        "image": "src/assets/photos/hero-helvellyn-sky-ultra.webp",
+        "alt": "Peter running towards the camera with poles in hand during the Helvellyn Sky Ultra"
       },
       {
-        "image": "src/assets/demo/hero-2.jpg",
-        "alt": "Three trail runners heading up a grassy ridge below rocky mountains"
+        "image": "src/assets/photos/hero-deadly-dozen-lunge.webp",
+        "alt": "Peter doing a dumbbell lunge at the Deadly Dozen fitness race in Edinburgh"
       },
       {
-        "image": "src/assets/demo/hero-3.jpg",
-        "alt": "A lifter in a red top holding a loaded barbell at the top of a deadlift"
+        "image": "src/assets/photos/hero-marbella-epic-trail.webp",
+        "alt": "Peter climbing a rocky trail with poles at dusk in the Marbella Epic Trail"
+      },
+      {
+        "image": "src/assets/photos/hero-helvellyn-scramble.webp",
+        "alt": "Peter scrambling up a rocky ridge in the Lake District during the Helvellyn Sky Ultra"
       }
     ]
   },
@@ -36,8 +40,8 @@
     ],
     "stats": [],
     "photo": {
-      "image": "src/assets/demo/portrait.jpg",
-      "alt": "A runner in a white vest looking out over the hills, seen from behind"
+      "image": "src/assets/photos/portrait-climbing-ledge.webp",
+      "alt": "Peter smiling in a climbing helmet on a rocky ledge high in the mountains"
     }
   },
   "contact": {

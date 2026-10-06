@@ -1,12 +1,14 @@
 ---
 import Photo from './Photo.astro';
-import portrait from '../assets/demo/portrait.jpg';
 import site from '../data/site.json';
+import { photoFor, type SitePhoto } from '../lib/photos';
 
-const { name, paragraphs, stats } = site.about as {
+// The photo is set in the admin area, already cropped square.
+const { name, paragraphs, stats, photo } = site.about as {
   name: string;
   paragraphs: string[];
   stats: { value: string; label: string }[];
+  photo?: SitePhoto;
 };
 ---
 
@@ -14,9 +16,8 @@ const { name, paragraphs, stats } = site.about as {
   <div class="wrap about">
     <Photo
       class="portrait"
-      src={portrait}
-      alt="A runner in a white vest looking out over the hills, seen from behind"
-      position="50% 35%"
+      src={photoFor(photo?.image)}
+      alt={photo?.alt}
       sizes="(max-width: 900px) 100vw, min(42vw, 510px)"
       label="Portrait of Peter, ideally at a race finish or on a summit."
     />

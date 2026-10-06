@@ -59,6 +59,7 @@ const PATHS = {
   legal: 'src/content/legal',
   journalImages: 'src/assets/journal',
   photos: 'src/assets/photos',
+  library: 'src/assets/library',
   theme: 'src/data/theme.json',
 };
 const MODE_KEY = 'rr-admin-mode';
@@ -533,6 +534,12 @@ async function postEditor(slugArg: string) {
   // Cover photo
   const coverImg = h('img', { alt: '' });
   const fileInput = h('input', { type: 'file', accept: 'image/*', class: 'visually-hidden', id: 'cover-file' });
+  // One of Peter's photos from the library, or a new one from his device.
+  const chooseCover = (async () => {
+    const choice = await chooseFromLibrary();
+    if (choice === 'upload') fileInput.click();
+    else if (choice) takeCover(choice);
+  }) as EventListener;
   const dropText = h(
     'div',
     { class: 'drop-text' },
@@ -540,14 +547,14 @@ async function postEditor(slugArg: string) {
       'b',
       {},
       'Drag a photo here, or ',
-      h('label', { for: 'cover-file', class: 'link' }, 'choose from your phone or computer'),
+      h('button', { type: 'button', class: 'link', onclick: chooseCover }, 'choose a photo'),
     ),
     h('span', { class: 'hint' }, 'We resize it for you. Landscape photos work best.'),
   );
   const coverActions = h(
     'div',
     { class: 'cover-actions' },
-    h('label', { for: 'cover-file', class: 'btn btn--small' }, 'Change photo'),
+    h('button', { type: 'button', class: 'btn btn--small', onclick: chooseCover }, 'Change photo'),
     h(
       'button',
       {
@@ -1385,6 +1392,97 @@ interface SitePhoto {
   alt: string;
 }
 const MAX_HERO_PHOTOS = 6;
+const IMAGE_TYPES: Record<string, string> = {
+  jpg: 'image/jpeg',
+  jpeg: 'image/jpeg',
+  png: 'image/png',
+  webp: 'image/webp',
+};
+
+/**
+ * Peter's photo library (src/assets/library): full-size photos to pick from for
+ * any photo spot. Resolves with the chosen photo, 'upload' to choose one from his
+ * device instead (straight away if the library is empty), or null if cancelled.
+ */
+async function chooseFromLibrary(): Promise<File | 'upload' | null> {
+  let names: string[] = [];
+  try {
+    names = (await store!.list(PATHS.library)).filter((n) => /\.(jpe?g|png|webp)$/i.test(n)).sort();
+  } catch {
+    /* can't read the library: uploading still works */
+  }
+  if (!names.length) return 'upload';
+
+  const label = (name: string) => name.replace(/\.[^.]*$/, '').replace(/-/g, ' ');
+  let chosen = '';
+  const dlg = h(
+    'dialog',
+    { class: 'dlg dlg--library', 'aria-labelledby': 'library-title' },
+    h('h2', { id: 'library-title' }, 'Choose a photo'),
+    h('p', {}, 'Pick one of your photos, or upload a new one from your phone or computer.'),
+    h(
+      'div',
+      { class: 'library-grid' },
+      names.map((name) => {
+        const img = h('img', { alt: '', loading: 'lazy' });
+        store!.imageUrl(`${PATHS.library}/${name}`).then((url) => (img.src = url ?? ''));
+        return h(
+          'button',
+          {
+            type: 'button',
+            class: 'library-pick',
+            'aria-label': `Use ${label(name)}`,
+            title: label(name),
+            onclick: (() => {
+              chosen = name;
+              dlg.close('pick');
+            }) as EventListener,
+          },
+          img,
+        );
+      }),
+    ),
+    h(
+      'div',
+      { class: 'dlg-actions' },
+      h('button', { type: 'button', class: 'btn', onclick: (() => dlg.close('')) as EventListener }, 'Cancel'),
+      h(
+        'button',
+        { type: 'button', class: 'btn btn--primary', onclick: (() => dlg.close('upload')) as EventListener },
+        'Upload a new photo',
+      ),
+    ),
+  );
+  const answer = await new Promise<string>((resolve) => {
+    dlg.addEventListener('close', () => {
+      resolve(dlg.returnValue);
+      dlg.remove();
+    });
+    document.body.append(dlg);
+    dlg.showModal();
+  });
+  if (answer === 'upload') return 'upload';
+  if (answer !== 'pick') return null;
+
+  // The full-size photo, so it can be cropped sharply. It can take a few seconds.
+  toast('Opening photo…');
+  const url = await store!.imageUrl(`${PATHS.library}/${chosen}`, true);
+  const blob = url
+    ? await fetch(url)
+        .then((r) => (r.ok ? r.blob() : null))
+        .catch(() => null)
+    : null;
+  if (!blob) {
+    await dialog(
+      'That photo can’t be opened',
+      [h('p', {}, 'Something went wrong loading that photo. Please try again in a minute.')],
+      [{ label: 'OK', value: 'ok', primary: true }],
+    );
+    return null;
+  }
+  const type = IMAGE_TYPES[chosen.split('.').pop()!.toLowerCase()];
+  return new File([blob], chosen, { type });
+}
 
 async function photosScreen() {
   const site = await readJson<{
@@ -1394,30 +1492,40 @@ async function photosScreen() {
   const summary = errorSummary();
 
   // A photo already on the site (path) or a newly cropped one (data), waiting to be saved.
-  type Pic = { path: string; data: string; alt: Field; box: HTMLElement; img: HTMLImageElement };
+  // `upload` is the photo Peter chose from his device, added to his photo library on save.
+  type Pic = { path: string; data: string; upload?: File; alt: Field; box: HTMLElement; img: HTMLImageElement };
 
-  const pick = (slot: Slot, onPicked: (data: string) => void) => {
-    const input = h('input', { type: 'file', accept: 'image/*', class: 'visually-hidden' });
-    input.addEventListener('change', async () => {
-      const file = input.files?.[0];
-      input.remove();
-      if (!file) return;
-      try {
-        const data = await cropPhoto(file, slot);
-        if (data) {
-          onPicked(data);
-          setDirty(true);
-        }
-      } catch (err) {
-        await dialog(
-          'That photo can’t be used',
-          [h('p', {}, err instanceof PhotoError ? err.message : 'Something went wrong opening that photo.')],
-          [{ label: 'OK', value: 'ok', primary: true }],
-        );
-      }
+  const chooseFile = () =>
+    new Promise<File | null>((resolve) => {
+      const input = h('input', { type: 'file', accept: 'image/*', class: 'visually-hidden' });
+      const done = () => {
+        resolve(input.files?.[0] ?? null);
+        input.remove();
+      };
+      input.addEventListener('change', done);
+      input.addEventListener('cancel', done);
+      document.body.append(input);
+      input.click();
     });
-    document.body.append(input);
-    input.click();
+
+  const pick = async (slot: Slot, onPicked: (data: string, upload?: File) => void) => {
+    const choice = await chooseFromLibrary();
+    if (!choice) return;
+    const file = choice === 'upload' ? await chooseFile() : choice;
+    if (!file) return;
+    try {
+      const data = await cropPhoto(file, slot);
+      if (data) {
+        onPicked(data, choice === 'upload' ? file : undefined);
+        setDirty(true);
+      }
+    } catch (err) {
+      await dialog(
+        'That photo can’t be used',
+        [h('p', {}, err instanceof PhotoError ? err.message : 'Something went wrong opening that photo.')],
+        [{ label: 'OK', value: 'ok', primary: true }],
+      );
+    }
   };
 
   const showPic = async (pic: Pic) => {
@@ -1450,8 +1558,9 @@ async function photosScreen() {
         type: 'button',
         class: 'btn btn--small',
         onclick: (() =>
-          pick(slot, (data) => {
+          pick(slot, (data, upload) => {
             pic.data = data;
+            pic.upload = upload;
             showPic(pic);
           })) as EventListener,
       },
@@ -1467,9 +1576,10 @@ async function photosScreen() {
       type: 'button',
       class: 'btn',
       onclick: (() =>
-        pick(SLOTS.hero, (data) => {
+        pick(SLOTS.hero, (data, upload) => {
           const pic = heroPic(undefined);
           pic.data = data;
+          pic.upload = upload;
           showPic(pic);
           heroPics.push(pic);
           drawHero();
@@ -1532,17 +1642,23 @@ async function photosScreen() {
         if (!errors.show()) return;
 
         // New photos get their own file; uploaded photos no longer used are deleted.
+        // Photos from Peter's device also go in his photo library, uncropped, to use again later.
         const stamp = Date.now().toString(36);
         const changes: Change[] = [];
-        const keep = (pic: Pic, name: string): SitePhoto => {
+        const keep = async (pic: Pic, name: string): Promise<SitePhoto> => {
           const alt = pic.alt.input.value.trim();
           if (!pic.data) return { image: pic.path, alt };
           const path = `${PATHS.photos}/${name}-${stamp}.jpg`;
           changes.push({ path, image: pic.data });
+          if (pic.upload) {
+            const original = `${PATHS.library}/${slugify(pic.upload.name.replace(/.[^.]*$/, '')) || 'photo'}-${name}-${stamp}.jpg`;
+            changes.push({ path: original, image: await resizePhoto(pic.upload) });
+          }
           return { image: path, alt };
         };
-        const heroPhotos = heroPics.map((p, i) => keep(p, `hero-${i + 1}`));
-        const portraitPhoto = keep(portrait, 'portrait');
+        const heroPhotos: SitePhoto[] = [];
+        for (const [i, p] of heroPics.entries()) heroPhotos.push(await keep(p, `hero-${i + 1}`));
+        const portraitPhoto = await keep(portrait, 'portrait');
         const used = new Set([...heroPhotos, portraitPhoto].map((p) => p.image));
         const before = [...(site.hero.photos ?? []), ...(site.about.photo ? [site.about.photo] : [])];
         for (const old of before) {

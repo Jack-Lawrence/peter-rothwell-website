@@ -21,16 +21,19 @@ const raw = import.meta.glob<string>(['/src/data/*.json', '/src/content/journal/
 const files = Object.fromEntries(Object.entries(raw).map(([path, text]) => [path.slice(1), text]));
 
 // Small previews of the photos already on the site, so the editor can show them.
-const photos = import.meta.glob<ImageMetadata>('/src/assets/{demo,journal,photos}/*.{jpg,jpeg,png,webp}', {
+const photos = import.meta.glob<ImageMetadata>('/src/assets/{demo,journal,photos,library}/*.{jpg,jpeg,png,webp}', {
   import: 'default',
   eager: true,
 });
 const images: Record<string, string> = {};
+// Full-size library photos, so demo mode can crop them for a slot.
+const originals: Record<string, string> = {};
 for (const [path, image] of Object.entries(photos)) {
   images[path.slice(1)] = (await getImage({ src: image, width: 1000, format: 'webp' })).src;
+  if (path.startsWith('/src/assets/library/')) originals[path.slice(1)] = image.src;
 }
 
-const config = { repo: ADMIN_REPO, preview: PREVIEW, siteUrl: absolute('/'), baked: { files, images } };
+const config = { repo: ADMIN_REPO, preview: PREVIEW, siteUrl: absolute('/'), baked: { files, images, originals } };
 const json = JSON.stringify(config).replace(/</g, '\u003c');
 
 const nav = [
