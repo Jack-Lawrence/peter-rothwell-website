@@ -483,6 +483,10 @@ async function postsList() {
 const AUTOSAVE = 'rr-admin-autosave:';
 const mdToRepo = (p: string) => `src/${p.replace(/^(\.\.\/)+/, '')}`;
 
+/** A front matter date as YYYY-MM-DD, whether it was read as text or as a date. */
+const isoDate = (value: unknown) =>
+  value instanceof Date ? value.toISOString().slice(0, 10) : String(value ?? '').slice(0, 10);
+
 interface Draft {
   title: string;
   topic: string;
@@ -491,6 +495,8 @@ interface Draft {
   coverPath: string;
   coverData: string;
   coverAlt: string;
+  /** Older autosaves have no date. */
+  date?: string;
   savedAt: number;
 }
 
@@ -525,6 +531,14 @@ async function postEditor(slugArg: string) {
   );
   const topicInput = textInput(String(front.topic ?? ''), { list: 'topics', maxlength: 30 });
   const topic = field('Topic', topicInput, 'Pick one you used before, or type a new one.');
+  // The date shown on the post. Today for a new post; an earlier date for posts
+  // brought over from the old website, so they keep their original dates.
+  const storedDate = isoDate(front.date);
+  const postDate = field(
+    'Date',
+    h('input', { type: 'date', value: storedDate || today(), max: today() }),
+    'Shown on the post. Change it to add an older post with its original date.',
+  );
   const coverAlt = field(
     'Describe the photo',
     textInput(String(front.coverAlt ?? ''), { maxlength: 160 }),
@@ -661,6 +675,7 @@ async function postEditor(slugArg: string) {
     coverPath,
     coverData,
     coverAlt: coverAlt.input.value,
+    date: postDate.input.value,
     savedAt: Date.now(),
   });
   function changed() {
@@ -688,7 +703,7 @@ async function postEditor(slugArg: string) {
     if (!document.body.contains(autosaveNote)) clearInterval(noteTimer);
     else updateAutosaveNote();
   }, 30_000);
-  [title, excerpt, topic, coverAlt].forEach((f) => f.input.addEventListener('input', changed));
+  [title, excerpt, topic, coverAlt, postDate].forEach((f) => f.input.addEventListener('input', changed));
 
   // Restore an autosaved draft
   let restoredNote: HTMLElement | null = null;
@@ -703,6 +718,7 @@ async function postEditor(slugArg: string) {
       coverPath = d.coverPath;
       coverData = d.coverData;
       coverAlt.input.value = d.coverAlt;
+      if (d.date) postDate.input.value = d.date;
       autosavedAt = d.savedAt;
       updateAutosaveNote();
       setDirty(true);
@@ -735,6 +751,9 @@ async function postEditor(slugArg: string) {
   function validate(publishing: boolean) {
     const errors = new Errors(summary);
     if (!title.input.value.trim()) errors.add(title, 'Give your post a title.');
+    if (!postDate.input.value) errors.add(postDate, 'Choose the date for your post.');
+    else if (postDate.input.value > today())
+      errors.add(postDate, 'That date is in the future. Choose today or earlier.');
     if (publishing) {
       if (!excerpt.input.value.trim()) errors.add(excerpt, 'Write a short summary (one or two sentences).');
       if (!topic.input.value.trim()) errors.add(topic, 'Choose a topic, for example "Strength".');
@@ -773,7 +792,7 @@ async function postEditor(slugArg: string) {
     }
     const data: Front = {
       title: title.input.value.trim(),
-      date: String(front.date ?? '') || today(),
+      date: postDate.input.value || today(),
       topic: topic.input.value.trim(),
       excerpt: excerpt.input.value.trim(),
       cover: coverPath,
@@ -781,8 +800,8 @@ async function postEditor(slugArg: string) {
       draft: draft || '',
       sample: front.sample === true || '',
     };
-    // A draft published for the first time gets today's date.
-    if (!draft && front.draft === true) data.date = today();
+    // A draft published for the first time gets today's date, unless a date was chosen for it.
+    if (!draft && front.draft === true && postDate.input.value === storedDate) data.date = today();
     changes.push({
       path: `${PATHS.journal}/${finalSlug}.md`,
       text: stringifyDoc(data, htmlToMarkdown(rich.getHTML())),
@@ -888,6 +907,7 @@ async function postEditor(slugArg: string) {
         'div',
         { class: 'box' },
         topic.wrap,
+        postDate.wrap,
         excerpt.wrap,
         h(
           'datalist',
@@ -954,11 +974,7 @@ async function postEditor(slugArg: string) {
       h(
         'article',
         { class: 'site-post' },
-        h(
-          'p',
-          { class: 'mono' },
-          `${topic.input.value || 'Topic'} · ${formatDate(String(front.date ?? '') || today())}`,
-        ),
+        h('p', { class: 'mono' }, `${topic.input.value || 'Topic'} · ${formatDate(postDate.input.value || today())}`),
         h('h1', { class: 'display' }, title.input.value || 'Your title'),
         h('p', { class: 'excerpt' }, excerpt.input.value),
         coverImg.src && !coverImg.hidden && h('img', { class: 'cover', src: coverImg.src, alt: coverAlt.input.value }),

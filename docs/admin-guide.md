@@ -47,7 +47,7 @@ To sign out (for example on a shared computer), press **Sign out** in the menu.
 
    A button stays dark while it's switched on where your cursor is, e.g. **B** inside bold words.
 
-5. On the right (or below, on a phone), choose a **topic** and write a **short summary** of one or two sentences.
+5. On the right (or below, on a phone), choose a **topic** and write a **short summary** of one or two sentences. The **date** is today unless you change it; set an earlier date when you're adding an older post (for example one from the old website) so it keeps its original date.
 6. Press **Preview** to see how it will look.
 7. Press **Publish now**. It appears on your website in about a minute.
 
