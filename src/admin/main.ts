@@ -28,6 +28,7 @@ import { parseDoc, stringifyDoc, markdownToHtml, htmlToMarkdown, wordCount, slug
 import { resizePhoto } from './images';
 import { createRichEditor } from './rich-editor';
 import { cropPhoto, PhotoError } from './cropper';
+import { textGroup, setPath } from './text-fields';
 import { SLOTS, type Slot } from '../lib/slots';
 import {
   checkPalette,
@@ -61,6 +62,7 @@ const PATHS = {
   photos: 'src/assets/photos',
   library: 'src/assets/library',
   theme: 'src/data/theme.json',
+  faq: 'src/data/faq.json',
 };
 const MODE_KEY = 'rr-admin-mode';
 
@@ -238,11 +240,31 @@ function renderChrome() {
   }
 }
 
+// Screens reached from "Your website", which stays highlighted in the menu while on them.
+const WEBSITE_ROUTES = [
+  'menu',
+  'hero',
+  'week',
+  'prices',
+  'runclub',
+  'about',
+  'testimonials',
+  'instagram',
+  'journal',
+  'faq',
+  'getintouch',
+];
+
 function markNav(hash: string) {
+  const name = hash.match(/^#\/([a-z]*)/)?.[1] ?? '';
   document.querySelectorAll<HTMLAnchorElement>('.side-nav a').forEach((a) => {
     const target = a.getAttribute('href')!;
     const on =
-      target === '#/' ? hash === '#/' : hash.startsWith(target) || (target === '#/posts' && hash.startsWith('#/post/'));
+      target === '#/'
+        ? hash === '#/'
+        : hash.startsWith(target) ||
+          (target === '#/posts' && hash.startsWith('#/post/')) ||
+          (target === '#/website' && WEBSITE_ROUTES.includes(name));
     if (on) a.setAttribute('aria-current', 'page');
     else a.removeAttribute('aria-current');
   });
@@ -289,8 +311,15 @@ async function route() {
       '': dashboard,
       posts: postsList,
       post: postEditor,
+      website: websiteScreen,
+      menu: menuScreen,
+      hero: heroScreen,
       prices: pricesScreen,
       runclub: runClubScreen,
+      about: aboutScreen,
+      journal: journalScreen,
+      faq: faqScreen,
+      getintouch: getInTouchScreen,
       testimonials: testimonialsScreen,
       week: weekScreen,
       contact: contactScreen,
@@ -377,6 +406,7 @@ const icons: Record<string, string> = {
   write: 'M4 20h4L19 9l-4-4L4 16v4z',
   price: 'M17 6.5A5 5 0 0 0 8 9v4H6m2 0v3a2 2 0 0 1-2 2h11M6 13h7',
   calendar: 'M4 7a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zM4 10h16M9 3v4M15 3v4',
+  page: 'M6 3h9l4 4v14H6zM14 3v5h5M9 12h7M9 16h7',
   quote: 'M5 18l-1 3 4-2h9a3 3 0 0 0 3-3V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v11z',
   photo: 'M4 6h16v12H4zM4 15l4-4 4 4 3-3 5 5M15 9.5h.01',
   palette:
@@ -411,11 +441,12 @@ async function dashboard() {
     h(
       'div',
       { class: 'acts' },
+      action('#/website', 'page', 'Change your website', 'Any words, in any section'),
       action('#/post/new', 'write', 'Write a blog post', 'Training tips, race reports, club news'),
-      action('#/prices', 'price', 'Change prices', 'Coaching, PT and Run Club'),
-      action('#/runclub', 'calendar', 'Set Run Club dates', 'Next block, time, spaces left'),
+      action('#/prices', 'price', 'Change plans and prices', 'Coaching, PT and Run Club'),
+      action('#/runclub', 'calendar', 'Run Club', 'Dates, details and what it says'),
       action('#/testimonials/new', 'quote', 'Add a testimonial', 'A client’s kind words'),
-      action('#/photos', 'photo', 'Change photos', 'Home page and Meet your coach'),
+      action('#/photos', 'photo', 'Change photos', 'Home page, Run Club and Meet your coach'),
       action('#/theme', 'palette', 'Change colours', 'Pick a theme for your website'),
     ),
     h(
@@ -1027,12 +1058,374 @@ function waitForRoute() {
   return new Promise((r) => setTimeout(r, 400));
 }
 
-// ---------- Prices ----------
+// ---------- Your website: every section, in page order ----------
+
+type Site = Record<string, unknown>;
+/** Part of a section form: a box of fields that checks itself and writes into site.json. */
+interface Part {
+  box: HTMLElement;
+  check(errors: Errors): void;
+  apply(site: Site): Site;
+}
+
+// The public site's home page, worked out from where the editor is (…/admin/).
+const siteRoot = new URL('../', location.href.split('#')[0]).href;
+
+const SECTIONS: { route: string; title: string; sub: string }[] = [
+  { route: 'menu', title: 'Menu and footer', sub: 'Menu links, the main button, and the bottom of every page' },
+  { route: 'hero', title: 'Top of the page', sub: 'The big headline, introduction and buttons' },
+  { route: 'week', title: 'Typical week', sub: 'The week of training under the headline' },
+  { route: 'prices', title: 'Ways to train', sub: 'Your plans, prices and where you train' },
+  { route: 'runclub', title: 'Run Club', sub: 'What it says, the details and the next block' },
+  { route: 'about', title: 'Meet your coach', sub: 'Your name and a few words about you' },
+  { route: 'testimonials', title: 'Reviews', sub: 'What clients say about you' },
+  { route: 'instagram', title: 'Instagram', sub: 'The heading and button above your posts' },
+  { route: 'journal', title: 'Training journal', sub: 'The headings for your blog' },
+  { route: 'faq', title: 'Questions', sub: 'Common questions and your answers' },
+  { route: 'getintouch', title: 'Get in touch', sub: 'The contact section and the enquiry form' },
+];
+
+function websiteScreen() {
+  screen(
+    'Your website',
+    heading(
+      'Your website',
+      'Every part of your home page, from top to bottom. Tap one to change its words, or anything in it.',
+    ),
+    h(
+      'section',
+      { class: 'box' },
+      h(
+        'ol',
+        { class: 'rows' },
+        SECTIONS.map((s) =>
+          h(
+            'li',
+            {},
+            h(
+              'a',
+              { class: 'row', href: `#/${s.route}` },
+              h('span', { class: 'row-text' }, h('b', {}, s.title), h('span', { class: 'sub' }, s.sub)),
+              h('span', { class: 'row-go', 'aria-hidden': 'true' }, '→'),
+            ),
+          ),
+        ),
+      ),
+    ),
+    h(
+      'p',
+      { class: 'hint' },
+      'Blog posts, photos, colours, contact details and policies have their own pages in the menu.',
+    ),
+  );
+}
+
+/** Page heading for a section: back to Your website, plus a link to see it on the live site. */
+function sectionHeading(title: string, intro: string, anchor?: string) {
+  const head = heading(title, intro, ['#/website', 'Your website']);
+  if (anchor !== undefined)
+    head.append(
+      h(
+        'p',
+        { class: 'see-live' },
+        h('a', { href: `${siteRoot}${anchor}`, target: '_blank', rel: 'noopener' }, 'See this on your website ↗'),
+      ),
+    );
+  return head;
+}
+
+/** A box pointing to where something else is changed, e.g. photos. */
+const infoBox = (title: string, text: string, links: [string, string][]) =>
+  h(
+    'div',
+    { class: 'box' },
+    h('h2', {}, title),
+    h('p', {}, text),
+    h(
+      'div',
+      { class: 'row-actions' },
+      links.map(([label, to]) => h('a', { class: 'btn btn--small', href: to }, label)),
+    ),
+  );
+
+/** A section whose wording all lives in site.json. */
+async function sectionScreen(o: {
+  title: string;
+  intro: string;
+  anchor?: string;
+  message: string;
+  parts: (site: Site) => (Part | HTMLElement)[];
+}) {
+  const site = await readJson<Site>(PATHS.site);
+  const summary = errorSummary();
+  const items = o.parts(site);
+  const parts = items.filter((p): p is Part => !(p instanceof HTMLElement));
+  const saveBtn = h('button', { type: 'submit', class: 'btn btn--primary btn--big' }, 'Save changes');
+  const form = h(
+    'form',
+    {
+      novalidate: true,
+      class: 'stack',
+      onsubmit: (async (e: Event) => {
+        e.preventDefault();
+        const errors = new Errors(summary);
+        parts.forEach((p) => p.check(errors));
+        if (!errors.show()) return;
+        const next = parts.reduce((s, p) => p.apply(s), site);
+        if (await save([{ path: PATHS.site, text: toJson(next) }], o.message, saveBtn)) toast(savedMessage());
+      }) as EventListener,
+    },
+    items.map((p) => (p instanceof HTMLElement ? p : p.box)),
+    h('div', { class: 'save-bar' }, saveBtn),
+  );
+  trackDirty(form);
+  screen(o.title, sectionHeading(o.title, o.intro, o.anchor), summary, form);
+}
+
+const menuScreen = () =>
+  sectionScreen({
+    title: 'Menu and footer',
+    intro: 'The links at the top of every page, the main button, and the bottom of every page.',
+    message: 'Update menu and footer',
+    parts: (site) => [
+      textGroup(site, 'Menu links', [
+        { path: 'nav.coaching', label: 'Link to your plans', max: 20 },
+        { path: 'nav.runClub', label: 'Link to the Run Club', max: 20 },
+        { path: 'nav.about', label: 'Link to Meet your coach', max: 20 },
+        { path: 'nav.journal', label: 'Link to your blog', max: 20 },
+        {
+          path: 'nav.cta',
+          label: 'Main button',
+          max: 24,
+          hint: 'The yellow button at the top. It goes to the contact section.',
+        },
+      ]),
+      textGroup(site, 'Bottom of every page', [
+        {
+          path: 'footer.text',
+          label: 'A few words about you',
+          kind: 'text',
+          max: 220,
+          hint: 'Shown beside your logo.',
+        },
+      ]),
+      textGroup(site, 'Your business name and Google', [
+        {
+          path: 'name',
+          label: 'Business name',
+          max: 24,
+          hint: 'Shown in the logo, on browser tabs and in Google.',
+        },
+        {
+          path: 'description',
+          label: 'Description for Google',
+          kind: 'text',
+          max: 160,
+          hint: 'Shown under your website in Google’s search results. One or two sentences.',
+        },
+      ]),
+    ],
+  });
+
+const heroScreen = () =>
+  sectionScreen({
+    title: 'Top of the page',
+    intro: 'The first thing people see: the big headline, a short introduction and two buttons.',
+    anchor: '',
+    message: 'Update top of the home page',
+    parts: (site) => [
+      textGroup(site, 'Words', [
+        {
+          path: 'hero.eyebrow',
+          label: 'Small line above the headline',
+          max: 90,
+          hint: 'e.g. “Running & strength coaching · Meadowbank, Edinburgh & online”',
+        },
+        {
+          path: 'hero.headline',
+          label: 'Headline',
+          kind: 'lines',
+          most: 4,
+          max: 20,
+          hint: 'One short line per line, up to 4. The last line shows in your highlight colour.',
+        },
+        { path: 'hero.intro', label: 'Introduction', kind: 'text', max: 300 },
+      ]),
+      textGroup(site, 'Buttons', [
+        { path: 'hero.buttons.primary', label: 'Main button (goes to your plans)', max: 26 },
+        { path: 'hero.buttons.secondary', label: 'Second button (goes to the Run Club)', max: 26 },
+      ]),
+      infoBox('Photos', 'The photos beside the headline are changed in Photos.', [['Change photos', '#/photos']]),
+    ],
+  });
+
+const aboutScreen = () =>
+  sectionScreen({
+    title: 'Meet your coach',
+    intro: 'Your name, a few words about you and, if you like, some numbers.',
+    anchor: '#about',
+    message: 'Update Meet your coach',
+    parts: (site) => [
+      textGroup(site, 'Words', [
+        { path: 'about.eyebrow', label: 'Small heading', max: 40, hint: 'e.g. “Meet your coach”' },
+        { path: 'about.name', label: 'Big heading', max: 40, hint: 'Usually your name.' },
+        {
+          path: 'about.paragraphs',
+          label: 'About you',
+          kind: 'paras',
+          most: 4,
+          max: 700,
+          hint: 'Leave an empty line between paragraphs.',
+        },
+      ]),
+      statsPart(site),
+      infoBox('Photo', 'Your photo is changed in Photos.', [['Change photo', '#/photos']]),
+    ],
+  });
+
+/** Up to three big numbers under the About text, e.g. "12" / "Ultras finished". Empty ones are hidden. */
+function statsPart(site: Site): Part {
+  const stats = ((site.about as { stats?: { value: string; label: string }[] }).stats ?? []).slice(0, 3);
+  const rows = [0, 1, 2].map((i) => ({
+    value: field(`Number ${i + 1}`, textInput(stats[i]?.value ?? '', { maxlength: 8 }), i === 0 ? 'e.g. “12”' : ''),
+    label: field(
+      `What it means`,
+      textInput(stats[i]?.label ?? '', { maxlength: 30 }),
+      i === 0 ? 'e.g. “Ultras finished”' : '',
+    ),
+  }));
+  return {
+    box: h(
+      'fieldset',
+      { class: 'box' },
+      h('legend', {}, 'Numbers (optional)'),
+      h('p', { class: 'hint' }, 'Up to three big numbers shown under your words. Leave them empty to hide them.'),
+      rows.map((r) => h('div', { class: 'pair' }, r.value.wrap, r.label.wrap)),
+    ),
+    check(errors) {
+      rows.forEach((r, i) => {
+        const v = r.value.input.value.trim();
+        const l = r.label.input.value.trim();
+        if (v && !l) errors.add(r.label, `Number ${i + 1}: say what the number means.`);
+        if (l && !v) errors.add(r.value, `Number ${i + 1}: add the number, or clear what it means.`);
+      });
+    },
+    apply(next) {
+      const list = rows
+        .map((r) => ({ value: r.value.input.value.trim(), label: r.label.input.value.trim() }))
+        .filter((s) => s.value && s.label);
+      return setPath(next, 'about.stats', list);
+    },
+  };
+}
+
+const journalScreen = () =>
+  sectionScreen({
+    title: 'Training journal',
+    intro: 'The headings for your blog, on the home page and on the blog page.',
+    anchor: 'journal/',
+    message: 'Update training journal headings',
+    parts: (site) => [
+      textGroup(site, 'Headings', [
+        {
+          path: 'journal.title',
+          label: 'Heading',
+          max: 40,
+          hint: 'Shown on your home page and at the top of your blog page.',
+        },
+        { path: 'journal.allPosts', label: 'Link to all your posts', max: 24 },
+      ]),
+      textGroup(site, 'For Google', [
+        {
+          path: 'journal.intro',
+          label: 'Description of your blog',
+          kind: 'text',
+          max: 160,
+          hint: 'Shown in Google’s search results, not on the page.',
+        },
+      ]),
+      infoBox('Posts', 'To write a new post or change one, go to Blog posts.', [
+        ['Write a blog post', '#/post/new'],
+        ['See all posts', '#/posts'],
+      ]),
+    ],
+  });
+
+const getInTouchScreen = () =>
+  sectionScreen({
+    title: 'Get in touch',
+    intro: 'The yellow contact section at the bottom of every page, and the enquiry form in it.',
+    anchor: '#contact',
+    message: 'Update Get in touch',
+    parts: (site) => [
+      textGroup(site, 'Contact section', [
+        { path: 'getInTouch.eyebrow', label: 'Small heading', max: 40 },
+        { path: 'getInTouch.title', label: 'Big heading', max: 60 },
+        { path: 'getInTouch.intro', label: 'Introduction', kind: 'text', max: 250 },
+      ]),
+      textGroup(site, 'Enquiry form', [
+        { path: 'getInTouch.formTitle', label: 'Form heading', max: 40 },
+        { path: 'getInTouch.formIntro', label: 'Line under the heading', kind: 'text', max: 200 },
+        {
+          path: 'getInTouch.placeholder',
+          label: 'Example text in the message box',
+          max: 100,
+          hint: 'Shown in grey until they start typing.',
+        },
+        {
+          path: 'getInTouch.note',
+          label: 'Note above the button',
+          kind: 'text',
+          max: 300,
+          hint: 'A link to your Privacy Policy is added after it.',
+        },
+        { path: 'getInTouch.button', label: 'Send button', max: 24 },
+        {
+          path: 'getInTouch.thanks',
+          label: 'Thank-you message',
+          kind: 'text',
+          max: 200,
+          hint: 'Shown after someone sends the form. If it starts with “Thanks”, their first name is added: “Thanks, Sam.”',
+        },
+      ]),
+      textGroup(
+        site,
+        '“I’m interested in” choices',
+        [
+          {
+            path: 'enquiries.interests',
+            label: 'Other choices',
+            kind: 'lines',
+            most: 5,
+            max: 40,
+            optional: true,
+            hint: 'One per line, e.g. “Something else”.',
+          },
+        ],
+        'Your plans are listed automatically, so a new or renamed plan appears by itself. Add any other choices here.',
+      ),
+      infoBox('Phone, email and address', 'These are changed in Contact details.', [
+        ['Change contact details', '#/contact'],
+      ]),
+    ],
+  });
+
+// ---------- Ways to train (plans and prices) ----------
+
+const MAX_PLANS = 4;
 
 async function pricesScreen() {
-  const services = await readJson<Service[]>(PATHS.services);
+  const [services, site, testimonials] = await Promise.all([
+    readJson<Service[]>(PATHS.services),
+    readJson<Site>(PATHS.site),
+    readJson<Testimonial[]>(PATHS.testimonials),
+  ]);
   const summary = errorSummary();
-  const rows = services.map((s) => {
+  const list = h('div', { class: 'stack' });
+
+  type Row = { s: Service; name: Field; label: Field; price: Field; per: Field; points: Field; box: HTMLElement };
+  let rows: Row[] = [];
+  const makeRow = (s: Service): Row => {
     const name = field('Name', textInput(s.name, { maxlength: 40 }));
     const label = field(
       'Small label above the name',
@@ -1049,19 +1442,119 @@ async function pricesScreen() {
       textArea(s.points.join('\n'), { rows: 4 }),
       'One point per line. Three or four short points work best.',
     );
-    const box = h(
-      'fieldset',
-      { class: 'box' },
-      h('legend', {}, s.name),
+    const isClub = s.id === 'runclub';
+    const row: Row = { s, name, label, price, per, points, box: h('fieldset', { class: 'box' }) };
+    row.box.append(
+      h('legend', {}, s.name || 'New plan'),
+      isClub ? h('p', { class: 'hint' }, 'This plan is linked to your Run Club section, so it can’t be removed.') : '',
       name.wrap,
       label.wrap,
       h('div', { class: 'pair' }, price.wrap, per.wrap),
       points.wrap,
+      h(
+        'div',
+        { class: 'row-actions' },
+        h(
+          'button',
+          { type: 'button', class: 'btn btn--small', onclick: (() => move(row, -1)) as EventListener },
+          'Move left',
+        ),
+        h(
+          'button',
+          { type: 'button', class: 'btn btn--small', onclick: (() => move(row, 1)) as EventListener },
+          'Move right',
+        ),
+        !isClub &&
+          h(
+            'button',
+            {
+              type: 'button',
+              class: 'btn btn--small btn--danger',
+              onclick: (async () => {
+                const answer = await dialog(
+                  `Remove ${row.name.input.value.trim() || 'this plan'}?`,
+                  [h('p', {}, 'It comes off your website when you press Save. You can add it again later.')],
+                  [
+                    { label: 'Keep it', value: '' },
+                    { label: 'Remove plan', value: 'remove', primary: true },
+                  ],
+                );
+                if (answer !== 'remove') return;
+                rows = rows.filter((r) => r !== row);
+                draw();
+                setDirty(true);
+              }) as EventListener,
+            },
+            'Remove plan',
+          ),
+      ),
     );
-    return { s, name, label, price, per, points, box };
-  });
+    return row;
+  };
+  const move = (row: Row, by: number) => {
+    const i = rows.indexOf(row);
+    const j = i + by;
+    if (j < 0 || j >= rows.length) return;
+    [rows[i], rows[j]] = [rows[j], rows[i]];
+    draw();
+    setDirty(true);
+  };
+  const addBtn = h(
+    'button',
+    {
+      type: 'button',
+      class: 'btn',
+      onclick: (() => {
+        const row = makeRow({ id: '', label: '', name: '', price: '', per: 'month', points: [] });
+        rows.push(row);
+        draw();
+        setDirty(true);
+        row.name.input.focus();
+      }) as EventListener,
+    },
+    '+ Add a plan',
+  );
+  const draw = () => {
+    list.replaceChildren(...rows.map((r) => r.box));
+    addBtn.hidden = rows.length >= MAX_PLANS;
+  };
+  rows = services.map(makeRow);
+  draw();
 
-  const saveBtn = h('button', { type: 'submit', class: 'btn btn--primary btn--big' }, 'Save prices');
+  const heads = textGroup(site, 'Heading', [
+    { path: 'coaching.title', label: 'Heading', max: 40 },
+    { path: 'coaching.intro', label: 'Introduction', kind: 'text', max: 250 },
+  ]);
+  const extras = textGroup(site, 'Under the plans', [
+    {
+      path: 'coaching.enquire',
+      label: 'Button on each plan',
+      max: 20,
+      hint: 'It goes to the enquiry form, with that plan picked.',
+    },
+    {
+      path: 'coaching.more',
+      label: 'Second button on the Run Club plan',
+      max: 14,
+      hint: 'One word works best, e.g. “Details”. It goes to the Run Club section.',
+    },
+    {
+      path: 'coaching.inPersonLabel',
+      label: 'Label above your address',
+      max: 30,
+      hint: 'Your address and map come from Contact details.',
+    },
+    { path: 'coaching.onlineLabel', label: 'Label for online training', max: 30 },
+    { path: 'coaching.onlineTitle', label: 'Online heading', max: 30 },
+    { path: 'coaching.onlineText', label: 'Online text', kind: 'text', max: 160 },
+  ]);
+
+  const saveBtn = h('button', { type: 'submit', class: 'btn btn--primary btn--big' }, 'Save changes');
+  const lines = (f: Field) =>
+    f.input.value
+      .split('\n')
+      .map((p) => p.trim())
+      .filter(Boolean);
   const form = h(
     'form',
     {
@@ -1070,71 +1563,162 @@ async function pricesScreen() {
       onsubmit: (async (e: Event) => {
         e.preventDefault();
         const errors = new Errors(summary);
-        for (const r of rows) {
-          const n = r.name.input.value.trim() || r.s.name;
-          if (!r.name.input.value.trim()) errors.add(r.name, `Give the ${r.s.name} plan a name.`);
+        heads.check(errors);
+        if (!rows.length) errors.add(addBtn, 'Add at least one plan.');
+        const names = new Set<string>();
+        rows.forEach((r, i) => {
+          const n = r.name.input.value.trim();
+          const who = n || `Plan ${i + 1}`;
+          if (!n) errors.add(r.name, `Plan ${i + 1}: give it a name.`);
+          else if (names.has(n.toLowerCase())) errors.add(r.name, `${n}: two plans have this name. Give each its own.`);
+          names.add(n.toLowerCase());
           if (!/^\d+(\.\d{1,2})?$/.test(r.price.input.value.trim()))
-            errors.add(r.price, `${n}: the price should be a number, like 80 or 79.50.`);
-          if (!r.per.input.value.trim()) errors.add(r.per, `${n}: say what the price is per, like "month".`);
-          const pts = r.points.input.value
-            .split('\n')
-            .map((p) => p.trim())
-            .filter(Boolean);
-          if (pts.length === 0) errors.add(r.points, `${n}: add at least one thing that’s included.`);
-          else if (pts.length > 6) errors.add(r.points, `${n}: keep it to 6 points or fewer so the cards stay tidy.`);
-          else if (pts.some((p) => p.length > 70)) errors.add(r.points, `${n}: keep each point under 70 characters.`);
-        }
+            errors.add(r.price, `${who}: the price should be a number, like 80 or 79.50.`);
+          if (!r.per.input.value.trim()) errors.add(r.per, `${who}: say what the price is per, like "month".`);
+          const pts = lines(r.points);
+          if (pts.length === 0) errors.add(r.points, `${who}: add at least one thing that’s included.`);
+          else if (pts.length > 6) errors.add(r.points, `${who}: keep it to 6 points or fewer so the cards stay tidy.`);
+          else if (pts.some((p) => p.length > 70)) errors.add(r.points, `${who}: keep each point under 70 characters.`);
+        });
+        extras.check(errors);
         if (!errors.show()) return;
-        const next = rows.map((r) => ({
-          ...r.s,
-          label: r.label.input.value.trim(),
-          name: r.name.input.value.trim(),
-          price: `£${r.price.input.value.trim()}`,
-          per: `/ ${r.per.input.value.trim()}`,
-          points: r.points.input.value
-            .split('\n')
-            .map((p) => p.trim())
-            .filter(Boolean),
-        }));
-        if (await save([{ path: PATHS.services, text: toJson(next) }], 'Update prices', saveBtn)) toast(savedMessage());
+
+        // New plans get an id from their name (used for links); existing ones keep theirs.
+        const ids = new Set(rows.map((r) => r.s.id).filter(Boolean));
+        const next: Service[] = rows.map((r) => {
+          let id = r.s.id;
+          if (!id) {
+            const base = slugify(r.name.input.value) || 'plan';
+            id = base;
+            for (let n = 2; ids.has(id) || id === 'runclub'; n++) id = `${base}-${n}`;
+            ids.add(id);
+          }
+          return {
+            ...r.s,
+            id,
+            label: r.label.input.value.trim(),
+            name: r.name.input.value.trim(),
+            price: `£${r.price.input.value.trim()}`,
+            per: `/ ${r.per.input.value.trim()}`,
+            points: lines(r.points),
+          };
+        });
+        const changes: Change[] = [
+          { path: PATHS.services, text: toJson(next) },
+          { path: PATHS.site, text: toJson(extras.apply(heads.apply(site))) },
+        ];
+        // A renamed plan: reviews that named it follow the new name.
+        const renamed = new Map(
+          services.flatMap((old) => {
+            const now = next.find((s) => s.id === old.id);
+            return now && now.name !== old.name ? [[old.name, now.name] as const] : [];
+          }),
+        );
+        if (renamed.size && testimonials.some((t) => renamed.has(t.service))) {
+          const updated = testimonials.map((t) => ({ ...t, service: renamed.get(t.service) ?? t.service }));
+          changes.push({ path: PATHS.testimonials, text: toJson(updated) });
+        }
+        if (await save(changes, 'Update Ways to train', saveBtn)) {
+          toast(savedMessage());
+          route();
+        }
       }) as EventListener,
     },
-    rows.map((r) => r.box),
+    heads.box,
+    h('h2', {}, 'Your plans'),
+    h('p', { class: 'hint' }, `Up to ${MAX_PLANS} plans, shown side by side in this order.`),
+    list,
+    addBtn,
+    extras.box,
     h('div', { class: 'save-bar' }, saveBtn),
   );
   trackDirty(form);
   screen(
-    'Services & prices',
-    heading('Services & prices', 'Change what each plan costs and what’s included.'),
+    'Ways to train',
+    sectionHeading('Ways to train', 'Your plans and prices, and where you train people.', '#coaching'),
     summary,
     form,
   );
 }
 
-// ---------- Run Club dates ----------
+// ---------- Run Club ----------
+
+interface RunClub {
+  eyebrow: string;
+  headline: string;
+  paragraphs: string[];
+  facts: { label: string; value: string; note: string }[];
+  button: string;
+  photos?: SitePhoto[];
+}
 
 async function runClubScreen() {
-  const services = await readJson<Service[]>(PATHS.services);
-  const club = services.find((s) => s.id === 'runclub');
-  if (!club) {
-    screen('Run Club dates', heading('Run Club dates'), h('p', {}, 'The Run Club plan is missing from your services.'));
+  const [services, site] = await Promise.all([
+    readJson<Service[]>(PATHS.services),
+    readJson<{ runClub?: RunClub } & Site>(PATHS.site),
+  ]);
+  const plan = services.find((s) => s.id === 'runclub');
+  if (!plan || !site.runClub) {
+    screen('Run Club', heading('Run Club'), h('p', {}, 'The Run Club is missing from your website’s files.'));
     return;
   }
-  const sched = club.schedule ?? { starts: '', when: '', spaces: '' };
+  const club = site.runClub;
+  const sched = plan.schedule ?? { starts: '', when: '', spaces: '' };
   const summary = errorSummary();
-  const starts = field('Next block starts', h('input', { type: 'date', value: sched.starts }));
-  const when = field('Day and time', textInput(sched.when, { maxlength: 40 }), 'e.g. "Tuesdays, 6:30pm"');
+
+  const words = textGroup(site, 'What it says', [
+    { path: 'runClub.eyebrow', label: 'Small heading', max: 40 },
+    { path: 'runClub.headline', label: 'Big heading', max: 50, hint: 'e.g. “Run together. Get faster.”' },
+    {
+      path: 'runClub.paragraphs',
+      label: 'About the Run Club',
+      kind: 'paras',
+      most: 4,
+      max: 600,
+      hint: 'Leave an empty line between paragraphs. Two short paragraphs work best.',
+    },
+    { path: 'runClub.button', label: 'Button', max: 26, hint: 'It goes to the enquiry form, with Run Club picked.' },
+  ]);
+
+  // The four boxes of key facts.
+  const facts = [0, 1, 2, 3].map((i) => {
+    const f = (club.facts ?? [])[i] ?? { label: '', value: '', note: '' };
+    const label = field('Small label', textInput(f.label, { maxlength: 24 }));
+    const value = field('Big text', textInput(f.value, { maxlength: 16 }), 'Short, e.g. “8 sessions”.');
+    const note = field('Line underneath', textInput(f.note, { maxlength: 40 }));
+    return {
+      label,
+      value,
+      note,
+      box: h('fieldset', { class: 'box' }, h('legend', {}, `Box ${i + 1}`), label.wrap, value.wrap, note.wrap),
+    };
+  });
+
+  const starts = field('Next block starts (optional)', h('input', { type: 'date', value: sched.starts }));
+  const when = field(
+    'Day and time',
+    textInput(sched.when || 'Thursdays, 6pm', { maxlength: 40 }),
+    'Shown with the date on the Run Club plan card, e.g. “Thursdays, 6pm”.',
+  );
   const spaces = field(
     'Spaces left (optional)',
     textInput(sched.spaces, { inputmode: 'numeric', maxlength: 3 }),
     'Leave empty to hide it.',
   );
-  const saveBtn = h('button', { type: 'submit', class: 'btn btn--primary btn--big' }, 'Save dates');
-
-  const persist = async (schedule: Service['schedule'], message: string, button: HTMLButtonElement) => {
-    const next = services.map((s) => (s.id === 'runclub' ? { ...s, schedule } : s));
-    if (await save([{ path: PATHS.services, text: toJson(next) }], message, button)) toast(savedMessage());
-  };
+  const clearDates = h(
+    'button',
+    {
+      type: 'button',
+      class: 'btn btn--small',
+      onclick: (() => {
+        (starts.input as HTMLInputElement).value = '';
+        spaces.input.value = '';
+        setDirty(true);
+      }) as EventListener,
+    },
+    'Clear dates',
+  );
+  const saveBtn = h('button', { type: 'submit', class: 'btn btn--primary btn--big' }, 'Save changes');
 
   const form = h(
     'form',
@@ -1144,44 +1728,221 @@ async function runClubScreen() {
       onsubmit: (async (e: Event) => {
         e.preventDefault();
         const errors = new Errors(summary);
+        words.check(errors);
+        facts.forEach((f, i) => {
+          const any = [f.label, f.value, f.note].some((x) => x.input.value.trim());
+          if (any && !f.value.input.value.trim())
+            errors.add(f.value, `Box ${i + 1}: add the big text, or clear the box.`);
+        });
+        if (!facts.some((f) => f.value.input.value.trim())) errors.add(facts[0].value, 'Fill in at least one box.');
         const date = (starts.input as HTMLInputElement).value;
-        if (!date) errors.add(starts, 'Choose the date the next block starts.');
-        else if (date < today()) errors.add(starts, 'That date is in the past. Choose the next block’s start date.');
-        if (!when.input.value.trim()) errors.add(when, 'Say which day and time, for example "Tuesdays, 6:30pm".');
+        if (date && date < today())
+          errors.add(starts, 'That date has passed. Choose the next block’s start date, or press Clear dates.');
+        if (date && !when.input.value.trim()) errors.add(when, 'Say which day and time, e.g. “Thursdays, 6pm”.');
         if (spaces.input.value.trim() && !/^\d{1,3}$/.test(spaces.input.value.trim()))
           errors.add(spaces, 'Spaces left should be a number, like 6. Or leave it empty.');
         if (!errors.show()) return;
-        await persist(
-          { starts: date, when: when.input.value.trim(), spaces: spaces.input.value.trim() },
-          'Update Run Club dates',
-          saveBtn,
-        );
+
+        const schedule = date
+          ? { starts: date, when: when.input.value.trim(), spaces: spaces.input.value.trim() }
+          : undefined;
+        const nextServices = services.map((s) => (s.id === 'runclub' ? { ...s, schedule } : s));
+        const nextFacts = facts.map((f) => ({
+          label: f.label.input.value.trim(),
+          value: f.value.input.value.trim(),
+          note: f.note.input.value.trim(),
+        }));
+        const nextSite = setPath(words.apply(site), 'runClub.facts', nextFacts);
+        const changes: Change[] = [
+          { path: PATHS.site, text: toJson(nextSite) },
+          { path: PATHS.services, text: toJson(nextServices) },
+        ];
+        if (await save(changes, 'Update Run Club', saveBtn)) toast(savedMessage());
       }) as EventListener,
     },
-    h('div', { class: 'box' }, starts.wrap, when.wrap, spaces.wrap),
+    words.box,
+    h('h2', {}, 'Key facts'),
+    h(
+      'p',
+      { class: 'hint' },
+      'Four boxes beside the photos, e.g. “The block / 8 sessions / over 8 weeks”. Leave a box empty to hide it.',
+    ),
     h(
       'div',
-      { class: 'save-bar' },
-      saveBtn,
-      sched.starts &&
+      { class: 'days' },
+      facts.map((f) => f.box),
+    ),
+    h(
+      'fieldset',
+      { class: 'box' },
+      h('legend', {}, 'Next block'),
+      h(
+        'p',
+        { class: 'hint' },
+        'Shown under the price, and on the Run Club plan card. Leave the date empty to hide it.',
+      ),
+      starts.wrap,
+      when.wrap,
+      spaces.wrap,
+      h('div', { class: 'row-actions' }, clearDates),
+    ),
+    infoBox(
+      'Photos and price',
+      `The photos (${club.photos?.length ?? 0} at the moment) are changed in Photos. ` +
+        `The price, ${plan.price} ${plan.per}, is changed in Ways to train.`,
+      [
+        ['Change Run Club photos', '#/photos/runclub'],
+        ['Change the price', '#/prices'],
+      ],
+    ),
+    h('div', { class: 'save-bar' }, saveBtn),
+  );
+  trackDirty(form);
+  screen(
+    'Run Club',
+    sectionHeading(
+      'Run Club',
+      'The Run Club section of your home page, and the dates on the Run Club card.',
+      '#runclub',
+    ),
+    summary,
+    form,
+  );
+}
+
+// ---------- Questions (FAQ) ----------
+
+interface Faq {
+  question: string;
+  answer: string;
+}
+const MAX_FAQS = 12;
+// Notes still to fill in are saved as <mark>[Peter to confirm: …]</mark>. In the
+// editor they show as plain [Peter to confirm: …] so they're easy to read and replace.
+const fromMarks = (s: string) => s.replace(/<mark>([\s\S]*?)<\/mark>/g, '$1');
+const toMarks = (s: string) => s.replace(/\[Peter to confirm:[^\]]*\]/g, (m) => `<mark>${m}</mark>`);
+
+async function faqScreen() {
+  const [items, site] = await Promise.all([readJson<Faq[]>(PATHS.faq), readJson<Site>(PATHS.site)]);
+  const summary = errorSummary();
+  const heads = textGroup(site, 'Heading', [
+    { path: 'faq.eyebrow', label: 'Small heading', max: 40 },
+    { path: 'faq.title', label: 'Big heading', max: 30, hint: 'Also used for the link at the bottom of every page.' },
+  ]);
+  const list = h('div', { class: 'stack' });
+  type Row = { question: Field; answer: Field; box: HTMLElement };
+  let rows: Row[] = [];
+  const makeRow = (f: Faq): Row => {
+    const question = field('Question', textInput(f.question, { maxlength: 120 }));
+    const todo = /\[Peter to confirm:/.test(fromMarks(f.answer));
+    const answer = field(
+      'Your answer',
+      textArea(fromMarks(f.answer), { rows: 4, maxlength: 800 }),
+      todo ? 'Replace the part in [square brackets] with your answer.' : undefined,
+    );
+    const row: Row = { question, answer, box: h('fieldset', { class: 'box' }) };
+    row.box.append(
+      h('legend', {}, 'Question'),
+      question.wrap,
+      answer.wrap,
+      h(
+        'div',
+        { class: 'row-actions' },
+        h(
+          'button',
+          { type: 'button', class: 'btn btn--small', onclick: (() => move(row, -1)) as EventListener },
+          'Move up',
+        ),
+        h(
+          'button',
+          { type: 'button', class: 'btn btn--small', onclick: (() => move(row, 1)) as EventListener },
+          'Move down',
+        ),
         h(
           'button',
           {
             type: 'button',
-            class: 'btn btn--big',
-            onclick: (async (e: Event) => {
-              await persist(undefined, 'Clear Run Club dates', e.currentTarget as HTMLButtonElement);
-              route();
+            class: 'btn btn--small btn--danger',
+            onclick: (() => {
+              rows = rows.filter((r) => r !== row);
+              draw();
+              setDirty(true);
             }) as EventListener,
           },
-          'Hide dates from the website',
+          'Remove',
         ),
-    ),
+      ),
+    );
+    return row;
+  };
+  const move = (row: Row, by: number) => {
+    const i = rows.indexOf(row);
+    const j = i + by;
+    if (j < 0 || j >= rows.length) return;
+    [rows[i], rows[j]] = [rows[j], rows[i]];
+    draw();
+    setDirty(true);
+  };
+  const addBtn = h(
+    'button',
+    {
+      type: 'button',
+      class: 'btn',
+      onclick: (() => {
+        const row = makeRow({ question: '', answer: '' });
+        rows.push(row);
+        draw();
+        setDirty(true);
+        row.question.input.focus();
+      }) as EventListener,
+    },
+    '+ Add a question',
+  );
+  const draw = () => {
+    list.replaceChildren(...(rows.length ? rows.map((r) => r.box) : [h('p', {}, 'No questions yet.')]));
+    rows.forEach((r, i) => (r.box.querySelector('legend')!.textContent = `Question ${i + 1}`));
+    addBtn.hidden = rows.length >= MAX_FAQS;
+  };
+  rows = items.map(makeRow);
+  draw();
+
+  const saveBtn = h('button', { type: 'submit', class: 'btn btn--primary btn--big' }, 'Save changes');
+  const form = h(
+    'form',
+    {
+      novalidate: true,
+      class: 'stack',
+      onsubmit: (async (e: Event) => {
+        e.preventDefault();
+        const errors = new Errors(summary);
+        heads.check(errors);
+        rows.forEach((r, i) => {
+          if (!r.question.input.value.trim()) errors.add(r.question, `Question ${i + 1}: write the question.`);
+          if (!r.answer.input.value.trim()) errors.add(r.answer, `Question ${i + 1}: write your answer.`);
+        });
+        if (!errors.show()) return;
+        const next: Faq[] = rows.map((r) => ({
+          question: r.question.input.value.trim(),
+          answer: toMarks(r.answer.input.value.replace(/\s+/g, ' ').trim()),
+        }));
+        const changes: Change[] = [
+          { path: PATHS.faq, text: toJson(next) },
+          { path: PATHS.site, text: toJson(heads.apply(site)) },
+        ];
+        if (await save(changes, 'Update questions', saveBtn)) toast(savedMessage());
+      }) as EventListener,
+    },
+    heads.box,
+    h('h2', {}, 'Questions and answers'),
+    h('p', { class: 'hint' }, 'People tap a question to see your answer. They show in this order.'),
+    list,
+    addBtn,
+    h('div', { class: 'save-bar' }, saveBtn),
   );
   trackDirty(form);
   screen(
-    'Run Club dates',
-    heading('Run Club dates', 'These show on the Run Club card on your home page. Leave them empty to hide them.'),
+    'Questions',
+    sectionHeading('Questions', 'Common questions near the bottom of your home page, with your answers.', '#faq'),
     summary,
     form,
   );
@@ -1190,9 +1951,21 @@ async function runClubScreen() {
 // ---------- Testimonials ----------
 
 async function testimonialsScreen(arg: string) {
-  const items = await readJson<Testimonial[]>(PATHS.testimonials);
-  const services = await readJson<Service[]>(PATHS.services);
+  const [items, services, site] = await Promise.all([
+    readJson<Testimonial[]>(PATHS.testimonials),
+    readJson<Service[]>(PATHS.services),
+    readJson<Site>(PATHS.site),
+  ]);
   const summary = errorSummary();
+  const heads = textGroup(site, 'Heading', [
+    { path: 'reviews.eyebrow', label: 'Small heading', max: 40 },
+    {
+      path: 'reviews.title',
+      label: 'Big heading',
+      max: 30,
+      hint: 'Also used for the link at the bottom of every page.',
+    },
+  ]);
   const list = h('div', { class: 'stack' });
   type Row = {
     name: Field;
@@ -1326,7 +2099,7 @@ async function testimonialsScreen(arg: string) {
     row.name.input.focus();
   };
 
-  const saveBtn = h('button', { type: 'submit', class: 'btn btn--primary btn--big' }, 'Save testimonials');
+  const saveBtn = h('button', { type: 'submit', class: 'btn btn--primary btn--big' }, 'Save changes');
   const form = h(
     'form',
     {
@@ -1335,6 +2108,7 @@ async function testimonialsScreen(arg: string) {
       onsubmit: (async (e: Event) => {
         e.preventDefault();
         const errors = new Errors(summary);
+        heads.check(errors);
         rows.forEach((r, i) => {
           const who = r.name.input.value.trim() || `Testimonial ${i + 1}`;
           if (!r.name.input.value.trim()) errors.add(r.name, `Testimonial ${i + 1}: add the client’s first name.`);
@@ -1364,7 +2138,11 @@ async function testimonialsScreen(arg: string) {
             ended: r.ongoing.checked ? 'ongoing' : r.ended.input.value,
           }),
         }));
-        if (await save([{ path: PATHS.testimonials, text: toJson(next) }], 'Update testimonials', saveBtn)) {
+        const changes: Change[] = [
+          { path: PATHS.testimonials, text: toJson(next) },
+          { path: PATHS.site, text: toJson(heads.apply(site)) },
+        ];
+        if (await save(changes, 'Update reviews', saveBtn)) {
           toast(savedMessage());
           history.replaceState(null, '', '#/testimonials');
           lastHash = location.hash;
@@ -1372,6 +2150,8 @@ async function testimonialsScreen(arg: string) {
         }
       }) as EventListener,
     },
+    heads.box,
+    h('h2', {}, 'Reviews'),
     list,
     h(
       'div',
@@ -1390,10 +2170,11 @@ async function testimonialsScreen(arg: string) {
   );
   trackDirty(form);
   screen(
-    'Testimonials',
-    heading(
-      'Testimonials',
+    'Reviews',
+    sectionHeading(
+      'Reviews',
       'Kind words from clients, shown on your home page. Only add ones the client has agreed to share.',
+      '#reviews',
     ),
     summary,
     form,
@@ -1401,13 +2182,13 @@ async function testimonialsScreen(arg: string) {
   if (arg === 'new') addRow();
 }
 
-// ---------- Photos (hero carousel and Meet your coach) ----------
+// ---------- Photos (hero carousel, Run Club and Meet your coach) ----------
 
 interface SitePhoto {
   image: string;
   alt: string;
 }
-const MAX_HERO_PHOTOS = 6;
+const MAX_CAROUSEL_PHOTOS = 6;
 const IMAGE_TYPES: Record<string, string> = {
   jpg: 'image/jpeg',
   jpeg: 'image/jpeg',
@@ -1500,9 +2281,10 @@ async function chooseFromLibrary(): Promise<File | 'upload' | null> {
   return new File([blob], chosen, { type });
 }
 
-async function photosScreen() {
+async function photosScreen(arg: string) {
   const site = await readJson<{
     hero: { photos?: SitePhoto[] } & Record<string, unknown>;
+    runClub?: { photos?: SitePhoto[] } & Record<string, unknown>;
     about: { photo?: SitePhoto } & Record<string, unknown>;
   }>(PATHS.site);
   const summary = errorSummary();
@@ -1583,59 +2365,64 @@ async function photosScreen() {
       'Replace photo',
     );
 
-  // Hero carousel
-  let heroPics: Pic[] = [];
-  const heroList = h('div', { class: 'stack' });
-  const addHeroBtn = h(
-    'button',
-    {
-      type: 'button',
-      class: 'btn',
-      onclick: (() =>
-        pick(SLOTS.hero, (data, upload) => {
-          const pic = heroPic(undefined);
-          pic.data = data;
-          pic.upload = upload;
-          showPic(pic);
-          heroPics.push(pic);
-          drawHero();
-          pic.alt.input.focus();
-        })) as EventListener,
-    },
-    '+ Add a photo',
-  );
-  const moveHero = (pic: Pic, by: number) => {
-    const i = heroPics.indexOf(pic);
-    const j = i + by;
-    if (j < 0 || j >= heroPics.length) return;
-    [heroPics[i], heroPics[j]] = [heroPics[j], heroPics[i]];
-    drawHero();
-    setDirty(true);
-  };
   const smallBtn = (label: string, onclick: () => void, extra = '') =>
     h('button', { type: 'button', class: `btn btn--small ${extra}`.trim(), onclick: onclick as EventListener }, label);
-  const heroPic = (photo: SitePhoto | undefined): Pic =>
-    makePic(photo, SLOTS.hero, 'Photo', (pic) => [
-      replaceBtn(pic, SLOTS.hero),
-      smallBtn('Move up', () => moveHero(pic, -1)),
-      smallBtn('Move down', () => moveHero(pic, 1)),
-      smallBtn(
-        'Remove',
-        () => {
-          heroPics = heroPics.filter((p) => p !== pic);
-          drawHero();
-          setDirty(true);
-        },
-        'btn--danger',
-      ),
-    ]);
-  const drawHero = () => {
-    heroPics.forEach((p, i) => (p.box.querySelector('legend')!.textContent = `Photo ${i + 1}`));
-    heroList.replaceChildren(...(heroPics.length ? heroPics.map((p) => p.box) : [h('p', {}, 'No photos yet.')]));
-    addHeroBtn.hidden = heroPics.length >= MAX_HERO_PHOTOS;
+
+  // A carousel (top of the home page, Run Club): a list of photos to add, replace, reorder and remove.
+  const carousel = (photos: SitePhoto[] | undefined, slot: Slot) => {
+    const c = { pics: [] as Pic[], list: h('div', { class: 'stack' }), addBtn: h('button', { type: 'button' }) };
+    const move = (pic: Pic, by: number) => {
+      const i = c.pics.indexOf(pic);
+      const j = i + by;
+      if (j < 0 || j >= c.pics.length) return;
+      [c.pics[i], c.pics[j]] = [c.pics[j], c.pics[i]];
+      draw();
+      setDirty(true);
+    };
+    const one = (photo: SitePhoto | undefined): Pic =>
+      makePic(photo, slot, 'Photo', (pic) => [
+        replaceBtn(pic, slot),
+        smallBtn('Move up', () => move(pic, -1)),
+        smallBtn('Move down', () => move(pic, 1)),
+        smallBtn(
+          'Remove',
+          () => {
+            c.pics = c.pics.filter((p) => p !== pic);
+            draw();
+            setDirty(true);
+          },
+          'btn--danger',
+        ),
+      ]);
+    const draw = () => {
+      c.pics.forEach((p, i) => (p.box.querySelector('legend')!.textContent = `Photo ${i + 1}`));
+      c.list.replaceChildren(...(c.pics.length ? c.pics.map((p) => p.box) : [h('p', {}, 'No photos yet.')]));
+      c.addBtn.hidden = c.pics.length >= MAX_CAROUSEL_PHOTOS;
+    };
+    c.addBtn = h(
+      'button',
+      {
+        type: 'button',
+        class: 'btn',
+        onclick: (() =>
+          pick(slot, (data, upload) => {
+            const pic = one(undefined);
+            pic.data = data;
+            pic.upload = upload;
+            showPic(pic);
+            c.pics.push(pic);
+            draw();
+            pic.alt.input.focus();
+          })) as EventListener,
+      },
+      '+ Add a photo',
+    );
+    c.pics = (photos ?? []).map((p) => one(p));
+    draw();
+    return c;
   };
-  heroPics = (site.hero.photos ?? []).map((p) => heroPic(p));
-  drawHero();
+  const hero = carousel(site.hero.photos, SLOTS.hero);
+  const club = carousel(site.runClub?.photos, SLOTS.runClub);
 
   // Meet your coach
   const portrait = makePic(site.about.photo, SLOTS.portrait, 'Your photo', (pic) => [replaceBtn(pic, SLOTS.portrait)]);
@@ -1649,9 +2436,13 @@ async function photosScreen() {
       onsubmit: (async (e: Event) => {
         e.preventDefault();
         const errors = new Errors(summary);
-        if (!heroPics.length) errors.add(addHeroBtn, 'Add at least one photo for the top of the home page.');
-        heroPics.forEach((p, i) => {
-          if (!p.alt.input.value.trim()) errors.add(p.alt, `Photo ${i + 1}: describe the photo.`);
+        if (!hero.pics.length) errors.add(hero.addBtn, 'Add at least one photo for the top of the home page.');
+        hero.pics.forEach((p, i) => {
+          if (!p.alt.input.value.trim()) errors.add(p.alt, `Top of the home page, photo ${i + 1}: describe the photo.`);
+        });
+        if (!club.pics.length) errors.add(club.addBtn, 'Add at least one photo for the Run Club.');
+        club.pics.forEach((p, i) => {
+          if (!p.alt.input.value.trim()) errors.add(p.alt, `Run Club, photo ${i + 1}: describe the photo.`);
         });
         if (!portrait.path && !portrait.data) errors.add(portrait.box, 'Add a photo for Meet your coach.');
         else if (!portrait.alt.input.value.trim()) errors.add(portrait.alt, 'Meet your coach: describe the photo.');
@@ -1673,10 +2464,16 @@ async function photosScreen() {
           return { image: path, alt };
         };
         const heroPhotos: SitePhoto[] = [];
-        for (const [i, p] of heroPics.entries()) heroPhotos.push(await keep(p, `hero-${i + 1}`));
+        for (const [i, p] of hero.pics.entries()) heroPhotos.push(await keep(p, `hero-${i + 1}`));
+        const clubPhotos: SitePhoto[] = [];
+        for (const [i, p] of club.pics.entries()) clubPhotos.push(await keep(p, `runclub-${i + 1}`));
         const portraitPhoto = await keep(portrait, 'portrait');
-        const used = new Set([...heroPhotos, portraitPhoto].map((p) => p.image));
-        const before = [...(site.hero.photos ?? []), ...(site.about.photo ? [site.about.photo] : [])];
+        const used = new Set([...heroPhotos, ...clubPhotos, portraitPhoto].map((p) => p.image));
+        const before = [
+          ...(site.hero.photos ?? []),
+          ...(site.runClub?.photos ?? []),
+          ...(site.about.photo ? [site.about.photo] : []),
+        ];
         for (const old of before) {
           if (old.image.startsWith(`${PATHS.photos}/`) && !used.has(old.image))
             changes.push({ path: old.image, remove: true });
@@ -1684,6 +2481,7 @@ async function photosScreen() {
         const next = {
           ...site,
           hero: { ...site.hero, photos: heroPhotos },
+          ...(site.runClub && { runClub: { ...site.runClub, photos: clubPhotos } }),
           about: { ...site.about, photo: portraitPhoto },
         };
         changes.push({ path: PATHS.site, text: toJson(next) });
@@ -1700,12 +2498,26 @@ async function photosScreen() {
       h(
         'p',
         { class: 'hint' },
-        `These take turns beside “Run further. Lift stronger.”, in this order. Up to ${MAX_HERO_PHOTOS} photos, ` +
+        `These take turns beside “Run further. Lift stronger.”, in this order. Up to ${MAX_CAROUSEL_PHOTOS} photos, ` +
           `each at least ${SLOTS.hero.width} × ${SLOTS.hero.height} pixels. When you add one, you choose which part shows.`,
       ),
-      heroList,
-      addHeroBtn,
+      hero.list,
+      hero.addBtn,
     ),
+    site.runClub &&
+      h(
+        'section',
+        { class: 'stack', id: 'runclub-photos-section', 'aria-labelledby': 'runclub-photos' },
+        h('h2', { id: 'runclub-photos' }, 'Run Club'),
+        h(
+          'p',
+          { class: 'hint' },
+          `These take turns beside the Run Club details, in this order. Up to ${MAX_CAROUSEL_PHOTOS} photos, ` +
+            `each at least ${SLOTS.runClub.width} × ${SLOTS.runClub.height} pixels. Group photos from your sessions work well.`,
+        ),
+        club.list,
+        club.addBtn,
+      ),
     h(
       'section',
       { class: 'stack', 'aria-labelledby': 'coach-photo' },
@@ -1722,10 +2534,12 @@ async function photosScreen() {
   trackDirty(form);
   screen(
     'Photos',
-    heading('Photos', 'The photos at the top of your home page and in the Meet your coach section.'),
+    heading('Photos', 'The photos at the top of your home page, in the Run Club section and in Meet your coach.'),
     summary,
     form,
   );
+  // Arriving from the Run Club page: go straight to its photos.
+  if (arg === 'runclub') document.getElementById('runclub-photos-section')?.scrollIntoView();
 }
 
 // ---------- Colours (theme) ----------
@@ -2004,7 +2818,7 @@ async function weekScreen() {
   trackDirty(form);
   screen(
     'Typical week',
-    heading('Typical week', 'The week of training shown under the big headline on your home page.'),
+    sectionHeading('Typical week', 'The week of training shown under the big headline on your home page.', ''),
     summary,
     form,
   );
@@ -2022,11 +2836,6 @@ async function contactScreen() {
     'Instagram name',
     textInput(contact.instagram, { maxlength: 30 }),
     'Without the @, e.g. peter_rothwell.pt',
-  );
-  const note = field(
-    'How people book',
-    textInput(contact.bookingNote, { maxlength: 60 }),
-    'Shown above your prices, e.g. "All bookings by text or email"',
   );
   const place = field('Venue', textInput(loc.place, { maxlength: 60 }), 'e.g. "Meadowbank Shopping Park"');
   const street = field('Street address', textInput(loc.street, { maxlength: 60 }));
@@ -2058,7 +2867,6 @@ async function contactScreen() {
           .replace(/\/$/, '');
         if (!/^[A-Za-z0-9._]{1,30}$/.test(handle))
           errors.add(insta, 'Enter your Instagram name using only letters, numbers, dots and underscores.');
-        if (!note.input.value.trim()) errors.add(note, 'Say how people book, e.g. "All bookings by text or email".');
         if (!street.input.value.trim()) errors.add(street, 'Add the street address.');
         if (!town.input.value.trim()) errors.add(town, 'Add the town or city.');
         if (!/^[A-Z]{1,2}\d[A-Z\d]? ?\d[A-Z]{2}$/i.test(postcode.input.value.trim()))
@@ -2079,7 +2887,6 @@ async function contactScreen() {
             phone: phone.input.value.trim(),
             email: email.input.value.trim(),
             instagram: handle,
-            bookingNote: note.input.value.trim(),
           },
           location: {
             ...loc,
@@ -2096,15 +2903,7 @@ async function contactScreen() {
           toast(savedMessage());
       }) as EventListener,
     },
-    h(
-      'fieldset',
-      { class: 'box' },
-      h('legend', {}, 'How people reach you'),
-      phone.wrap,
-      email.wrap,
-      insta.wrap,
-      note.wrap,
-    ),
+    h('fieldset', { class: 'box' }, h('legend', {}, 'How people reach you'), phone.wrap, email.wrap, insta.wrap),
     h(
       'fieldset',
       { class: 'box' },
@@ -2119,7 +2918,10 @@ async function contactScreen() {
   trackDirty(form);
   screen(
     'Contact details',
-    heading('Contact details', 'Shown at the bottom of every page and on your policies.'),
+    heading(
+      'Contact details',
+      'Your phone, email, Instagram and address. Shown at the bottom of every page and on your policies.',
+    ),
     summary,
     form,
   );
@@ -2284,11 +3086,23 @@ async function policyEditor(id: string) {
 
 async function instagramScreen() {
   const insta = await readJson<{ updated: string | null; posts: unknown[] }>(PATHS.instagram);
-  screen(
-    'Instagram feed',
-    heading('Instagram feed', 'Your latest Instagram posts show on the home page by themselves.'),
-    h('div', { class: 'narrow' }, instagramBox(insta)),
-  );
+  await sectionScreen({
+    title: 'Instagram',
+    intro: 'Your latest Instagram posts show on the home page by themselves. You can change the words around them.',
+    message: 'Update Instagram section',
+    parts: (site) => [
+      textGroup(
+        site,
+        'Words',
+        [
+          { path: 'instagram.eyebrow', label: 'Small heading', max: 40 },
+          { path: 'instagram.button', label: 'Button', max: 26, hint: 'It opens your Instagram page.' },
+        ],
+        'The big heading is your Instagram name, from Contact details.',
+      ),
+      instagramBox(insta),
+    ],
+  });
 }
 
 // ---------- Sign in ----------

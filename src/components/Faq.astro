@@ -2,17 +2,18 @@
 // Common questions, from src/data/faq.json (answers are Markdown).
 import { marked } from 'marked';
 import faq from '../data/faq.json';
+import site from '../data/site.json';
 import { baseLinks } from '../lib/url';
 
 const items = faq.map((f) => ({ ...f, html: baseLinks(marked.parseInline(f.answer, { async: false })) }));
 ---
 
-<section class="section faq" aria-labelledby="faq-title">
+<section id="faq" class="section faq" aria-labelledby="faq-title">
   <div class="wrap inner">
     <div class="head">
-      <span class="mono accent">Before you get in touch</span>
+      <span class="mono accent">{site.faq.eyebrow}</span>
       <h2 id="faq-title" class="display h2">
-        Questions
+        {site.faq.title}
       </h2>
     </div>
     <div class="list">

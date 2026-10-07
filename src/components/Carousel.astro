@@ -1,0 +1,200 @@
+---
+// A box of photos that cross-fade every few seconds, with one "next" arrow.
+// Used by the hero and the Run Club section. The parent sets the box's size
+// through `class`; anything in the default slot sits on top (e.g. a badge).
+import Photo from './Photo.astro';
+import type { ImageMetadata } from 'astro';
+
+interface Props {
+  slides: { src: ImageMetadata; alt: string }[];
+  class?: string;
+  /** How wide the photos show at each screen size. */
+  sizes: string;
+  widths?: number[];
+  /** Load the first photo straight away (for the top of the page). */
+  priority?: boolean;
+  /** Names the carousel for screen readers; each one on a page needs its own. */
+  label: string;
+  /** Shown in an empty box until photos are added. */
+  placeholder: string;
+  /** Soft duotone in the site's colours (the hero uses it). */
+  tint?: boolean;
+}
+
+const {
+  slides,
+  class: className,
+  sizes,
+  widths = [540, 1080],
+  priority = false,
+  label,
+  placeholder,
+  tint = false,
+} = Astro.props;
+---
+
+<section
+  class:list={['carousel', { 'carousel--tint': tint }, className]}
+  data-carousel
+  aria-roledescription={slides.length > 1 ? 'carousel' : undefined}
+  aria-label={slides.length > 1 ? label : undefined}
+>
+  {slides.length === 0 && <Photo class="slide-photo" label={placeholder} />}
+  {slides.map((p, i) => (
+    <div class:list={['slide', { 'is-active': i === 0 }]} data-slide aria-hidden={i > 0 ? 'true' : undefined}>
+      <Photo class="slide-photo" src={p.src} alt={p.alt} priority={priority && i === 0} sizes={sizes} widths={widths} />
+    </div>
+  ))}
+  <slot />
+  {slides.length > 1 && (
+    <div class="tags">
+      <span class="mono count" data-count aria-hidden="true">
+        01 / {String(slides.length).padStart(2, '0')}
+      </span>
+      <button class="next" type="button" data-next aria-label={`Next photo (2 of ${slides.length})`}>
+        <svg width="16" height="10" viewBox="0 0 16 10" aria-hidden="true">
+          <path d="M0 5h14M10 1l4 4-4 4"></path>
+        </svg>
+      </button>
+    </div>
+  )}
+</section>
+
+<script>
+  // Cross-fades every few seconds, with one "next" arrow. It stops while the
+  // pointer or keyboard focus is on it, and never moves by itself for people
+  // who prefer reduced motion.
+  document.querySelectorAll<HTMLElement>('[data-carousel]').forEach((box) => {
+    const slides = [...box.querySelectorAll<HTMLElement>('[data-slide]')];
+    const next = box.querySelector<HTMLButtonElement>('[data-next]');
+    const count = box.querySelector<HTMLElement>('[data-count]');
+    if (slides.length < 2 || !next) return;
+
+    const pad = (n: number) => String(n).padStart(2, '0');
+    const still = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    let current = 0;
+    let timer = 0;
+    let held = false; // pointer over it or focus inside it
+
+    const show = (index: number) => {
+      current = (index + slides.length) % slides.length;
+      slides.forEach((s, i) => {
+        s.classList.toggle('is-active', i === current);
+        if (i === current) s.removeAttribute('aria-hidden');
+        else s.setAttribute('aria-hidden', 'true');
+      });
+      if (count) count.textContent = `${pad(current + 1)} / ${pad(slides.length)}`;
+      const after = ((current + 1) % slides.length) + 1;
+      next.setAttribute('aria-label', `Next photo (${after} of ${slides.length})`);
+    };
+    const run = () => {
+      clearInterval(timer);
+      if (!still && !held) timer = window.setInterval(() => show(current + 1), 6000);
+    };
+
+    next.addEventListener('click', () => show(current + 1));
+    box.addEventListener('pointerenter', () => ((held = true), run()));
+    box.addEventListener('pointerleave', () => ((held = false), run()));
+    box.addEventListener('focusin', () => ((held = true), run()));
+    box.addEventListener('focusout', (e) => {
+      if (!box.contains(e.relatedTarget as Node)) ((held = false), run());
+    });
+    run();
+  });
+</script>
+
+<style>
+  .carousel {
+    position: relative;
+    overflow: hidden;
+    background: var(--panel);
+  }
+  .slide {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    transition: opacity 0.9s ease;
+  }
+  .slide.is-active {
+    opacity: 1;
+  }
+  /* A light duotone so the photos sit in the site's palette but keep their own
+     colours: partly desaturated, with a soft gorse wash over the top. */
+  .carousel--tint .slide :global(img) {
+    filter: grayscale(0.35) contrast(1.04);
+  }
+  .carousel--tint .slide::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--gorse);
+    mix-blend-mode: color;
+    opacity: 0.2;
+    pointer-events: none;
+  }
+  .slide :global(.slide-photo),
+  .carousel > :global(.slide-photo) {
+    height: 100%;
+  }
+  .carousel > :global(.slide-photo) {
+    position: absolute;
+    inset: 0;
+  }
+
+  /* Photo number ("02 / 03") with the "next" arrow beside it, top left. They
+     only show while the photo is hovered (or a keyboard user tabs to the arrow);
+     on touch screens, which can't hover, they're always there. */
+  .tags {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    z-index: 1;
+    display: flex;
+    gap: 2px;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+  }
+  .carousel:hover .tags,
+  .tags:focus-within {
+    opacity: 1;
+  }
+  @media (hover: none) {
+    .tags {
+      opacity: 1;
+    }
+  }
+  .count,
+  .next {
+    height: 28px;
+    background: var(--ink);
+    color: var(--paper);
+  }
+  .count {
+    display: grid;
+    place-items: center;
+    padding: 0 8px;
+    font-size: 11px;
+  }
+  .next {
+    width: 36px;
+    padding: 0;
+    border: 0;
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+    transition: color 0.15s ease;
+  }
+  .next svg {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.6;
+  }
+  .next:hover {
+    color: var(--gorse);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .slide {
+      transition: none;
+    }
+  }
+</style>

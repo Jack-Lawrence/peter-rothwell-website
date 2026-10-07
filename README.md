@@ -38,7 +38,7 @@ Optional fields that are left empty are hidden: `hero.badge` (e.g. "Longest run 
 
 ## Admin area (`/admin`)
 
-A small app for Peter to edit the content files above: blog posts (with a simple editor that saves Markdown), prices, Run Club dates, testimonials, the typical week, contact details and the four policy pages. The code is in `src/admin/` and only loads on `/admin`, so public pages stay light. `/admin` is `noindex` and left out of the sitemap. Peter's instructions are in [docs/admin-guide.md](docs/admin-guide.md).
+A small app for Peter to edit the content files above: blog posts (with a simple editor that saves Markdown), every heading, sentence and button on the home page (under "Your website", one screen per section), plans and prices (add, remove, reorder), the Run Club, questions, photos, colours, testimonials, the typical week, contact details and the four policy pages. The code is in `src/admin/` and only loads on `/admin`, so public pages stay light. `/admin` is `noindex` and left out of the sitemap. Peter's instructions are in [docs/admin-guide.md](docs/admin-guide.md).
 
 It has two modes:
 

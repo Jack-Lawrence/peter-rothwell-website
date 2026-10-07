@@ -8,7 +8,7 @@ Open **rothwellsrunning.com/admin** (on the preview site, add `/admin` to the en
 
 The first time you open the editor it may be in **demo mode**. A yellow bar at the top says so.
 
-- Everything works, so try it all: write a post, change a price.
+- Everything works, so try it all: write a post, change a price, rename a section.
 - Nothing you do in the demo changes your real website.
 - To start again, press **Reset demo** in the menu.
 
@@ -63,29 +63,54 @@ Your writing is also saved on your device as you type, so if you close the page 
 - **Move back to drafts** takes it off your website but keeps it.
 - **Delete post** removes it completely.
 
-## Changing prices
+## Changing the words on your website
 
-1. Press **Change prices** on the home screen.
-2. Change the price (numbers only, for example `85`) or the list of what's included (one point per line).
-3. Press **Save prices**.
+Every heading, sentence and button on your home page can be changed. Press **Your website** in the menu. It lists each part of your home page from top to bottom:
 
-## Setting Run Club dates
+- **Menu and footer**: the links at the top, the yellow button, the words at the bottom of every page, and your business name and description for Google.
+- **Top of the page**: the big headline (one line per line, the last one in your highlight colour), the introduction and the two buttons.
+- **Typical week**: the week of training under the headline. Keep each session short (14 letters or fewer) so it fits.
+- **Ways to train**: your plans and prices (see below).
+- **Run Club**: see below.
+- **Meet your coach**: your name, a few words about you, and up to three big numbers if you'd like them (for example "12" and "Ultras finished").
+- **Reviews**: the heading, and your clients' reviews (see below).
+- **Instagram**: the heading and button above your posts. The posts appear by themselves.
+- **Training journal**: the headings for your blog.
+- **Questions**: common questions and your answers. Add, change, reorder or remove them. If an answer has something in [square brackets], that's a note to replace with your own answer.
+- **Get in touch**: the yellow contact section and everything in the enquiry form, including the thank-you message.
 
-1. Press **Set Run Club dates**.
-2. Choose the date the next block starts, and type the day and time (for example "Tuesdays, 6:30pm").
-3. If you like, add how many spaces are left.
-4. Press **Save dates**. They show on the Run Club card on your home page.
+Tap one, change what you like, and press **Save changes**. Each page has a **See this on your website** link so you can find that part on your site.
 
-To take them off the website, press **Hide dates from the website**.
+## Plans and prices
 
-## Adding a testimonial
+Go to **Your website**, then **Ways to train** (or press **Change plans and prices** on the home screen).
+
+- Change a plan's name, price (numbers only, for example `85`) or what's included (one point per line).
+- **+ Add a plan** adds a new one (up to 4). **Remove plan** takes one off. **Move left** and **Move right** change the order.
+- The Run Club plan can't be removed, because the Run Club section uses it.
+
+The "I'm interested in" list on your enquiry form always matches your plans, so a new or renamed plan appears there by itself. If you rename a plan, any reviews that mention it are updated too.
+
+Press **Save changes** when you're done.
+
+## Run Club
+
+Go to **Your website**, then **Run Club** (or press **Run Club** on the home screen). Everything in the Run Club section of your home page is here:
+
+- **What it says**: the headings, a few words about the club and the button. Leave an empty line between paragraphs.
+- **Key facts**: the four boxes beside the photos, for example "The block / 8 sessions / over 8 weeks" or "Group chat / WhatsApp / 40 members and growing". Leave a box empty to hide it.
+- **Next block**: the date the next block starts, the day and time, and, if you like, how many spaces are left. These show in the Run Club section and on the Run Club plan. Press **Clear dates** to take them off the website.
+
+The Run Club photos are changed in **Photos**, and the price in **Ways to train**. There are buttons for both at the bottom of the Run Club page.
+
+## Adding a review
 
 Only add a client's words if they've said you can.
 
-1. Press **Add a testimonial**.
+1. Press **Add a testimonial** on the home screen.
 2. Type their first name, choose what they did with you, and paste what they said.
 3. Tick **Client agreed to this being published**.
-4. Press **Save testimonials**.
+4. Press **Save changes**.
 
 You can also change the order with **Move up** and **Move down**, or **Remove** one.
 
@@ -93,9 +118,10 @@ If you add the date they started training with you, their review shows how long 
 
 ## Changing photos
 
-Go to **Photos**. There are two places:
+Go to **Photos**. There are three places:
 
 - **Top of the home page**: up to 6 photos that take turns beside "Run further. Lift stronger.". They show in the order listed.
+- **Run Club**: up to 6 photos that take turns in the Run Club section. Group photos from your sessions work well.
 - **Meet your coach**: one square photo of you.
 
 To add or change one:
@@ -105,7 +131,7 @@ To add or change one:
 3. Press **Use this photo**, then describe the photo in a few words (for people who can't see it).
 4. Press **Save photos**.
 
-Photos need to be big enough to look sharp: at least 1080 × 1350 pixels for the top of the home page, and 1080 × 1080 for Meet your coach. Photos straight from your phone are fine. If a photo is too small, the editor tells you; try the original rather than a screenshot or one sent in a message.
+Photos need to be big enough to look sharp: at least 1080 × 1350 pixels for the top of the home page and the Run Club, and 1080 × 1080 for Meet your coach. Photos straight from your phone are fine. If a photo is too small, the editor tells you; try the original rather than a screenshot or one sent in a message.
 
 ## Changing your website's colours
 
@@ -115,10 +141,8 @@ To fine-tune, change any of the five colours under **Fine-tune**. Every choice i
 
 ## Other things you can change
 
-- **Typical week**: the week of training under the big headline on your home page. Keep each session short (14 letters or fewer) so it fits.
 - **Contact details**: your phone, email, Instagram name and training address.
 - **Policies**: your privacy policy, terms, refunds and accessibility pages. Anything still to fill in is highlighted in yellow. Tap an item in the yellow list to jump to it, replace the whole highlighted part with the real details, then press **Save page**.
-- **Instagram feed**: nothing to do. Your latest 6 posts appear on your home page by themselves.
 
 ## If something goes wrong
 

@@ -2,35 +2,23 @@
 import services from '../data/services.json';
 import site from '../data/site.json';
 import LocationMap from './LocationMap.astro';
+import { scheduleLine, type Schedule } from '../lib/schedule';
+import { href } from '../lib/url';
 
-interface Schedule {
-  starts: string;
-  when: string;
-  spaces: string;
-}
-
-// Run Club dates, set in the admin area. Hidden when empty.
-function scheduleLine(schedule?: Schedule) {
-  if (!schedule?.starts) return '';
-  const date = new Date(schedule.starts).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
-  const spaces = schedule.spaces && `${schedule.spaces} ${schedule.spaces === '1' ? 'space' : 'spaces'} left`;
-  return [`Next block ${date}`, schedule.when, spaces].filter(Boolean).join(' · ');
-}
+// Wording set in the admin area (Ways to train).
+const text = site.coaching;
 ---
 
 <section id="coaching" class="light services">
   <div class="wrap inner">
     <div class="head">
-      <h2 class="display title">Ways to train with me</h2>
-      <p class="lede">
-        {site.contact.bookingNote}. Every plan starts with a free 15-minute chat about where you are and where you want
-        to get to.
-      </p>
+      <h2 class="display title">{text.title}</h2>
+      <p class="lede">{text.intro}</p>
     </div>
 
-    <div class="cards">
+    <div class="cards" style={`--count: ${services.length}`}>
       {services.map((s) => (
-        <article class="card" id={s.id}>
+        <article class="card" id={`plan-${s.id}`}>
           <span class="mono label">{s.label}</span>
           <h3 class="display name">{s.name}</h3>
           <p class="price">
@@ -45,12 +33,22 @@ function scheduleLine(schedule?: Schedule) {
               <li>{p}</li>
             ))}
           </ul>
-          <a class="enquire" href="#contact" data-enquire={s.name}>
-            Enquire<span class="visually-hidden"> about {s.name}</span>
-            <span class="arrow" aria-hidden="true">
-              →
-            </span>
-          </a>
+          <div class="card-actions">
+            <a class="enquire" href="#contact" data-enquire={s.name}>
+              {text.enquire}
+              <span class="visually-hidden"> about {s.name}</span>
+              <span class="arrow" aria-hidden="true">
+                →
+              </span>
+            </a>
+            {/* The Run Club plan also links to its own section further down. */}
+            {s.id === 'runclub' && (
+              <a class="more" href={href('/#runclub')}>
+                {text.more}
+                <span class="visually-hidden"> about {s.name}</span>
+              </a>
+            )}
+          </div>
         </article>
       ))}
     </div>
@@ -58,7 +56,7 @@ function scheduleLine(schedule?: Schedule) {
     <div class="where">
       <div class="spot spot--map">
         <div class="spot-text">
-          <span class="mono label">Train in person</span>
+          <span class="mono label">{text.inPersonLabel}</span>
           <h3 class="display where-title">{site.location.area}</h3>
           <p>
             {site.location.address}
@@ -79,7 +77,7 @@ function scheduleLine(schedule?: Schedule) {
               <path d="M17 2C9 2 3 8 3 16c0 11 14 26 14 26s14-15 14-26C31 8 25 2 17 2z" class="pin-body"></path>
               <circle cx="17" cy="16" r="5" class="pin-dot"></circle>
             </svg>
-            <span class="mono map-tag">Rothwells Running</span>
+            <span class="mono map-tag">{site.name}</span>
           </span>
           <span class="map-cta">Get directions →</span>
         </a>
@@ -100,9 +98,9 @@ function scheduleLine(schedule?: Schedule) {
           <path d="M3 12h18M12 3c2.5 2.7 3.8 5.7 3.8 9s-1.3 6.3-3.8 9c-2.5-2.7-3.8-5.7-3.8-9S9.5 5.7 12 3z"></path>
         </svg>
         <div class="spot-text">
-          <span class="mono label">Or train online</span>
-          <h3 class="display where-title">Anywhere you run</h3>
-          <p>Your plan, check-ins and support, wherever you live and train.</p>
+          <span class="mono label">{text.onlineLabel}</span>
+          <h3 class="display where-title">{text.onlineTitle}</h3>
+          <p>{text.onlineText}</p>
         </div>
       </div>
     </div>
@@ -160,7 +158,8 @@ function scheduleLine(schedule?: Schedule) {
 
   .cards {
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    /* One column per plan (Peter can have 1 to 4). */
+    grid-template-columns: repeat(var(--count, 3), minmax(0, 1fr));
     gap: 16px;
   }
   /* Each plan is a coloured panel: loch blue, gorse, bracken (then repeating). */
@@ -219,9 +218,14 @@ function scheduleLine(schedule?: Schedule) {
     font-size: 16px;
   }
   /* Sits at the bottom of each card, so the three line up. */
-  .enquire {
+  .card-actions {
     margin-top: auto;
-    align-self: flex-start;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .enquire,
+  .more {
     display: inline-flex;
     align-items: center;
     gap: 10px;
@@ -236,6 +240,15 @@ function scheduleLine(schedule?: Schedule) {
   }
   .enquire:hover {
     background: var(--ink-soft);
+  }
+  /* "Details": an outline button beside Enquire. */
+  .more {
+    background: transparent;
+    color: var(--granite);
+    border: 1.5px solid var(--granite);
+  }
+  .more:hover {
+    background: color-mix(in srgb, var(--granite) 10%, transparent);
   }
   .enquire .arrow {
     color: var(--gorse);

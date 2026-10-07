@@ -47,6 +47,17 @@
   color-scheme: dark;
 }
 
+/* Phones and tablets: a shorter header, which stays at the top while scrolling,
+   so links to a section stop just below it. */
+@media (max-width: 900px) {
+  :root {
+    --header-h: 72px;
+  }
+  html {
+    scroll-padding-top: var(--header-h);
+  }
+}
+
 /* Light mode (the sun/moon button in the header). The granite sections turn
    light; chalk sections and the gorse contact section look the same in both. */
 :root[data-theme='light'] {
@@ -127,7 +138,7 @@ a {
 :root[data-theme='light'] :focus-visible {
   outline-color: var(--ink);
 }
-:root[data-theme='light'] .footer .enquiry :focus-visible {
+:root[data-theme='light'] .footer :is(.enquiry, .base) :focus-visible {
   outline-color: var(--gorse);
 }
 

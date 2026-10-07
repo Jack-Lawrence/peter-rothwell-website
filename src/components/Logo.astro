@@ -1,8 +1,9 @@
 ---
+import site from '../data/site.json';
 import { href } from '../lib/url';
 ---
 
-<a class="logo" href={href('/')} aria-label="Rothwells Running home">
+<a class="logo" href={href('/')} aria-label={`${site.name} home`}>
   <svg width="34" height="34" viewBox="0 0 34 34" fill="none" aria-hidden="true">
     <path
       d="M2 28 L11 14 L16 20 L23 8 L32 28 Z"
@@ -11,7 +12,7 @@ import { href } from '../lib/url';
       stroke-linejoin="round"
     ></path>
   </svg>
-  <span class="display">Rothwells Running</span>
+  <span class="display">{site.name}</span>
 </a>
 
 <style>

@@ -1,0 +1,188 @@
+---
+import Carousel from './Carousel.astro';
+import site from '../data/site.json';
+import services from '../data/services.json';
+import { href } from '../lib/url';
+import { slidesFor, type SitePhoto } from '../lib/photos';
+import { scheduleLine, type Schedule } from '../lib/schedule';
+
+// Words, details and photos are set in the admin area (Run Club); the price
+// and next block's dates come from the Run Club plan in services.json.
+const club = site.runClub as {
+  eyebrow: string;
+  headline: string;
+  paragraphs: string[];
+  facts: { label: string; value: string; note: string }[];
+  button: string;
+  photos?: SitePhoto[];
+};
+const plan = services.find((s) => s.id === 'runclub') as
+  ((typeof services)[number] & { schedule?: Schedule }) | undefined;
+const slides = slidesFor(club.photos);
+const next = scheduleLine(plan?.schedule, false);
+// Up to four key facts; any left empty are hidden.
+const facts = club.facts.filter((f) => f.value);
+---
+
+<section id="runclub" class="section club" aria-labelledby="runclub-title">
+  <div class="wrap grid">
+    <Carousel
+      class="club-photos"
+      slides={slides}
+      label="Run Club photos"
+      sizes="(max-width: 900px) 100vw, min(42vw, 510px)"
+      placeholder="The Run Club out on a Thursday session."
+    />
+    <div class="text">
+      <span class="mono accent">{club.eyebrow}</span>
+      <h2 id="runclub-title" class="display h2">
+        {club.headline}
+      </h2>
+      {club.paragraphs.map((p) => (
+        <p class="para">{p}</p>
+      ))}
+
+      <dl class="facts">
+        {facts.map((f) => (
+          <div>
+            <dt class="mono">{f.label}</dt>
+            <dd>
+              <span class="display value">{f.value}</span>
+              {f.note && <span class="sub">{f.note}</span>}
+            </dd>
+          </div>
+        ))}
+      </dl>
+
+      <div class="join">
+        {plan && (
+          <div class="cost">
+            <p class="price">
+              <span class="display amount">{plan.price}</span>
+              <span class="per">{plan.per}</span>
+            </p>
+            {next && <p class="mono next">{next}</p>}
+          </div>
+        )}
+        <a class="btn" href={href('/#contact')} data-enquire={plan?.name}>
+          {club.button}
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .club {
+    background: var(--granite-2);
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
+    gap: 72px;
+    align-items: center;
+  }
+  .grid :global(.club-photos) {
+    aspect-ratio: 4 / 5;
+  }
+  .text {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+  .para {
+    margin: 0;
+    font-size: 19px;
+    line-height: 1.6;
+    color: var(--muted-2);
+    max-width: 36em;
+  }
+
+  /* ---------- Key facts: 2 × 2 ---------- */
+  .facts {
+    margin: 8px 0 0;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0 32px;
+  }
+  .facts div {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding-block: 16px;
+    border-top: 1px solid var(--line);
+  }
+  dt {
+    color: var(--muted);
+  }
+  dd {
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .value {
+    font-size: 34px;
+    font-weight: 800;
+    color: var(--chalk);
+  }
+  .sub {
+    font-size: 15px;
+    color: var(--muted-2);
+  }
+
+  /* ---------- Price and button ---------- */
+  .join {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 20px 32px;
+    padding-top: 24px;
+    border-top: 1px solid var(--line);
+  }
+  .cost {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .price {
+    margin: 0;
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+  }
+  .amount {
+    font-size: 48px;
+    color: var(--accent);
+  }
+  .per {
+    color: var(--muted-2);
+    font-weight: 600;
+  }
+  .next {
+    margin: 0;
+    color: var(--muted);
+  }
+
+  @media (max-width: 900px) {
+    .grid {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 40px;
+    }
+    .grid :global(.club-photos) {
+      max-height: 75svh;
+    }
+  }
+  @media (max-width: 420px) {
+    .facts {
+      gap: 0 20px;
+    }
+    .value {
+      font-size: 28px;
+    }
+    .join .btn {
+      width: 100%;
+    }
+  }
+</style>

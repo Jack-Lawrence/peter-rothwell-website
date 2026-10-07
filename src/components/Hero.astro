@@ -1,15 +1,13 @@
 ---
-import Photo from './Photo.astro';
+import Carousel from './Carousel.astro';
 import site from '../data/site.json';
 import { href } from '../lib/url';
-import { photoFor, type SitePhoto } from '../lib/photos';
+import { slidesFor, type SitePhoto } from '../lib/photos';
 
-const { eyebrow, headline, intro, badge } = site.hero;
+const { eyebrow, headline, intro, badge, buttons } = site.hero;
 const last = headline.length - 1;
 // Photos set in the admin area, already cropped to the box's shape (4:5).
-const slides = ((site.hero as { photos?: SitePhoto[] }).photos ?? [])
-  .map((p) => ({ src: photoFor(p.image), alt: p.alt }))
-  .filter((p) => p.src);
+const slides = slidesFor((site.hero as { photos?: SitePhoto[] }).photos);
 const sizes = '(max-width: 900px) 100vw, min(37vw, 450px)';
 ---
 
@@ -26,91 +24,31 @@ const sizes = '(max-width: 900px) 100vw, min(37vw, 450px)';
     </div>
     <div class="ctas">
       <a class="btn" href={href('/#coaching')}>
-        See coaching plans
+        {buttons.primary}
       </a>
       <a class="btn btn--ghost" href={href('/#runclub')}>
-        Join the Run Club
+        {buttons.secondary}
       </a>
     </div>
   </div>
 
-  <section
+  <Carousel
     class="hero-photo"
-    data-carousel
-    aria-roledescription={slides.length > 1 ? 'carousel' : undefined}
-    aria-label={slides.length > 1 ? 'Photos' : undefined}
+    slides={slides}
+    sizes={sizes}
+    priority
+    tint
+    label="Photos of Peter"
+    placeholder="Peter on a hill trail, mid-run. Full-bleed, high-contrast action shot."
   >
-    {slides.length === 0 && (
-      <Photo class="slide-photo" label="Peter on a hill trail, mid-run. Full-bleed, high-contrast action shot." />
-    )}
-    {slides.map((p, i) => (
-      <div class:list={['slide', { 'is-active': i === 0 }]} data-slide aria-hidden={i > 0 ? 'true' : undefined}>
-        <Photo class="slide-photo" src={p.src} alt={p.alt} priority={i === 0} sizes={sizes} widths={[540, 1080]} />
-      </div>
-    ))}
     {badge.value && (
       <div class="badge">
         <span class="mono">{badge.label}</span>
         <span class="display">{badge.value}</span>
       </div>
     )}
-    {slides.length > 1 && (
-      <div class="tags">
-        <span class="mono count" data-count aria-hidden="true">
-          01 / {String(slides.length).padStart(2, '0')}
-        </span>
-        <button class="next" type="button" data-next aria-label={`Next photo (2 of ${slides.length})`}>
-          <svg width="16" height="10" viewBox="0 0 16 10" aria-hidden="true">
-            <path d="M0 5h14M10 1l4 4-4 4"></path>
-          </svg>
-        </button>
-      </div>
-    )}
-  </section>
+  </Carousel>
 </section>
-
-<script>
-  // Hero carousel: cross-fades every few seconds, with one "next" arrow. It
-  // stops while the pointer or keyboard focus is on it, and never moves by
-  // itself for people who prefer reduced motion.
-  document.querySelectorAll<HTMLElement>('[data-carousel]').forEach((box) => {
-    const slides = [...box.querySelectorAll<HTMLElement>('[data-slide]')];
-    const next = box.querySelector<HTMLButtonElement>('[data-next]');
-    const count = box.querySelector<HTMLElement>('[data-count]');
-    if (slides.length < 2 || !next) return;
-
-    const pad = (n: number) => String(n).padStart(2, '0');
-    const still = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    let current = 0;
-    let timer = 0;
-    let held = false; // pointer over it or focus inside it
-
-    const show = (index: number) => {
-      current = (index + slides.length) % slides.length;
-      slides.forEach((s, i) => {
-        s.classList.toggle('is-active', i === current);
-        if (i === current) s.removeAttribute('aria-hidden');
-        else s.setAttribute('aria-hidden', 'true');
-      });
-      if (count) count.textContent = `${pad(current + 1)} / ${pad(slides.length)}`;
-      const after = ((current + 1) % slides.length) + 1;
-      next.setAttribute('aria-label', `Next photo (${after} of ${slides.length})`);
-    };
-    const run = () => {
-      clearInterval(timer);
-      if (!still && !held) timer = window.setInterval(() => show(current + 1), 6000);
-    };
-
-    next.addEventListener('click', () => show(current + 1));
-    box.addEventListener('pointerenter', () => ((held = true), run()));
-    box.addEventListener('pointerleave', () => ((held = false), run()));
-    box.addEventListener('focusin', () => ((held = true), run()));
-    box.addEventListener('focusout', (e) => {
-      if (!box.contains(e.relatedTarget as Node)) ((held = false), run());
-    });
-    run();
-  });
-</script>
 
 <style>
   .hero {
@@ -153,99 +91,8 @@ const sizes = '(max-width: 900px) 100vw, min(37vw, 450px)';
     flex-wrap: wrap;
   }
   /* The photo stretches to whatever height the first screen leaves it. */
-  .hero-photo {
-    position: relative;
+  .hero :global(.hero-photo) {
     min-height: 320px;
-    overflow: hidden;
-    background: var(--panel);
-  }
-  .slide {
-    position: absolute;
-    inset: 0;
-    opacity: 0;
-    transition: opacity 0.9s ease;
-  }
-  .slide.is-active {
-    opacity: 1;
-  }
-  /* A light duotone so the photos sit in the site's palette but keep their own
-     colours: partly desaturated, with a soft gorse wash over the top. */
-  .slide :global(img) {
-    filter: grayscale(0.35) contrast(1.04);
-  }
-  .slide::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: var(--gorse);
-    mix-blend-mode: color;
-    opacity: 0.2;
-    pointer-events: none;
-  }
-  .slide :global(.slide-photo),
-  .hero-photo > :global(.slide-photo) {
-    height: 100%;
-  }
-  .hero-photo > :global(.slide-photo) {
-    position: absolute;
-    inset: 0;
-  }
-
-  /* Photo number ("02 / 03") with the "next" arrow beside it, top left. They
-     only show while the photo is hovered (or a keyboard user tabs to the arrow);
-     on touch screens, which can't hover, they're always there. */
-  .tags {
-    position: absolute;
-    top: 10px;
-    left: 10px;
-    z-index: 1;
-    display: flex;
-    gap: 2px;
-    opacity: 0;
-    transition: opacity 0.2s ease;
-  }
-  .hero-photo:hover .tags,
-  .tags:focus-within {
-    opacity: 1;
-  }
-  @media (hover: none) {
-    .tags {
-      opacity: 1;
-    }
-  }
-  .count,
-  .next {
-    height: 28px;
-    background: var(--ink);
-    color: var(--paper);
-  }
-  .count {
-    display: grid;
-    place-items: center;
-    padding: 0 8px;
-    font-size: 11px;
-  }
-  .next {
-    width: 36px;
-    padding: 0;
-    border: 0;
-    display: grid;
-    place-items: center;
-    cursor: pointer;
-    transition: color 0.15s ease;
-  }
-  .next svg {
-    fill: none;
-    stroke: currentColor;
-    stroke-width: 1.6;
-  }
-  .next:hover {
-    color: var(--gorse);
-  }
-  @media (prefers-reduced-motion: reduce) {
-    .slide {
-      transition: none;
-    }
   }
   .badge {
     position: absolute;
@@ -288,7 +135,7 @@ const sizes = '(max-width: 900px) 100vw, min(37vw, 450px)';
       padding-top: 8px;
     }
     /* Same 4:5 shape as the saved photos, but never taller than most of the screen. */
-    .hero-photo {
+    .hero :global(.hero-photo) {
       aspect-ratio: 4 / 5;
       max-height: 75svh;
     }

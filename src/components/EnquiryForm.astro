@@ -18,20 +18,31 @@
 // but nothing is sent. A genuine submission shows the success screen plus a
 // sample of the email Peter would receive.
 import site from '../data/site.json';
+import services from '../data/services.json';
 import { href } from '../lib/url';
 import { PREVIEW } from 'astro:env/server';
 
 const { accessKey, captcha, interests } = site.enquiries;
+// The dropdown: every plan (so "Enquire" on a plan can pick it), then any extra choices.
+const options = [...services.map((s) => s.name), ...interests].filter((o, i, all) => o && all.indexOf(o) === i);
+const text = site.getInTouch;
 const reversedKey = accessKey.split('').reverse().join('');
 const demo = PREVIEW && !accessKey;
 ---
 
 <div class="enquiry">
   <div class="enquiry-head">
-    <h3 class="display">Send an enquiry</h3>
-    <p>Tell me a bit about you and what you're aiming for, and I'll reply by email.</p>
+    <h3 class="display">{text.formTitle}</h3>
+    <p>{text.formIntro}</p>
   </div>
-  <form class="form" data-enquiry data-k={reversedKey} data-demo={demo ? '' : undefined} novalidate>
+  <form
+    class="form"
+    data-enquiry
+    data-site={site.name}
+    data-k={reversedKey}
+    data-demo={demo ? '' : undefined}
+    novalidate
+  >
     <div class="row">
       <div class="field">
         <label for="enq-name">Name</label>
@@ -56,7 +67,7 @@ const demo = PREVIEW && !accessKey;
           <option value="" selected disabled>
             Choose one
           </option>
-          {interests.map((i) => (
+          {options.map((i) => (
             <option>{i}</option>
           ))}
         </select>
@@ -71,7 +82,7 @@ const demo = PREVIEW && !accessKey;
         rows="4"
         required
         maxlength="2000"
-        placeholder="Your goals, a race you're training for, or any questions."
+        placeholder={text.placeholder}
       ></textarea>
     </div>
 
@@ -85,13 +96,12 @@ const demo = PREVIEW && !accessKey;
     {captcha && <div class="h-captcha" data-captcha="true"></div>}
 
     <p class="note">
-      Please don't include health details here, we'll go through those when we talk. Your details are only used to reply
-      to you. See the <a href={href('/privacy/')}>Privacy Policy</a>.
+      {text.note} See the <a href={href('/privacy/')}>Privacy Policy</a>.
     </p>
 
     <div class="actions">
       <button class="send" type="submit">
-        Send enquiry
+        {text.button}
       </button>
       <p class="status" id="enq-status" data-status role="status" aria-live="polite"></p>
     </div>
@@ -111,7 +121,7 @@ const demo = PREVIEW && !accessKey;
       <path d="M7.5 12.5l3 3 6-6.5"></path>
     </svg>
     <h3 class="display">Message sent</h3>
-    <p data-done-text>Thanks. Peter will reply by email as soon as he can.</p>
+    <p data-done-text>{text.thanks}</p>
     {demo && (
       <div class="demo" data-demo-note hidden>
         <p class="demo-note">
@@ -155,6 +165,9 @@ const demo = PREVIEW && !accessKey;
     const button = form.querySelector<HTMLButtonElement>('button[type="submit"]')!;
     const done = wrap.querySelector<HTMLElement>('[data-done]')!;
     const doneText = wrap.querySelector<HTMLElement>('[data-done-text]')!;
+    // Wording set in the admin area.
+    const thanks = doneText.textContent?.trim() ?? '';
+    const sendLabel = button.textContent?.trim() ?? '';
     const loadedAt = Date.now();
     let interacted = false;
 
@@ -193,7 +206,8 @@ const demo = PREVIEW && !accessKey;
 
     const showDone = (name: string) => {
       const first = name.trim().split(/\s+/)[0];
-      doneText.textContent = `Thanks${first ? `, ${first}` : ''}. Peter will reply by email as soon as he can.`;
+      // "Thanks. Peter will reply…" becomes "Thanks, Sam. Peter will reply…".
+      doneText.textContent = first ? thanks.replace(/^(Thanks|Thank you)/i, `$1, ${first}`) : thanks;
       form.hidden = true;
       wrap.querySelector<HTMLElement>('.enquiry-head')!.hidden = true;
       done.hidden = false;
@@ -287,7 +301,7 @@ const demo = PREVIEW && !accessKey;
       data.delete('website');
       data.set('access_key', key);
       data.set('subject', subject);
-      data.set('from_name', 'Rothwells Running website');
+      data.set('from_name', `${form.dataset.site} website`);
 
       button.disabled = true;
       button.textContent = 'Sending…';
@@ -301,7 +315,7 @@ const demo = PREVIEW && !accessKey;
         say('Sorry, your message could not be sent. Please try again, or text or email Peter instead.');
       } finally {
         button.disabled = false;
-        button.textContent = 'Send enquiry';
+        button.textContent = sendLabel;
       }
     });
   });

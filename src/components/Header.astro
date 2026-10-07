@@ -1,79 +1,110 @@
 ---
 import Logo from './Logo.astro';
 import ThemeToggle from './ThemeToggle.astro';
-import { href } from '../lib/url';
+import site from '../data/site.json';
+import { href, telHref } from '../lib/url';
 
+// Labels are set in the admin area (Menu and footer).
+const { contact, nav } = site;
 const links = [
-  { label: 'Coaching', path: '/#coaching' },
-  { label: 'Run Club', path: '/#runclub' },
-  { label: 'Journal', path: '/journal/' },
-  { label: 'About Peter', path: '/#about' },
+  { label: nav.coaching, path: '/#coaching' },
+  { label: nav.runClub, path: '/#runclub' },
+  { label: nav.about, path: '/#about' },
+  { label: nav.journal, path: '/journal/' },
 ];
 ---
 
-<header class="wrap header">
-  <Logo />
-  <nav class="links" aria-label="Main">
-    {links.map((l) => (
-      <a href={href(l.path)}>{l.label}</a>
-    ))}
-  </nav>
-  <div class="actions">
-    <ThemeToggle />
-    <a class="btn cta" href={href('/#contact')}>
-      Book a free chat
-    </a>
+<div class="masthead" data-masthead>
+  <header class="wrap header">
+    <Logo />
+    <nav class="links" aria-label="Main">
+      {links.map((l) => (
+        <a href={href(l.path)}>{l.label}</a>
+      ))}
+    </nav>
+    <div class="actions">
+      <ThemeToggle />
+      <a class="btn cta" href={href('/#contact')}>
+        {nav.cta}
+      </a>
+      <button class="menu-btn" type="button" aria-label="Menu" aria-expanded="false" aria-controls="mobile-menu">
+        <span class="bars" aria-hidden="true">
+          <span></span>
+          <span></span>
+          <span></span>
+        </span>
+      </button>
+    </div>
+  </header>
+</div>
 
-    <details class="mobile">
-      <summary aria-label="Menu">
-        <svg
-          width="26"
-          height="26"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          aria-hidden="true"
-        >
-          <path d="M3 6h18M3 12h18M3 18h18"></path>
-        </svg>
-      </summary>
-      <nav class="sheet" aria-label="Mobile">
-        {links.map((l) => (
-          <a href={href(l.path)}>{l.label}</a>
-        ))}
-        <a class="btn" href={href('/#contact')}>
-          Book a free chat
-        </a>
-      </nav>
-    </details>
-  </div>
-</header>
+<!-- Phones and tablets: the menu covers the whole screen below the header. -->
+<div class="menu" id="mobile-menu" data-menu>
+  <nav class="wrap menu-inner" aria-label="Mobile">
+    <ol class="menu-links">
+      {links.map((l, i) => (
+        <li style={`--i: ${i}`}>
+          <a href={href(l.path)}>
+            <span class="mono num" aria-hidden="true">
+              {String(i + 1).padStart(2, '0')}
+            </span>
+            <span class="display">{l.label}</span>
+          </a>
+        </li>
+      ))}
+    </ol>
+    <div class="menu-foot" style={`--i: ${links.length}`}>
+      <a class="btn" href={href('/#contact')}>
+        {nav.cta}
+      </a>
+      <p class="reach">
+        <a href={telHref(contact.phone)}>{contact.phone.replace(/ /g, ' ')}</a>
+        <a href={`mailto:${contact.email}`}>{contact.email}</a>
+      </p>
+    </div>
+  </nav>
+</div>
 
 <script>
-  document.querySelectorAll<HTMLDetailsElement>('details.mobile').forEach((menu) => {
-    const toggle = menu.querySelector('summary')!;
-    const close = () => menu.removeAttribute('open');
+  const masthead = document.querySelector<HTMLElement>('[data-masthead]');
+  const menu = document.querySelector<HTMLElement>('[data-menu]');
+  const button = masthead?.querySelector<HTMLButtonElement>('.menu-btn');
 
+  if (masthead && menu && button) {
+    const root = document.documentElement;
+    // Everything except the header and menu, made unreachable while the menu is open.
+    const behind = () => document.querySelectorAll<HTMLElement>('body > :not(.masthead, .menu, script, style)');
+
+    const setOpen = (open: boolean) => {
+      // The menu starts just below the header, wherever the header is right now.
+      if (open) menu.style.setProperty('--menu-top', `${masthead.getBoundingClientRect().bottom}px`);
+      button.setAttribute('aria-expanded', String(open));
+      root.classList.toggle('menu-open', open);
+      behind().forEach((el) => (el.inert = open));
+    };
+    const isOpen = () => button.getAttribute('aria-expanded') === 'true';
+
+    button.addEventListener('click', () => setOpen(!isOpen()));
     // Close after jumping to a section on the same page.
-    menu.querySelectorAll('.sheet a').forEach((a) => a.addEventListener('click', close));
-    // Escape closes the menu and puts focus back on the menu button.
-    menu.addEventListener('keydown', (event) => {
-      if (event.key === 'Escape' && menu.open) {
-        close();
-        toggle.focus();
+    menu.querySelectorAll('a').forEach((a) => a.addEventListener('click', () => setOpen(false)));
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && isOpen()) {
+        setOpen(false);
+        button.focus();
       }
     });
-    // Close when focus moves on past the last link, so it doesn't cover the page.
-    menu.addEventListener('focusout', (event) => {
-      if (!menu.contains(event.relatedTarget as Node | null)) close();
-    });
-  });
+    // Turning a tablet sideways (past the desktop width) closes it.
+    window.matchMedia('(min-width: 901px)').addEventListener('change', (e) => e.matches && setOpen(false));
+
+    // A thin line under the header once the page has scrolled under it.
+    const stuck = () => masthead.classList.toggle('is-stuck', window.scrollY > 4);
+    window.addEventListener('scroll', stuck, { passive: true });
+    stuck();
+  }
 </script>
 
 <style>
   .header {
-    position: relative;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -99,42 +130,57 @@ const links = [
     align-items: center;
     gap: 12px;
   }
-  .mobile {
+
+  /* ---------- Menu button: three bars that turn into a cross ---------- */
+  .menu-btn {
     display: none;
-  }
-  summary {
-    list-style: none;
-    cursor: pointer;
-    display: grid;
     place-items: center;
     width: 48px;
     height: 48px;
+    padding: 0;
     border: 1.5px solid var(--line);
+    background: transparent;
+    color: var(--chalk);
+    cursor: pointer;
   }
-  summary::-webkit-details-marker {
-    display: none;
+  .bars {
+    position: relative;
+    width: 22px;
+    height: 16px;
   }
-  .sheet {
+  .bars span {
     position: absolute;
-    right: var(--gutter);
-    left: var(--gutter);
-    top: calc(100% - 8px);
-    z-index: 5;
-    background: var(--granite-2);
-    border: 1px solid var(--line);
-    padding: 12px;
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: currentColor;
+    transition:
+      transform 0.3s cubic-bezier(0.7, 0, 0.2, 1),
+      opacity 0.2s ease;
   }
-  .sheet a:not(.btn) {
-    padding: 12px;
-    text-decoration: none;
-    font-weight: 600;
-    font-size: 18px;
+  .bars span:nth-child(1) {
+    top: 0;
   }
-  .sheet .btn {
-    margin-top: 8px;
+  .bars span:nth-child(2) {
+    top: 7px;
+  }
+  .bars span:nth-child(3) {
+    top: 14px;
+  }
+  [aria-expanded='true'] .bars span:nth-child(1) {
+    transform: translateY(7px) rotate(45deg);
+  }
+  [aria-expanded='true'] .bars span:nth-child(2) {
+    opacity: 0;
+    transform: scaleX(0);
+  }
+  [aria-expanded='true'] .bars span:nth-child(3) {
+    transform: translateY(-7px) rotate(-45deg);
+  }
+
+  /* ---------- Full-screen menu ---------- */
+  .menu {
+    display: none;
   }
 
   @media (max-width: 900px) {
@@ -142,10 +188,131 @@ const links = [
     .cta {
       display: none;
     }
-    .mobile {
+    .menu-btn {
+      display: grid;
+    }
+
+    /* The header stays at the top of the screen while scrolling. */
+    .masthead {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      background: var(--granite);
+      transition: box-shadow 0.2s ease;
+    }
+    /* Phones round the sticky position to the nearest device pixel, which can
+       leave a sliver of the page showing above the header. This covers it. */
+    .masthead::before {
+      content: '';
+      position: absolute;
+      inset: auto 0 100%;
+      height: 16px;
+      background: inherit;
+    }
+    .masthead.is-stuck,
+    :global(.menu-open) .masthead {
+      box-shadow: 0 1px 0 var(--line);
+    }
+
+    .menu {
       display: block;
+      position: fixed;
+      inset: var(--menu-top, var(--header-h)) 0 0;
+      z-index: 19;
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      background: var(--granite);
+      /* Closed: wiped up out of sight. It opens downwards from the header. */
+      visibility: hidden;
+      clip-path: inset(0 0 100% 0);
+      transition:
+        clip-path 0.45s cubic-bezier(0.7, 0, 0.2, 1),
+        visibility 0s linear 0.45s;
+    }
+    :global(.menu-open) .menu {
+      visibility: visible;
+      clip-path: inset(0 0 0 0);
+      transition: clip-path 0.5s cubic-bezier(0.7, 0, 0.2, 1);
+    }
+    :global(.menu-open) {
+      overflow: hidden;
     }
   }
+
+  .menu-inner {
+    min-height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 40px;
+    padding-block: 16px 32px;
+  }
+  .menu-links {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .menu-links li,
+  .menu-foot {
+    opacity: 0;
+    transform: translateY(24px);
+    transition:
+      opacity 0.2s ease,
+      transform 0.2s ease;
+  }
+  /* Each line rises into place a moment after the one before. */
+  :global(.menu-open) :is(.menu-links li, .menu-foot) {
+    opacity: 1;
+    transform: none;
+    transition:
+      opacity 0.4s ease calc(0.15s + var(--i) * 0.06s),
+      transform 0.5s cubic-bezier(0.2, 0.7, 0.2, 1) calc(0.15s + var(--i) * 0.06s);
+  }
+  .menu-links a {
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+    padding-block: 14px;
+    border-bottom: 1px solid var(--line);
+    text-decoration: none;
+  }
+  .menu-links .display {
+    font-size: clamp(44px, 13vw, 72px);
+    font-weight: 800;
+    line-height: 0.95;
+  }
+  .menu-links a:hover .display,
+  .menu-links a:focus-visible .display {
+    color: var(--accent);
+  }
+  .num {
+    color: var(--accent);
+    min-width: 2ch;
+  }
+  .menu-foot {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+  .menu-foot .btn {
+    width: 100%;
+  }
+  .reach {
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    color: var(--muted-2);
+    font-size: 16px;
+  }
+  .reach a {
+    text-decoration: none;
+    overflow-wrap: anywhere;
+  }
+  .reach a:hover {
+    color: var(--chalk);
+  }
+
   /* Very narrow screens (or 400% zoom): tighter spacing so everything fits. */
   @media (max-width: 360px) {
     .header {
@@ -154,7 +321,7 @@ const links = [
     .actions {
       gap: 8px;
     }
-    summary,
+    .menu-btn,
     .actions :global(.theme-toggle) {
       width: 44px;
       height: 44px;

@@ -10,7 +10,8 @@ Pre-launch. The site is previewed on **GitHub Pages** so Peter can review it. No
 
 - Astro 7, static output, TypeScript, no UI framework. Node 24.
 - Content lives in files so the admin area can edit them:
-  - `src/data/site.json` (hero, about, contact, location, enquiry form settings)
+  - `src/data/site.json` (all the wording on the site: menu, every section's headings, text and buttons, contact, location, enquiry form), `src/data/faq.json`
+  - Never hard-code wording a visitor sees: put it in `site.json` and add a field for it in the admin ("Your website" screens in `src/admin/main.ts`, built with `textGroup` from `src/admin/text-fields.ts`)
   - `src/data/services.json`, `src/data/testimonials.json`, `src/data/week.json`, `src/data/instagram.json` (generated)
   - `src/content/journal/*.md` (blog posts, written in the admin with TipTap in `src/admin/rich-editor.ts` and saved as Markdown via `src/admin/markdown.ts`), `src/content/legal/*.md` (policies); schemas in `src/content.config.ts`
 - Photos Peter can change (hero carousel, Meet your coach) are repo paths in `site.json`, looked up with `photoFor()` in `src/lib/photos.ts`. The admin crops each one to its slot's fixed shape and minimum size (`src/lib/slots.ts`) and saves it in `src/assets/photos/`. If you change a slot's box shape on the site, change its slot too.

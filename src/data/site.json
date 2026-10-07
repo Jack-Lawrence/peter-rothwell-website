@@ -1,6 +1,16 @@
 {
   "name": "Rothwells Running",
   "description": "Running and strength coaching from Edinburgh ultra runner Peter Rothwell. Online coaching, 1-1 personal training at Meadowbank, and a weekly run club.",
+  "nav": {
+    "coaching": "Coaching",
+    "runClub": "Run Club",
+    "about": "About Peter",
+    "journal": "Journal",
+    "cta": "Book a free chat"
+  },
+  "footer": {
+    "text": "Running and strength coaching from Edinburgh ultra runner Peter Rothwell. Online coaching, 1-1 personal training at Meadowbank, and a weekly run club."
+  },
   "hero": {
     "eyebrow": "Running & strength coaching · Meadowbank, Edinburgh & online",
     "headline": [
@@ -30,9 +40,69 @@
         "image": "src/assets/photos/hero-helvellyn-scramble.webp",
         "alt": "Peter scrambling up a rocky ridge in the Lake District during the Helvellyn Sky Ultra"
       }
+    ],
+    "buttons": {
+      "primary": "See coaching plans",
+      "secondary": "Join the Run Club"
+    }
+  },
+  "coaching": {
+    "title": "Ways to train with me",
+    "intro": "All bookings by text or email. Every plan starts with a free 15-minute chat about where you are and where you want to get to.",
+    "enquire": "Enquire",
+    "more": "Details",
+    "inPersonLabel": "Train in person",
+    "onlineLabel": "Or train online",
+    "onlineTitle": "Anywhere you run",
+    "onlineText": "Your plan, check-ins and support, wherever you live and train."
+  },
+  "runClub": {
+    "eyebrow": "Rothwells Run Club",
+    "headline": "Run together. Get faster.",
+    "paragraphs": [
+      "Run Club is a weekly group session for runners of every level, whether you’re training for your first 5K or your next ultra.",
+      "Every session is tailored to your experience, so you’re pushed at the right level and never left behind. Expect intervals, hills and tempo work, plenty of hard effort and a good laugh along the way."
+    ],
+    "facts": [
+      {
+        "label": "The block",
+        "value": "8 sessions",
+        "note": "over 8 weeks"
+      },
+      {
+        "label": "Every week",
+        "value": "Thursdays",
+        "note": "6pm"
+      },
+      {
+        "label": "Who for",
+        "value": "All levels",
+        "note": "Tailored to your experience"
+      },
+      {
+        "label": "Group chat",
+        "value": "WhatsApp",
+        "note": "A growing club"
+      }
+    ],
+    "button": "Join the next block",
+    "photos": [
+      {
+        "image": "src/assets/photos/runclub-kerry-way-group.webp",
+        "alt": "Peter and three other runners with medals holding a Walters & Co banner at the Kerry Way Ultra finish"
+      },
+      {
+        "image": "src/assets/photos/runclub-hill-trail.webp",
+        "alt": "A runner with poles heading along a grassy trail into misty green hills"
+      },
+      {
+        "image": "src/assets/photos/runclub-valencia-marathon.webp",
+        "alt": "Peter pointing at his name on the runners’ wall at the Valencia Marathon"
+      }
     ]
   },
   "about": {
+    "eyebrow": "Meet your coach",
     "name": "Peter Rothwell",
     "paragraphs": [
       "I found fitness in my early twenties and was obsessed almost straight away. A few years later I made it my career. Now I run ultra marathons and coach athletes from every background.",
@@ -44,19 +114,43 @@
       "alt": "Peter smiling in a climbing helmet on a rocky ledge high in the mountains"
     }
   },
+  "reviews": {
+    "eyebrow": "What clients say",
+    "title": "From the athletes"
+  },
+  "instagram": {
+    "eyebrow": "Latest from Instagram",
+    "button": "Follow on Instagram"
+  },
+  "journal": {
+    "title": "Training journal",
+    "intro": "Training tips, race reports and Run Club news from coach Peter Rothwell.",
+    "allPosts": "All posts"
+  },
+  "faq": {
+    "eyebrow": "Before you get in touch",
+    "title": "Questions"
+  },
+  "getInTouch": {
+    "eyebrow": "Get in touch",
+    "title": "Your next start line starts here.",
+    "intro": "Every plan starts with a free 15-minute chat. All bookings by text or email, or send an enquiry.",
+    "formTitle": "Send an enquiry",
+    "formIntro": "Tell me a bit about you and what you’re aiming for, and I’ll reply by email.",
+    "placeholder": "Your goals, a race you’re training for, or any questions.",
+    "note": "Please don’t include health details here, we’ll go through those when we talk. Your details are only used to reply to you.",
+    "button": "Send enquiry",
+    "thanks": "Thanks. Peter will reply by email as soon as he can."
+  },
   "contact": {
     "phone": "07367 636632",
     "email": "Rothwell.pt@gmail.com",
-    "instagram": "peter_rothwell.pt",
-    "bookingNote": "All bookings by text or email"
+    "instagram": "peter_rothwell.pt"
   },
   "enquiries": {
     "accessKey": "",
     "captcha": false,
     "interests": [
-      "1-1 Online Coaching",
-      "1-1 Personal Training",
-      "Rothwells Run Club",
       "Something else"
     ]
   },

@@ -4,6 +4,7 @@
 import Base from '../layouts/Base.astro';
 import PostCard from './PostCard.astro';
 import type { Post } from '../lib/journal';
+import site from '../data/site.json';
 import { href } from '../lib/url';
 
 interface Props {
@@ -20,11 +21,11 @@ const topicName = topics.find((t) => t.slug === topic)?.name;
 const listPath = topic ? `/journal/topic/${topic}/` : '/journal/';
 const pagePath = (n: number) => (n === 1 ? listPath : `${listPath}page/${n}/`);
 
-const heading = topicName ? `Journal: ${topicName}` : 'Training journal';
+const heading = topicName ? `${site.nav.journal}: ${topicName}` : site.journal.title;
 const title = [heading, page > 1 ? `Page ${page}` : ''].filter(Boolean).join(', ');
 const description = topicName
   ? `Posts about ${topicName.toLowerCase()} from coach Peter Rothwell.`
-  : 'Training tips, race reports and Run Club news from coach Peter Rothwell.';
+  : site.journal.intro;
 ---
 
 <Base title={title} description={description}>

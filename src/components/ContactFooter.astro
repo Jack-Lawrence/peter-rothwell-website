@@ -1,12 +1,23 @@
 ---
 import EnquiryForm from './EnquiryForm.astro';
+import Logo from './Logo.astro';
+import services from '../data/services.json';
 import site from '../data/site.json';
 import { getCollection } from 'astro:content';
 import { href, telHref } from '../lib/url';
 
-const { contact, location } = site;
+const { contact, location, getInTouch: text, nav } = site;
 const policies = (await getCollection('legal')).sort((a, b) => a.data.order - b.data.order);
 const year = new Date().getFullYear();
+// The same labels as the menu (set in the admin area), plus the reviews and questions headings.
+const explore = [
+  { label: nav.coaching, path: '/#coaching' },
+  { label: nav.runClub, path: '/#runclub' },
+  { label: nav.about, path: '/#about' },
+  { label: site.reviews.title, path: '/#reviews' },
+  { label: nav.journal, path: '/journal/' },
+  { label: site.faq.title, path: '/#faq' },
+];
 
 // Stroke icons for the ways to get in touch (24×24).
 const icons = {
@@ -21,9 +32,9 @@ const icons = {
 <footer id="contact" class="section footer">
   <div class="wrap grid">
     <div class="intro">
-      <span class="mono eyebrow">Get in touch</span>
-      <h2 class="display big">Your next start line starts here.</h2>
-      <p class="lede">Every plan starts with a free 15-minute chat. {contact.bookingNote}, or send an enquiry.</p>
+      <span class="mono eyebrow">{text.eyebrow}</span>
+      <h2 class="display big">{text.title}</h2>
+      <p class="lede">{text.intro}</p>
 
       <ul class="ways">
         <li>
@@ -85,12 +96,54 @@ const icons = {
     <EnquiryForm />
   </div>
 
-  <div class="bottom">
-    <div class="wrap bottom-inner">
-      <span>
-        © {year} {site.name} · Edinburgh
-      </span>
-      <nav aria-label="Policies">
+  <div class="base">
+    <div class="wrap base-grid">
+      <div class="brand">
+        <Logo />
+        <p>{site.footer.text}</p>
+        <a
+          class="social"
+          href={`https://www.instagram.com/${contact.instagram}/`}
+          target="_blank"
+          rel="noopener"
+          aria-label={`Peter on Instagram, @${contact.instagram} (opens in a new tab)`}
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d={icons.insta}></path>
+          </svg>
+        </a>
+      </div>
+
+      <nav class="col" aria-labelledby="foot-explore">
+        <h2 id="foot-explore" class="mono">
+          Explore
+        </h2>
+        <ul>
+          {explore.map((l) => (
+            <li>
+              <a href={href(l.path)}>{l.label}</a>
+            </li>
+          ))}
+        </ul>
+      </nav>
+
+      <nav class="col" aria-labelledby="foot-plans">
+        <h2 id="foot-plans" class="mono">
+          Coaching
+        </h2>
+        <ul>
+          {services.map((s) => (
+            <li>
+              <a href={href(s.id === 'runclub' ? '/#runclub' : '/#coaching')}>{s.name}</a>
+            </li>
+          ))}
+        </ul>
+      </nav>
+
+      <nav class="col" aria-labelledby="foot-policies">
+        <h2 id="foot-policies" class="mono">
+          Policies
+        </h2>
         <ul>
           {policies.map((p) => (
             <li>
@@ -99,6 +152,16 @@ const icons = {
           ))}
         </ul>
       </nav>
+    </div>
+
+    <div class="wrap base-row">
+      <span>
+        © {year} {site.name} · {location.area}
+      </span>
+      <a class="top" href="#top">
+        Back to top
+        <span aria-hidden="true">↑</span>
+      </a>
     </div>
   </div>
 </footer>
@@ -206,51 +269,116 @@ const icons = {
     font-weight: 700;
   }
 
-  /* ---------- Bottom bar ---------- */
-  .bottom {
-    background: var(--ink);
-    color: var(--muted-2);
-    font-size: 14px;
+  /* ---------- Footer proper: brand, links and policies ----------
+     Inside .footer the surface tokens keep their dark values in both modes. */
+  .base {
+    background: var(--granite);
+    color: var(--chalk);
+    font-size: 15px;
   }
-  .bottom-inner {
+  .base-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.6fr) repeat(3, minmax(0, 1fr));
+    gap: 40px 48px;
+    padding-block: 64px 48px;
+  }
+  .brand {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 12px 24px;
-    flex-wrap: wrap;
-    padding-block: 20px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 18px;
   }
-  .bottom ul {
+  .brand p {
+    margin: 0;
+    max-width: 30em;
+    color: var(--muted-2);
+    line-height: 1.6;
+  }
+  .social {
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    border: 1.5px solid var(--line);
+    color: var(--accent);
+  }
+  .social:hover {
+    background: var(--panel);
+  }
+  .social svg {
+    width: 22px;
+    height: 22px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .col h2 {
+    margin: 0 0 16px;
+    font-size: 11px;
+    color: var(--accent);
+  }
+  .col ul {
     list-style: none;
     margin: 0;
     padding: 0;
     display: flex;
-    flex-wrap: wrap;
-    gap: 8px 24px;
+    flex-direction: column;
+    gap: 6px;
   }
-  .bottom a {
+  .col a,
+  .top {
     display: inline-flex;
     align-items: center;
-    min-height: 24px;
-    color: var(--paper);
+    gap: 8px;
+    min-height: 32px;
+    color: var(--muted-2);
     text-decoration: none;
-    font-weight: 600;
+    font-weight: 500;
   }
-  .bottom a:hover {
+  .col a:hover,
+  .top:hover {
+    color: var(--chalk);
     text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  .base-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px 24px;
+    padding-block: 20px;
+    border-top: 1px solid var(--line);
+    color: var(--muted);
+    font-size: 14px;
   }
 
-  /* Focus outlines: granite on gorse, gorse on the dark bottom bar. */
+  /* Focus outlines: granite on gorse, gorse on the dark footer below. */
   .footer :focus-visible {
     outline-color: var(--ink);
   }
-  .bottom :focus-visible {
+  .base :focus-visible {
     outline-color: var(--gorse);
   }
 
   @media (max-width: 900px) {
     .grid {
       grid-template-columns: minmax(0, 1fr);
+    }
+    .base-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      padding-block: 48px 32px;
+    }
+    .brand {
+      grid-column: 1 / -1;
+    }
+  }
+  @media (max-width: 420px) {
+    .base-grid {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 32px;
     }
   }
 </style>

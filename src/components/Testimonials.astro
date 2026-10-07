@@ -1,5 +1,6 @@
 ---
 import data from '../data/testimonials.json';
+import site from '../data/site.json';
 import { tenureLabel } from '../lib/tenure';
 
 interface Testimonial {
@@ -15,13 +16,13 @@ interface Testimonial {
 const testimonials = (data as Testimonial[]).map((t) => ({ ...t, tenure: tenureLabel(t.started, t.ended) }));
 ---
 
-<section class="section reviews" aria-labelledby="reviews-title">
+<section id="reviews" class="section reviews" aria-labelledby="reviews-title">
   <div class="wrap">
     <div class="layout">
       <div class="intro">
-        <span class="mono label">What clients say</span>
+        <span class="mono label">{site.reviews.eyebrow}</span>
         <h2 id="reviews-title" class="display h2">
-          From the athletes
+          {site.reviews.title}
         </h2>
         <div class="controls" data-controls hidden>
           <button class="arrow" type="button" data-prev aria-label="Previous reviews">

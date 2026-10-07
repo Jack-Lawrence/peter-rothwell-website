@@ -18,4 +18,5 @@ export interface Slot {
 export const SLOTS = {
   hero: { width: 1080, height: 1350, safeHeight: 0.8 },
   portrait: { width: 1080, height: 1080 },
+  runClub: { width: 1080, height: 1350 },
 } satisfies Record<string, Slot>;

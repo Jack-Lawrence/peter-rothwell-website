@@ -16,3 +16,11 @@ export interface SitePhoto {
 export function photoFor(path?: string): ImageMetadata | undefined {
   return path ? files[`/${path.replace(/^\//, '')}`]?.default : undefined;
 }
+
+/** A carousel's photos (hero, Run Club), skipping any whose file is missing. */
+export function slidesFor(photos: SitePhoto[] = []) {
+  return photos.flatMap((p) => {
+    const src = photoFor(p.image);
+    return src ? [{ src, alt: p.alt }] : [];
+  });
+}

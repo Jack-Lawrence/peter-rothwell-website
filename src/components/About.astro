@@ -4,7 +4,8 @@ import site from '../data/site.json';
 import { photoFor, type SitePhoto } from '../lib/photos';
 
 // The photo is set in the admin area, already cropped square.
-const { name, paragraphs, stats, photo } = site.about as {
+const { eyebrow, name, paragraphs, stats, photo } = site.about as {
+  eyebrow: string;
   name: string;
   paragraphs: string[];
   stats: { value: string; label: string }[];
@@ -22,7 +23,7 @@ const { name, paragraphs, stats, photo } = site.about as {
       label="Portrait of Peter, ideally at a race finish or on a summit."
     />
     <div class="text">
-      <span class="mono accent">Meet your coach</span>
+      <span class="mono accent">{eyebrow}</span>
       <h2 class="display h2">{name}</h2>
       {paragraphs.map((p) => (
         <p>{p}</p>

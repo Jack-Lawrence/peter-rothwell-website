@@ -36,18 +36,15 @@ for (const [path, image] of Object.entries(photos)) {
 const config = { repo: ADMIN_REPO, preview: PREVIEW, siteUrl: absolute('/'), baked: { files, images, originals } };
 const json = JSON.stringify(config).replace(/</g, '\u003c');
 
+// Each section of the home page is edited from "Your website".
 const nav = [
   ['#/', 'Home'],
+  ['#/website', 'Your website'],
   ['#/posts', 'Blog posts'],
-  ['#/prices', 'Services & prices'],
-  ['#/runclub', 'Run Club dates'],
-  ['#/testimonials', 'Testimonials'],
   ['#/photos', 'Photos'],
   ['#/theme', 'Colours'],
-  ['#/week', 'Typical week'],
   ['#/contact', 'Contact details'],
   ['#/policies', 'Policies'],
-  ['#/instagram', 'Instagram feed'],
 ];
 ---
 
