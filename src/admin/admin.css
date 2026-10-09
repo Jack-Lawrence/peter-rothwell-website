@@ -269,6 +269,7 @@ fieldset.box legend {
   text-decoration: underline;
 }
 .row-text {
+  flex: 1;
   display: flex;
   flex-direction: column;
   gap: 2px;
@@ -308,6 +309,11 @@ fieldset.box legend {
   background: var(--granite);
   color: var(--chalk);
 }
+.pill--sample {
+  background: var(--paper);
+  color: var(--granite);
+  border: 1px dashed var(--granite);
+}
 .status {
   display: flex;
   align-items: center;
@@ -323,6 +329,68 @@ fieldset.box legend {
 .dot--ok {
   background: var(--gorse);
   border-color: var(--granite);
+}
+.dot--error {
+  background: var(--error);
+  border-color: var(--error);
+}
+.dot--busy {
+  border-color: var(--granite);
+  border-top-color: transparent;
+  animation: spin 0.9s linear infinite;
+}
+@keyframes spin {
+  to {
+    transform: rotate(1turn);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .dot--busy {
+    animation: none;
+  }
+}
+
+/* ---------- After a save: updating, live or failed ---------- */
+.deploy-status {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px clamp(16px, 3vw, 48px);
+  background: var(--paper);
+  border-bottom: 1px solid var(--edge);
+  font-size: 15px;
+  line-height: 1.45;
+}
+.deploy-status[hidden] {
+  display: none;
+}
+.deploy-status .dot {
+  flex: none;
+}
+.deploy-status--failed {
+  background: color-mix(in srgb, var(--error) 10%, var(--paper));
+  border-bottom-color: var(--error);
+}
+.deploy-status a {
+  color: var(--ink);
+  font-weight: 700;
+}
+.deploy-close {
+  margin-left: auto;
+  flex: none;
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--ink-muted);
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+}
+.deploy-close:hover {
+  background: var(--soft);
+  color: var(--ink);
 }
 
 /* ---------- Dashboard actions ---------- */

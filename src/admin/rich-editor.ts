@@ -2,7 +2,7 @@
 // or API key), with a simple toolbar of its own. It edits HTML; the post editor
 // turns that into Markdown when saving (see markdown.ts).
 
-import { Editor } from '@tiptap/core';
+import { Editor, Mark } from '@tiptap/core';
 import StarterKit from '@tiptap/starter-kit';
 import Image from '@tiptap/extension-image';
 import { h } from './ui';
@@ -21,6 +21,14 @@ const Photo = Image.extend({
       },
     };
   },
+});
+
+// "[Peter to confirm: …]" placeholders are wrapped in <mark>. The editor keeps
+// them highlighted, so they survive a save until Peter replaces the text.
+const Placeholder = Mark.create({
+  name: 'placeholder',
+  parseHTML: () => [{ tag: 'mark' }],
+  renderHTML: ({ HTMLAttributes }) => ['mark', HTMLAttributes, 0],
 });
 
 export interface PhotoInsert {
@@ -63,6 +71,7 @@ export function createRichEditor(options: {
         link: { openOnClick: false, autolink: true, protocols: ['mailto'] },
       }),
       Photo.configure({ inline: false, allowBase64: true }),
+      Placeholder,
     ],
     editorProps: {
       attributes: { class: 'editor-body', ...options.attrs },

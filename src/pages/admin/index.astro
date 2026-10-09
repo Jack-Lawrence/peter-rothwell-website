@@ -11,6 +11,7 @@ import type { ImageMetadata } from 'astro';
 import { getImage } from 'astro:assets';
 import { ADMIN_REPO, PREVIEW } from 'astro:env/server';
 import { absolute, href } from '../../lib/url';
+import { jsonForScript } from '../../lib/json-script';
 
 // The content as it is now, for demo mode to start from.
 const raw = import.meta.glob<string>(['/src/data/*.json', '/src/content/journal/*.md', '/src/content/legal/*.md'], {
@@ -21,7 +22,7 @@ const raw = import.meta.glob<string>(['/src/data/*.json', '/src/content/journal/
 const files = Object.fromEntries(Object.entries(raw).map(([path, text]) => [path.slice(1), text]));
 
 // Small previews of the photos already on the site, so the editor can show them.
-const photos = import.meta.glob<ImageMetadata>('/src/assets/{demo,journal,photos,library}/*.{jpg,jpeg,png,webp}', {
+const photos = import.meta.glob<ImageMetadata>('/src/assets/{journal,photos,library}/*.{jpg,jpeg,png,webp}', {
   import: 'default',
   eager: true,
 });
@@ -34,7 +35,25 @@ for (const [path, image] of Object.entries(photos)) {
 }
 
 const config = { repo: ADMIN_REPO, preview: PREVIEW, siteUrl: absolute('/'), baked: { files, images, originals } };
-const json = JSON.stringify(config).replace(/</g, '\u003c');
+// Escaped so no content (a post, an FAQ answer) can close the script tag early.
+const json = jsonForScript(config);
+
+// Content-Security-Policy for the editor: it only talks to this site and the GitHub API.
+// Astro bundles the editor's script into a file, so no inline scripts need allowing
+// (the config above is JSON, which browsers don't run). Left out in `astro dev`, whose
+// live reload uses inline scripts and a websocket.
+const csp = [
+  "default-src 'self'",
+  "connect-src 'self' https://api.github.com",
+  "img-src 'self' data: blob:",
+  // Small font subsets are inlined into the CSS as data: URLs.
+  "font-src 'self' data:",
+  "style-src 'self' 'unsafe-inline'",
+  "script-src 'self'",
+  "object-src 'none'",
+  "base-uri 'self'",
+  "form-action 'self'",
+].join('; ');
 
 // Each section of the home page is edited from "Your website".
 const nav = [
@@ -53,6 +72,7 @@ const nav = [
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    {import.meta.env.PROD && <meta http-equiv="Content-Security-Policy" content={csp} />}
     <meta name="robots" content="noindex, nofollow" />
     <title>Website editor | Rothwells Running</title>
     <link rel="icon" type="image/svg+xml" href={href('/favicon.svg')} />
@@ -85,6 +105,7 @@ const nav = [
       </aside>
       <div class="main-col">
         <p class="mode-banner" id="mode-banner" role="note" hidden></p>
+        <div class="deploy-status" id="deploy-status" role="status" aria-live="polite" hidden></div>
         <main id="view" class="view" tabindex="-1">
           <p class="loading">Loading…</p>
         </main>

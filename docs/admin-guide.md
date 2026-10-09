@@ -21,15 +21,36 @@ You only need to do this once on each phone or computer.
 3. Open the **new access key** link on that page.
 4. Name it "Website editor".
 5. Under **Repository access**, choose **Only select repositories** and pick the website.
-6. Under **Permissions**, find **Contents** and choose **Read and write**.
+6. Under **Permissions**, find **Contents** and choose **Read and write**. Then find **Actions** and choose **Read-only** (this lets the editor tell you when a change is live).
 7. Press **Generate token**, then copy the long code it shows you (it starts with `github_pat_`).
-8. Paste it into the editor and press **Sign in**.
+8. Paste it into the editor. On your own phone or computer, tick **Keep me signed in on this device**; leave it unticked anywhere else, and you'll be signed out when you close the tab.
+9. Press **Sign in**.
 
 The key expires on the date you chose. When it does, the editor will ask you to sign in again: just make a new key the same way.
 
-When you're signed in, changes you save go on your website within about a minute.
+When you're signed in, changes you save go on your website within a minute or two (see "After you save" below).
 
 To sign out (for example on a shared computer), press **Sign out** in the menu.
+
+## Your home screen
+
+- **Shortcuts** to the things you change most.
+- **Still to do**: everything on your website that only you can fill in. That's every highlighted "[Peter to confirm: …]" note (in your policies, questions and posts), the example posts Jack wrote for the preview, and a few optional extras like the badge on your top photo. Tap an item to go straight to where it's changed. The number at the top counts down as you go, and when it's all done you'll see a tick.
+- **Your website**: whether your latest change is live.
+- **Your posts** and your **Instagram feed**.
+
+## After you save
+
+A bar appears at the top of the editor:
+
+1. **Updating your site…** Your change is being checked and published. This usually takes a minute or two, and you can carry on with something else.
+2. **Live.** It's on your website. Press **See it on your website** to have a look.
+
+If it says **That change didn't go live**, don't worry: your website is unchanged, still showing how it was before. Jack has the details and will sort it out. Press **Details for Jack** if he asks for them.
+
+Before saving, the editor also checks that nothing important is missing (like a post's title). If something is, it tells you what, and saves nothing until it's fixed.
+
+In the demo you can see what each message looks like: on the home screen, under **Your website**, press **Show me** or **What if a change doesn't go live?**
 
 ## Writing a blog post
 
@@ -49,11 +70,15 @@ To sign out (for example on a shared computer), press **Sign out** in the menu.
 
 5. On the right (or below, on a phone), choose a **topic** and write a **short summary** of one or two sentences. The **date** is today unless you change it; set an earlier date when you're adding an older post (for example one from the old website) so it keeps its original date.
 6. Press **Preview** to see how it will look.
-7. Press **Publish now**. It appears on your website in about a minute.
+7. Press **Publish now**. It appears on your website in a minute or two.
 
 Not finished? Press **Save as draft**. Drafts aren't on your website.
 
 Your writing is also saved on your device as you type, so if you close the page by accident it will be there when you come back.
+
+### The example posts
+
+Jack wrote three example posts so you could see how the blog looks. On the preview site they're labelled "Example post: Peter will replace this", and in **Blog posts** they're marked **Example post**. Rewrite each one in your own words (the highlighted bits are for you to fill in) and save it, and the label goes. Or delete the ones you don't want.
 
 ## Changing or removing a post
 
@@ -67,15 +92,15 @@ Your writing is also saved on your device as you type, so if you close the page 
 
 Every heading, sentence and button on your home page can be changed. Press **Your website** in the menu. It lists each part of your home page from top to bottom:
 
-- **Menu and footer**: the links at the top, the yellow button, the words at the bottom of every page, and your business name and description for Google.
-- **Top of the page**: the big headline (one line per line, the last one in your highlight colour), the introduction and the two buttons.
+- **Menu and footer**: the links at the top, the yellow button, the words at the bottom of every page, your business name and description for Google, and the names of the small buttons on the photos (screen readers read these out).
+- **Top of the page**: the big headline (one line per line, the last one in your highlight colour), the introduction, the two buttons and, if you'd like one, a small badge in the corner of the photo (for example "Longest run" and "100 km").
 - **Typical week**: the week of training under the headline. Keep each session short (14 letters or fewer) so it fits.
 - **Ways to train**: your plans and prices (see below).
 - **Run Club**: see below.
 - **Meet your coach**: your name, a few words about you, and up to three big numbers if you'd like them (for example "12" and "Ultras finished").
 - **Reviews**: the heading, and your clients' reviews (see below).
 - **Instagram**: the heading and button above your posts. The posts appear by themselves.
-- **Training journal**: the headings for your blog.
+- **Training journal**: the headings for your blog, and the label on the example posts.
 - **Questions**: common questions and your answers. Add, change, reorder or remove them. If an answer has something in [square brackets], that's a note to replace with your own answer.
 - **Get in touch**: the yellow contact section and everything in the enquiry form, including the thank-you message.
 

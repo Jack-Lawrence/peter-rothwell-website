@@ -73,6 +73,23 @@ turndown.addRule('photo', {
 // Bold/italic made by the browser's editing commands.
 turndown.addRule('bTag', { filter: ['b'], replacement: (c) => (c.trim() ? `**${c}**` : c) });
 turndown.addRule('iTag', { filter: ['i'], replacement: (c) => (c.trim() ? `*${c}*` : c) });
+// A bare web or email address (which Markdown links up by itself) stays bare,
+// rather than becoming [address](mailto:address) when the post is saved.
+turndown.addRule('autolink', {
+  filter: (node) => {
+    if (node.nodeName !== 'A') return false;
+    const target = node.getAttribute('href') ?? '';
+    const text = node.textContent ?? '';
+    return target === text || target === `mailto:${text}`;
+  },
+  replacement: (content) => content,
+});
+// "[Peter to confirm: …]" placeholders stay as HTML <mark>, which Markdown allows.
+// Their square brackets don't need escaping (there's no link after them).
+turndown.addRule('placeholder', {
+  filter: 'mark',
+  replacement: (c) => (c.trim() ? `<mark>${c.replace(/\\([[\]])/g, '$1')}</mark>` : c),
+});
 // Headings in posts are h2 (the page title is h1).
 turndown.addRule('heading', {
   filter: ['h1', 'h2', 'h3'],

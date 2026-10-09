@@ -22,7 +22,8 @@ export interface Store {
   list(dir: string): Promise<string[]>;
   /** A URL the browser can show for an image in the repo, or null. `full` asks for the full-size photo, not a preview. */
   imageUrl(path: string, full?: boolean): Promise<string | null>;
-  commit(changes: Change[], message: string): Promise<void>;
+  /** Saves the changes. Live mode returns the new commit's SHA (demo mode returns ''). */
+  commit(changes: Change[], message: string): Promise<string>;
 }
 
 export interface Baked {
@@ -117,6 +118,7 @@ export function demoStore(baked: Baked): Store {
         );
       }
       overlay = next;
+      return '';
     },
   };
 }
@@ -124,7 +126,50 @@ export function demoStore(baked: Baked): Store {
 // ---------- Live (GitHub) ----------
 
 const API = 'https://api.github.com';
-export const TOKEN_KEY = 'rr-admin-token';
+const TOKEN_KEY = 'rr-admin-token';
+
+// On GitHub Pages the admin shares its origin (<user>.github.io) with every other Pages
+// site on that account, so the token is only kept beyond this tab (localStorage) when
+// Peter ticks "Keep me signed in". Otherwise it lasts until the tab closes (sessionStorage).
+const tokenStores = (): Storage[] =>
+  [() => sessionStorage, () => localStorage].flatMap((get) => {
+    try {
+      return [get()];
+    } catch {
+      return []; // storage blocked
+    }
+  });
+
+export function loadToken(): string | null {
+  for (const s of tokenStores()) {
+    try {
+      const token = s.getItem(TOKEN_KEY);
+      if (token) return token;
+    } catch {
+      /* storage blocked */
+    }
+  }
+  return null;
+}
+
+export function saveToken(token: string, remember: boolean) {
+  clearToken();
+  try {
+    (remember ? localStorage : sessionStorage).setItem(TOKEN_KEY, token);
+  } catch {
+    /* storage blocked: the token lasts until the page reloads */
+  }
+}
+
+export function clearToken() {
+  for (const s of tokenStores()) {
+    try {
+      s.removeItem(TOKEN_KEY);
+    } catch {
+      /* storage blocked */
+    }
+  }
+}
 const BRANCH = 'main';
 
 const utf8ToBase64 = (text: string) => {
@@ -216,6 +261,7 @@ export function liveStore(repo: string, token: string): Store {
       if (!moved.ok) {
         throw new SaveError('The website was changed somewhere else at the same time. Reload the page and try again.');
       }
+      return commit.sha as string;
     },
   };
 }
