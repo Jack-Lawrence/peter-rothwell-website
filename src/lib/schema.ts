@@ -1,6 +1,6 @@
 // Structured data (JSON-LD) for search engines, built from the data files.
 // Typed with schema-dts so a wrong property or type fails `astro check`.
-import type { BlogPosting, FAQPage, Graph, Offer, WithContext } from 'schema-dts';
+import type { BlogPosting, BreadcrumbList, FAQPage, Graph, Offer, WithContext } from 'schema-dts';
 import site from '../data/site.json';
 import services from '../data/services.json';
 import faq from '../data/faq.json';
@@ -73,6 +73,8 @@ interface PostInfo {
   title: string;
   excerpt: string;
   date: Date;
+  /** When the post was last changed, if that's known; otherwise its date. */
+  updated?: Date;
   path: string;
   image?: string;
 }
@@ -84,12 +86,32 @@ export function postSchema(post: PostInfo): BlogPosting & { '@context': string }
     headline: post.title,
     description: post.excerpt,
     datePublished: post.date.toISOString(),
+    dateModified: (post.updated ?? post.date).toISOString(),
     url: absolute(post.path),
     mainEntityOfPage: absolute(post.path),
     image: post.image ?? shareImage,
     inLanguage: 'en-GB',
     author: { '@type': 'Person', '@id': personId, name: site.about.name, url: absolute('/#about') },
     publisher: { '@type': 'LocalBusiness', '@id': businessId, name: site.name, logo: absolute('/icon-512.png') },
+  };
+}
+
+/** Home › Training journal › the post. */
+export function breadcrumbSchema(post: { title: string; path: string }): WithContext<BreadcrumbList> {
+  const crumbs: [string, string][] = [
+    [site.name, '/'],
+    [site.journal.title, '/journal/'],
+    [post.title, post.path],
+  ];
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: crumbs.map(([name, path], i) => ({
+      '@type': 'ListItem',
+      position: i + 1,
+      name,
+      item: absolute(path),
+    })),
   };
 }
 

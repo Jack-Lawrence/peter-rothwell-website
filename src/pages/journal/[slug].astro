@@ -7,7 +7,9 @@ import Photo from '../../components/Photo.astro';
 import { getPosts, readingTime, topicSlug } from '../../lib/journal';
 import JsonLd from '../../components/JsonLd.astro';
 import { href } from '../../lib/url';
-import { postSchema } from '../../lib/schema';
+import { breadcrumbSchema, postSchema } from '../../lib/schema';
+import { PREVIEW } from 'astro:env/server';
+import site from '../../data/site.json';
 
 export const getStaticPaths = (async () => {
   const posts = await getPosts();
@@ -20,7 +22,7 @@ export const getStaticPaths = (async () => {
 
 const { post, newer, older } = Astro.props;
 const { Content } = await render(post);
-const { title, topic, date, excerpt, cover, coverAlt } = post.data;
+const { title, topic, date, excerpt, cover, coverAlt, sample } = post.data;
 // Share image: the cover, cropped to the 1200×630 social media size.
 const shareImage = cover && (await getImage({ src: cover, width: 1200, height: 630, fit: 'cover', format: 'jpg' }));
 const share = shareImage && {
@@ -34,11 +36,13 @@ const dateLabel = date.toLocaleDateString('en-GB', { day: 'numeric', month: 'lon
 
 <Base title={title} description={excerpt} image={share} type="article">
   <JsonLd slot="head" data={postSchema({ title, excerpt, date, path: `/journal/${post.id}/`, image: share?.url })} />
+  <JsonLd slot="head" data={breadcrumbSchema({ title, path: `/journal/${post.id}/` })} />
   <article class="light section">
     <div class="wrap narrow">
       <a class="back" href={href('/journal/')}>
         ← All posts
       </a>
+      {PREVIEW && sample && <p class="mono sample">{site.journal.sampleLabel}</p>}
       <p class="mono meta">
         <a href={href(`/journal/topic/${topicSlug(topic)}/`)}>{topic}</a> ·{' '}
         <time datetime={date.toISOString()}>{dateLabel}</time>
@@ -106,13 +110,29 @@ const dateLabel = date.toLocaleDateString('en-GB', { day: 'numeric', month: 'lon
   .narrow {
     max-width: calc(720px + 2 * var(--gutter));
   }
+  /* At least 24px tall (WCAG 2.5.8), without moving anything around it. */
   .back {
+    display: inline-block;
+    padding-block: 2px;
+    margin-block: -2px;
     font-weight: 700;
     text-decoration: none;
   }
   .meta {
     color: var(--ink-muted);
     margin: 32px 0 16px;
+  }
+  /* Preview builds only: marks the example posts written before launch. */
+  .sample {
+    margin: 24px 0 0;
+    padding: 10px 14px;
+    width: fit-content;
+    font-size: 13px;
+    background: var(--gorse);
+    color: var(--ink);
+  }
+  .sample + .meta {
+    margin-top: 24px;
   }
   .meta a {
     color: var(--granite);

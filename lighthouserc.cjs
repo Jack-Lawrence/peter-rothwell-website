@@ -7,7 +7,8 @@ const pages = ['/', '/journal/', '/terms/'];
 module.exports = {
   ci: {
     collect: {
-      startServerCommand: `npx astro preview --port ${port}`,
+      // --ignore-lock: it can run alongside another astro preview (e.g. the end-to-end tests).
+      startServerCommand: `npx astro preview --port ${port} --ignore-lock`,
       startServerReadyPattern: `localhost:${port}`,
       url: pages.map((p) => `http://localhost:${port}${p}`),
       // Shared CI machines are noisy, so each page is tested three times and the

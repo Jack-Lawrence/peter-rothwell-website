@@ -22,10 +22,12 @@ const listPath = topic ? `/journal/topic/${topic}/` : '/journal/';
 const pagePath = (n: number) => (n === 1 ? listPath : `${listPath}page/${n}/`);
 
 const heading = topicName ? `${site.nav.journal}: ${topicName}` : site.journal.title;
-const title = [heading, page > 1 ? `Page ${page}` : ''].filter(Boolean).join(', ');
-const description = topicName
-  ? `Posts about ${topicName.toLowerCase()} from coach Peter Rothwell.`
-  : site.journal.intro;
+// Every list page gets its own title and description, e.g. "Strength | Training journal, page 2".
+const pageSuffix = page > 1 ? `, page ${page}` : '';
+const title = `${topicName ? `${topicName} | ` : ''}${site.journal.title}${pageSuffix}`;
+const description =
+  (topicName ? `Posts about ${topicName.toLowerCase()} from coach Peter Rothwell.` : site.journal.intro) +
+  (page > 1 ? ` Page ${page} of ${totalPages}.` : '');
 ---
 
 <Base title={title} description={description}>
