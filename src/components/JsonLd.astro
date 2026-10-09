@@ -1,10 +1,12 @@
 ---
 // Structured data for search engines. "<" is escaped so content can't close the tag.
+import { jsonForScript } from '../lib/json-script';
+
 interface Props {
   data: object;
 }
 
-const json = JSON.stringify(Astro.props.data).replace(/</g, '\u003c');
+const json = jsonForScript(Astro.props.data);
 ---
 
 <script type="application/ld+json" set:html={json} />

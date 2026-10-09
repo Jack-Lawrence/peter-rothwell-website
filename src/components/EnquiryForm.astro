@@ -207,7 +207,7 @@ const demo = PREVIEW && !accessKey;
     const showDone = (name: string) => {
       const first = name.trim().split(/\s+/)[0];
       // "Thanks. Peter will reply…" becomes "Thanks, Sam. Peter will reply…".
-      doneText.textContent = first ? thanks.replace(/^(Thanks|Thank you)/i, `$1, ${first}`) : thanks;
+      doneText.textContent = first ? thanks.replace(/^(Thanks|Thank you)\b/i, `$1, ${first}`) : thanks;
       form.hidden = true;
       wrap.querySelector<HTMLElement>('.enquiry-head')!.hidden = true;
       done.hidden = false;
