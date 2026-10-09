@@ -1,11 +1,10 @@
 ---
 // Shows a real image when one is supplied, otherwise a labelled placeholder
 // so the layout can be reviewed before the photography is ready.
-// Images are resized at build time and served as AVIF/WebP with a JPEG fallback.
+// Images are resized at build time and served as AVIF/WebP with a JPEG fallback
+// (without fallbackFormat Astro would fall back to multi-megabyte PNGs).
 import { Picture } from 'astro:assets';
 import type { ImageMetadata } from 'astro';
-import { PREVIEW } from 'astro:env/server';
-import { isDemoPhoto } from '../lib/demo';
 
 interface Props {
   src?: ImageMetadata;
@@ -24,8 +23,6 @@ interface Props {
   position?: string;
   /** For the main image at the top of a page: load it straight away instead of lazily. */
   priority?: boolean;
-  /** Temporary stock photo: labelled "Demo photo" on the preview site. Detected automatically for src/assets/demo/. */
-  demo?: boolean;
 }
 
 const {
@@ -40,7 +37,6 @@ const {
   height,
   position,
   priority = false,
-  demo = isDemoPhoto(src),
 } = Astro.props;
 
 // The plain <img> fallback (for browsers without AVIF/WebP) uses the largest width, not the original.
@@ -53,6 +49,7 @@ const size = width && height ? { width, height, fit: 'cover' as const } : { widt
       src={src}
       alt={alt}
       formats={['avif', 'webp']}
+      fallbackFormat="jpg"
       {...size}
       loading={priority ? 'eager' : 'lazy'}
       fetchpriority={priority ? 'high' : 'auto'}
@@ -65,11 +62,6 @@ const size = width && height ? { width, height, fit: 'cover' as const } : { widt
         <span>{label}</span>
       </span>
     )
-  )}
-  {PREVIEW && src && demo && (
-    <span class="mono demo" aria-hidden="true">
-      Demo photo
-    </span>
   )}
   <slot />
 </div>
@@ -107,17 +99,6 @@ const size = width && height ? { width, height, fit: 'cover' as const } : { widt
     height: 100%;
     object-fit: cover;
     object-position: var(--position, 50% 50%);
-  }
-  .demo {
-    position: absolute;
-    left: 8px;
-    bottom: 8px;
-    padding: 3px 6px;
-    font-size: 9px;
-    line-height: 1.2;
-    background: color-mix(in srgb, var(--ink) 75%, transparent);
-    color: var(--paper);
-    pointer-events: none;
   }
   .label {
     padding: 18px;

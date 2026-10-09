@@ -8,7 +8,8 @@ const { eyebrow, headline, intro, badge, buttons } = site.hero;
 const last = headline.length - 1;
 // Photos set in the admin area, already cropped to the box's shape (4:5).
 const slides = slidesFor((site.hero as { photos?: SitePhoto[] }).photos);
-const sizes = '(max-width: 900px) 100vw, min(37vw, 450px)';
+// On phones the box is the screen width less the side gutters (about 92%).
+const sizes = '(max-width: 900px) 92vw, min(37vw, 450px)';
 ---
 
 <section class="wrap hero">
@@ -38,7 +39,7 @@ const sizes = '(max-width: 900px) 100vw, min(37vw, 450px)';
     sizes={sizes}
     priority
     tint
-    label="Photos of Peter"
+    label={site.hero.photosLabel}
     placeholder="Peter on a hill trail, mid-run. Full-bleed, high-contrast action shot."
   >
     {badge.value && (

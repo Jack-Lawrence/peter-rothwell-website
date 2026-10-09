@@ -11,6 +11,11 @@
   "footer": {
     "text": "Running and strength coaching from Edinburgh ultra runner Peter Rothwell. Online coaching, 1-1 personal training at Meadowbank, and a weekly run club."
   },
+  "carousel": {
+    "next": "Next photo",
+    "pause": "Pause photos",
+    "play": "Play photos"
+  },
   "hero": {
     "eyebrow": "Running & strength coaching · Meadowbank, Edinburgh & online",
     "headline": [
@@ -41,6 +46,7 @@
         "alt": "Peter scrambling up a rocky ridge in the Lake District during the Helvellyn Sky Ultra"
       }
     ],
+    "photosLabel": "Photos of Peter",
     "buttons": {
       "primary": "See coaching plans",
       "secondary": "Join the Run Club"
@@ -99,7 +105,8 @@
         "image": "src/assets/photos/runclub-valencia-marathon.webp",
         "alt": "Peter pointing at his name on the runners’ wall at the Valencia Marathon"
       }
-    ]
+    ],
+    "photosLabel": "Run Club photos"
   },
   "about": {
     "eyebrow": "Meet your coach",
@@ -125,7 +132,8 @@
   "journal": {
     "title": "Training journal",
     "intro": "Training tips, race reports and Run Club news from coach Peter Rothwell.",
-    "allPosts": "All posts"
+    "allPosts": "All posts",
+    "sampleLabel": "Example post: Peter will replace this"
   },
   "faq": {
     "eyebrow": "Before you get in touch",

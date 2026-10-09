@@ -64,13 +64,7 @@ const text = site.coaching;
             Inside {site.location.place}
           </p>
         </div>
-        <a
-          class="map"
-          href={site.location.mapsUrl}
-          target="_blank"
-          rel="noopener"
-          aria-label={`Get directions to ${site.location.place} on Google Maps (opens in a new tab)`}
-        >
+        <a class="map" href={site.location.mapsUrl} target="_blank" rel="noopener">
           <LocationMap />
           <span class="map-pin" aria-hidden="true">
             <svg width="30" height="38" viewBox="0 0 34 44">
@@ -79,7 +73,11 @@ const text = site.coaching;
             </svg>
             <span class="mono map-tag">{site.name}</span>
           </span>
-          <span class="map-cta">Get directions →</span>
+          <!-- Named by its visible words first (WCAG 2.5.3), then where it goes. -->
+          <span class="map-cta">
+            Get directions<span aria-hidden="true"> →</span>
+            <span class="visually-hidden">to {site.location.place} on Google Maps (opens in a new tab)</span>
+          </span>
         </a>
       </div>
 

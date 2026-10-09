@@ -15,6 +15,7 @@ const club = site.runClub as {
   facts: { label: string; value: string; note: string }[];
   button: string;
   photos?: SitePhoto[];
+  photosLabel: string;
 };
 const plan = services.find((s) => s.id === 'runclub') as
   ((typeof services)[number] & { schedule?: Schedule }) | undefined;
@@ -29,8 +30,8 @@ const facts = club.facts.filter((f) => f.value);
     <Carousel
       class="club-photos"
       slides={slides}
-      label="Run Club photos"
-      sizes="(max-width: 900px) 100vw, min(42vw, 510px)"
+      label={club.photosLabel}
+      sizes="(max-width: 900px) 92vw, min(42vw, 510px)"
       placeholder="The Run Club out on a Thursday session."
     />
     <div class="text">

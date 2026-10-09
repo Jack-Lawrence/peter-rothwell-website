@@ -4,6 +4,7 @@
 // through `class`; anything in the default slot sits on top (e.g. a badge).
 import Photo from './Photo.astro';
 import type { ImageMetadata } from 'astro';
+import site from '../data/site.json';
 
 interface Props {
   slides: { src: ImageMetadata; alt: string }[];
@@ -25,12 +26,16 @@ const {
   slides,
   class: className,
   sizes,
-  widths = [540, 1080],
+  // Covers the boxes' widths (about 350–510px) on 1x to 3x screens.
+  widths = [400, 640, 800, 1080],
   priority = false,
   label,
   placeholder,
   tint = false,
 } = Astro.props;
+// Button names, read out by screen readers (edited in the admin: Menu and footer).
+const words = site.carousel;
+const total = String(slides.length).padStart(2, '0');
 ---
 
 <section
@@ -41,7 +46,11 @@ const {
 >
   {slides.length === 0 && <Photo class="slide-photo" label={placeholder} />}
   {slides.map((p, i) => (
-    <div class:list={['slide', { 'is-active': i === 0 }]} data-slide aria-hidden={i > 0 ? 'true' : undefined}>
+    <div
+      class:list={['slide', { 'is-active': i === 0, 'is-later': i > 0 }]}
+      data-slide
+      aria-hidden={i > 0 ? 'true' : undefined}
+    >
       <Photo class="slide-photo" src={p.src} alt={p.alt} priority={priority && i === 0} sizes={sizes} widths={widths} />
     </div>
   ))}
@@ -49,9 +58,30 @@ const {
   {slides.length > 1 && (
     <div class="tags">
       <span class="mono count" data-count aria-hidden="true">
-        01 / {String(slides.length).padStart(2, '0')}
+        01 / {total}
       </span>
-      <button class="next" type="button" data-next aria-label={`Next photo (2 of ${slides.length})`}>
+      <button
+        class="tag-btn pause"
+        type="button"
+        data-pause
+        data-pause-label={words.pause}
+        data-play-label={words.play}
+        aria-label={words.pause}
+      >
+        <svg class="icon-pause" width="10" height="10" viewBox="0 0 10 10" aria-hidden="true">
+          <path d="M2 0v10M8 0v10"></path>
+        </svg>
+        <svg class="icon-play" width="10" height="10" viewBox="0 0 10 10" aria-hidden="true">
+          <path d="M1 0l9 5-9 5z"></path>
+        </svg>
+      </button>
+      <button
+        class="tag-btn next"
+        type="button"
+        data-next
+        data-label={words.next}
+        aria-label={`${words.next} (02 / ${total})`}
+      >
         <svg width="16" height="10" viewBox="0 0 16 10" aria-hidden="true">
           <path d="M0 5h14M10 1l4 4-4 4"></path>
         </svg>
@@ -61,12 +91,18 @@ const {
 </section>
 
 <script>
-  // Cross-fades every few seconds, with one "next" arrow. It stops while the
-  // pointer or keyboard focus is on it, and never moves by itself for people
-  // who prefer reduced motion.
+  // Cross-fades every few seconds, with a "next" arrow and a pause button
+  // (WCAG 2.2.2). It also stops while the pointer or keyboard focus is on it,
+  // while it's off screen and while the tab is hidden, and never moves by
+  // itself for people who prefer reduced motion (the pause button is hidden then).
+  // Only the first photo loads with the page. The others start hidden
+  // (display: none, so their lazy images wait) and each is let in to load just
+  // before it's needed: a couple of seconds before it shows, or as soon as
+  // someone points at or tabs to the carousel.
   document.querySelectorAll<HTMLElement>('[data-carousel]').forEach((box) => {
     const slides = [...box.querySelectorAll<HTMLElement>('[data-slide]')];
     const next = box.querySelector<HTMLButtonElement>('[data-next]');
+    const pause = box.querySelector<HTMLButtonElement>('[data-pause]');
     const count = box.querySelector<HTMLElement>('[data-count]');
     if (slides.length < 2 || !next) return;
 
@@ -74,10 +110,16 @@ const {
     const still = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     let current = 0;
     let timer = 0;
+    let warm = 0;
     let held = false; // pointer over it or focus inside it
+    let paused = false; // stopped with the pause button, until played again
+    let onScreen = true;
 
+    const ready = (index: number) => slides[index % slides.length].classList.remove('is-later');
     const show = (index: number) => {
       current = (index + slides.length) % slides.length;
+      ready(current);
+      ready(current + 1);
       slides.forEach((s, i) => {
         s.classList.toggle('is-active', i === current);
         if (i === current) s.removeAttribute('aria-hidden');
@@ -85,17 +127,31 @@ const {
       });
       if (count) count.textContent = `${pad(current + 1)} / ${pad(slides.length)}`;
       const after = ((current + 1) % slides.length) + 1;
-      next.setAttribute('aria-label', `Next photo (${after} of ${slides.length})`);
+      next.setAttribute('aria-label', `${next.dataset.label} (${pad(after)} / ${pad(slides.length)})`);
     };
     const run = () => {
-      clearInterval(timer);
-      if (!still && !held) timer = window.setInterval(() => show(current + 1), 6000);
+      clearTimeout(timer);
+      clearTimeout(warm);
+      if (still || held || paused || !onScreen || document.hidden) return;
+      warm = window.setTimeout(() => ready(current + 1), 4000);
+      timer = window.setTimeout(() => (show(current + 1), run()), 6000);
     };
 
     next.addEventListener('click', () => show(current + 1));
-    box.addEventListener('pointerenter', () => ((held = true), run()));
+    pause?.addEventListener('click', () => {
+      paused = !paused;
+      pause.classList.toggle('is-paused', paused);
+      pause.setAttribute('aria-label', (paused ? pause.dataset.playLabel : pause.dataset.pauseLabel) ?? '');
+      run();
+    });
+    new IntersectionObserver(([entry]) => {
+      onScreen = entry.isIntersecting;
+      run();
+    }).observe(box);
+    document.addEventListener('visibilitychange', run);
+    box.addEventListener('pointerenter', () => ((held = true), ready(current + 1), run()));
     box.addEventListener('pointerleave', () => ((held = false), run()));
-    box.addEventListener('focusin', () => ((held = true), run()));
+    box.addEventListener('focusin', () => ((held = true), ready(current + 1), run()));
     box.addEventListener('focusout', (e) => {
       if (!box.contains(e.relatedTarget as Node)) ((held = false), run());
     });
@@ -117,6 +173,9 @@ const {
   }
   .slide.is-active {
     opacity: 1;
+  }
+  .slide.is-later {
+    display: none;
   }
   /* A light duotone so the photos sit in the site's palette but keep their own
      colours: partly desaturated, with a soft gorse wash over the top. */
@@ -164,7 +223,7 @@ const {
     }
   }
   .count,
-  .next {
+  .tag-btn {
     height: 28px;
     background: var(--ink);
     color: var(--paper);
@@ -175,7 +234,7 @@ const {
     padding: 0 8px;
     font-size: 11px;
   }
-  .next {
+  .tag-btn {
     width: 36px;
     padding: 0;
     border: 0;
@@ -184,17 +243,29 @@ const {
     cursor: pointer;
     transition: color 0.15s ease;
   }
-  .next svg {
+  .tag-btn svg {
     fill: none;
     stroke: currentColor;
     stroke-width: 1.6;
   }
-  .next:hover {
+  .tag-btn:hover {
     color: var(--gorse);
+  }
+  .pause .icon-play {
+    fill: currentColor;
+    stroke: none;
+  }
+  .pause.is-paused .icon-pause,
+  .pause:not(.is-paused) .icon-play {
+    display: none;
   }
   @media (prefers-reduced-motion: reduce) {
     .slide {
       transition: none;
+    }
+    /* The photos never move by themselves, so there's nothing to pause. */
+    .pause {
+      display: none;
     }
   }
 </style>

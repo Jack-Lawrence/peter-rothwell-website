@@ -2,11 +2,9 @@
 import '@fontsource-variable/figtree';
 import '@fontsource/jetbrains-mono/500';
 import '../styles/global.css';
-// Fonts on the first screen, preloaded so they arrive with the page.
+// The heading font, preloaded so headings show straight away (see below).
 import display800 from '@fontsource/sofia-sans-extra-condensed/files/sofia-sans-extra-condensed-latin-800-normal.woff2?url';
 import display900 from '@fontsource/sofia-sans-extra-condensed/files/sofia-sans-extra-condensed-latin-900-normal.woff2?url';
-import bodyFont from '@fontsource-variable/figtree/files/figtree-latin-wght-normal.woff2?url';
-import monoFont from '@fontsource/jetbrains-mono/files/jetbrains-mono-latin-500-normal.woff2?url';
 import Header from '../components/Header.astro';
 import PreviewBar from '../components/PreviewBar.astro';
 import ContactFooter from '../components/ContactFooter.astro';
@@ -43,7 +41,11 @@ const displayFaces = [
       `@font-face{font-family:'Sofia Sans Extra Condensed';font-style:normal;font-weight:${weight};font-display:block;src:url(${url}) format('woff2')}`,
   )
   .join('');
-const preloads = [display900, display800, bodyFont, monoFont];
+// Only the heading weights are preloaded: with font-display: block they hold up
+// the headline until they arrive. Body text and the small mono labels use "swap",
+// so they never hold anything up, and leaving them to load normally keeps the
+// network free for the hero photo (the largest paint on phones).
+const preloads = [display900, display800];
 // The colour theme chosen in the admin area (nothing extra for the default).
 const palette = paletteFor(theme as ThemeFile);
 const themeCss = paletteCss(palette);

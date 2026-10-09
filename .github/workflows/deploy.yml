@@ -1,6 +1,7 @@
 # Builds the site and publishes it to GitHub Pages.
 # Runs after the Checks workflow passes on main (so a change that breaks the
-# site never goes live), by hand, and hourly so new Instagram posts appear.
+# site never goes live), by hand, and hourly so new Instagram posts appear
+# (the hourly run is skipped until there's an Instagram token: see the gate job).
 name: Deploy to GitHub Pages
 
 on:
@@ -22,9 +23,32 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  build:
+  # The hourly run only exists to pick up new Instagram posts. Until the
+  # IG_ACCESS_TOKEN secret is set there's nothing new to fetch, so it would just
+  # redeploy the same site 24 times a day. Secrets can't be read in a job-level
+  # `if`, so this job checks for the token and the build job is gated on its
+  # output. Pushes (after Checks) and manual runs always deploy.
+  gate:
     # After a push, only deploy when the checks passed.
     if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    outputs:
+      deploy: ${{ steps.decide.outputs.deploy }}
+    steps:
+      - id: decide
+        env:
+          HAS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN != '' }}
+        run: |
+          if [ "$GITHUB_EVENT_NAME" = "schedule" ] && [ "$HAS_TOKEN" != "true" ]; then
+            echo "No Instagram token yet, so the hourly rebuild is skipped."
+            echo "deploy=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "deploy=true" >> "$GITHUB_OUTPUT"
+          fi
+
+  build:
+    needs: gate
+    if: needs.gate.outputs.deploy == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
