@@ -1,143 +1,142 @@
-# Site audit: 5 October 2026
+# Site audit: 9 October 2026
 
-Pre-launch audit of the Astro rebuild of rothwellsrunning.com, in its current state (not yet deployed).
+## Re-audit after round 2
 
-## Overall score: 72 / 100
+Every prompt in [PROMPTS.md](PROMPTS.md) (round 2) has been done. Re-scored with the same areas and weights as the audit below.
 
-The build itself is fast, accessible and cleanly structured. The score is held back by things a visitor would notice straight away (no photos, sample blog posts, placeholder text in the policies) and by features that are built but not connected yet (enquiry form, Instagram feed), plus missing SEO groundwork.
+### Overall score: 87 / 100 (was 80)
 
-| Area               | Score | Weight | Notes                                                                                            |
-| ------------------ | ----- | ------ | ------------------------------------------------------------------------------------------------ |
-| Performance        | 95    | 15%    | Lighthouse 100 (mobile and desktop), but measured without real photos                            |
-| Accessibility      | 92    | 15%    | Lighthouse 100; manual checks good; no screen reader test yet                                    |
-| SEO                | 62    | 15%    | No sitemap, robots.txt, share image, structured data or 404 page; the preview would be indexable |
-| Content            | 45    | 20%    | No photos; three sample posts; 11 placeholders in policies; plan details unconfirmed             |
-| Features           | 60    | 15%    | Form and Instagram built but not connected; admin area not built                                 |
-| Code quality       | 82    | 10%    | Clear components, content in data files; no type checking or CI checks; nothing committed        |
-| Security & privacy | 80    | 10%    | No trackers or cookies, layered spam traps; no security headers until Cloudflare                 |
+| Area               | Score | Weight | Was | What changed                                                                                                                                                                                           |
+| ------------------ | ----- | ------ | --- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Performance        | 97    | 15%    | 90  | Home page 604 → 176 KiB on mobile, LCP 2.3 → 1.9 s; only the first carousel photo loads up front; no PNG fallbacks (deploy 73 → 51 MB); two font preloads instead of four; idle hourly deploys skipped |
+| Accessibility      | 97    | 15%    | 90  | Carousel pause/play button, and it stops off screen and in background tabs; label-in-name fixed; target sizes checked at 375 and 1440 px; axe runs in CI on four pages                                 |
+| SEO                | 95    | 15%    | 88  | Sitemap `lastmod` for posts, breadcrumbs and `dateModified` on posts, distinct titles for list pages, an SEO check in CI; Lighthouse SEO 100 on a normal build                                         |
+| Content            | 60    | 20%    | 55  | Example posts clearly labelled on the preview, claims about Peter replaced with placeholders, stock photos gone. Still waiting on Peter: 17 placeholders, real posts, plan details, more reviews       |
+| Features           | 90    | 15%    | 82  | The admin checks a save before committing, then shows "Updating…", "Live" or "didn't go live"; "Still to do" list; keep-me-signed-in option; hero badge editable. Form and Instagram still await keys  |
+| Code quality       | 95    | 10%    | 88  | 113 unit tests (Vitest) and 26 end-to-end tests (Playwright) in CI; `admin/main.ts` split from 3,350 lines into 15 modules; content rules shared by the tests and the admin                            |
+| Security & privacy | 88    | 10%    | 78  | Script escaping fixed and tested; CSP on `/admin`; token kept per tab unless Peter opts in. The shared `github.io` origin and missing security headers remain until Cloudflare                         |
 
-Weighted total: 71.6, rounded to 72.
+Weighted total: 87.2, rounded to 87. Content is still the biggest gap, and only Peter can close it.
 
-## What was tested
+### Tests (9 October, after a clean `npm ci`, with `PREVIEW=true`)
 
-- **Lighthouse 12** on the production build (home page mobile and desktop, terms page mobile): Performance, Accessibility, Best Practices and SEO all **100**.
-  - Mobile: First Contentful Paint 1.5 s, Largest Contentful Paint 1.5 s, Total Blocking Time 0 ms, Cumulative Layout Shift 0.014, total page weight 91 KiB.
-  - Only flag: render-blocking CSS, about 700 ms potential saving on throttled mobile.
-- **Internal links** across all 9 pages: none broken.
-- **Headings:** exactly one `<h1>` per page.
-- **Enquiry form:** bot-style submit, honeypot, link filter and validation all behave as designed (tested with sending intercepted).
-- **Layout:** first screen and "Ways to train" section each fit one screen at 1920×929, 1440×900 and 1366×768; no sideways scrolling at 375 px.
+| Check                                     | Result                                                                                                                               |
+| ----------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| `npm run format:check`                    | Pass                                                                                                                                 |
+| `npm run check`                           | 0 errors, 0 warnings, 0 hints                                                                                                        |
+| `npm test` (Vitest)                       | 113 tests in 12 files pass (about 20 s)                                                                                              |
+| `npm run build`                           | Pass, 14 pages and 4 redirects                                                                                                       |
+| `npm run validate:html`                   | Pass                                                                                                                                 |
+| `npm run check:links`                     | 278 links, none broken                                                                                                               |
+| `node scripts/check-seo.mjs`              | 13 public pages, none missing a title, description, canonical link or share image, no repeats                                        |
+| `npm run test:e2e` (Playwright, Chromium) | 26 tests pass, including its own base-path build (about 50 s)                                                                        |
+| Lighthouse CI, mobile, best of 3          | Home 98 / 100 / 100, Journal 99 / 100 / 100, Terms 100 / 100 / 100 (Perf / A11y / BP)                                                |
+| Lighthouse SEO, normal build              | 100 on `/`, `/journal/` and a post                                                                                                   |
+| `npm audit --omit=dev`                    | 0 vulnerabilities                                                                                                                    |
+| Layout, base-path preview build           | First screen and "Ways to train" exactly one screen at 1920×929, 1440×900 and 1366×768, dark and light; no sideways scroll at 375 px |
+| Admin, demo mode                          | Every screen opens without errors; "Still to do" (23 items), price edit, new post, photo crop, colours and reset all work            |
 
-## Findings
+### Findings fixed
 
-### High priority (before launch)
+All 16 findings below are fixed: 1 (escaping), 2 (example posts labelled and placeholders added, though the real posts are still Peter's to write), 3 (carousel pause), 4 (save status), 5 (carousel images), 6 (PNG fallbacks), 7 (label in name), 8 (token storage and CSP), 9 (tests), 10 (hourly deploys), 11 (target size), 12 (font preloads), 13 (sign-in wording), 14 (`main.ts` split), 15 (sitemap and breadcrumbs), 16 (patch updates).
 
-1. **No photos.** The hero, About portrait, blog covers and Instagram grid are all placeholders. This is the biggest gap between the site and "eye-catching". Lighthouse scores will drop once photos are added unless they're handled carefully (see 4).
-2. **Preview will be indexed by Google.** Builds on GitHub Pages have no `noindex`, and the canonical URL points at the github.io address. Search engines could index the preview and treat it as the real site.
-3. **No sitemap, robots.txt, share image or structured data.** Links shared on WhatsApp, Facebook or Instagram show no image. There's no `LocalBusiness` data to support "personal trainer Edinburgh" searches.
-4. **Every photo is lazy-loaded.** `Photo.astro` uses lazy loading for all images, including the hero. Once a real hero photo is added it will load late and hurt Largest Contentful Paint. Instagram images use a plain `<img>` with no width or height, so they will shift the layout as they load.
-5. **Placeholder content is visible.** Three sample posts (labelled "Sample"), 11 highlighted gaps across the four policies, and "what's included" lines on each plan that Peter hasn't confirmed.
-6. **Form and Instagram not connected.** Both need keys (see [LAUNCH.md](LAUNCH.md)).
+Also fixed along the way: the enquiry form's "Thanks, Sam" never appeared (a literal backspace character sat where the regex `\b` should be; a unit test now rejects control characters in source); on phones the header covered half of the preview bar; a bare email address in a post turned into a Markdown link when the post was saved; the post editor dropped `<mark>` highlights on save.
 
-### Medium priority
+### Next
 
-7. **Render-blocking CSS** (about 700 ms on slow mobile). Inlining the stylesheets would remove it, since they're small.
-8. **No 404 page.** GitHub Pages and Cloudflare will show their own generic page.
-9. **No app icon or web manifest.** "Add to Home Screen" on iPhone uses a screenshot instead of the logo.
-10. **No automated checks.** There's no `astro check` (TypeScript), link checker or Lighthouse run in CI, so regressions would go unnoticed.
-11. **No security headers.** GitHub Pages can't set them. On Cloudflare, add a Content Security Policy, HSTS and the usual headers through `_headers`.
-12. **Spam checks are mostly client-side.** A bot posting directly to Web3Forms only meets Web3Forms' own filter. Moving to a Cloudflare Worker with Turnstile fixes this.
-13. **Nothing is committed.** The project is a git repo with no commits and no GitHub remote.
-
-### Low priority
-
-14. No privacy-friendly analytics, so there's no way to know if the site is bringing in enquiries. Cloudflare Web Analytics is free and cookieless.
-15. The journal has no RSS feed, topic filter, reading time or previous/next links.
-16. Only two testimonials. The carousel is ready for more.
-17. The dev server on Windows sometimes serves stale component styles until restarted. This affects development only, not the live site.
-
-### What's already good
-
-- Fast: 91 KiB page weight, self-hosted fonts, almost no JavaScript.
-- Accessible: skip link, visible focus, labelled form, reduced-motion support, good contrast, works with keyboard.
-- Private by default: no cookies, trackers or third-party requests, so no cookie banner is needed.
-- Content lives in plain data files, ready for the admin area.
-- Old Wix policy URLs redirect to the new pages.
-- The policies are real and specific to Peter's business. The Wix versions were unfinished templates.
+- **Hard-coded wording.** A few visitor-facing words are still in components rather than `site.json`: "← All posts" on posts, "Get directions" and "Inside" in the footer and on the map, the enquiry form's labels and messages, and the topic pages' "Posts about … from coach Peter Rothwell".
+- **Failure notifications.** "Jack has the details" relies on Jack hearing about failed runs. GitHub notifies whoever triggered a run, which for the admin's saves is Peter, so set up notifications for Jack (or a workflow step that opens an issue or emails him when Checks fails on `main`).
+- **Try the save status with Peter's real token.** It's unit-tested, and the Actions API works without a token for this public repo, but it hasn't been tried in a live save with a fine-grained token yet.
+- **Dev dependencies.** `npm audit` including dev dependencies reports 19 issues, all inside `@lhci/cli`'s dependencies; production has none. Update when a fixed `@lhci/cli` is out.
+- **Windows and Git Bash.** Git Bash turns `BASE_PATH=/peter-rothwell-website/` into a Windows path; use PowerShell or `MSYS_NO_PATHCONV=1` (noted in the README).
+- **Launch.** The Cloudflare prompt at the end of this file and [LAUNCH.md](LAUNCH.md): security headers, the enquiry Worker, Instagram, and removing `PREVIEW`.
 
 ---
 
-## AI handoff prompts
+## Audit before round 2
 
-**For work before launch, use [PROMPTS.md](PROMPTS.md)**, which has updated prompts that need no accounts or keys. The prompts below are the original set; prompt 5 (Cloudflare) is still the one to use when going live.
+Second pre-launch audit of the Astro rebuild of rothwellsrunning.com, at commit `8387012` (GitHub Pages preview, not live). The first audit (5 October, 72/100) is in git history. Every prompt from that round has been done.
 
-Each prompt stands alone: paste it into a new Claude Code session opened in this project folder.
+## Overall score: 80 / 100
 
-### 1. SEO foundations and preview protection
+The engineering is in good shape: fast, accessible, valid HTML, no broken links, clean types, CI on every change, and a working admin area. Most of the remaining gap is content Peter still has to supply or confirm, which no code change can close. The rest is a handful of real bugs and polish items, listed below and covered by the prompts in [PROMPTS.md](PROMPTS.md).
 
-```
-This is an Astro 7 static site for Rothwells Running, a personal trainer in Edinburgh (see README.md). It deploys to GitHub Pages for client preview (.github/workflows/deploy.yml sets SITE_URL and BASE_PATH) and will later move to Cloudflare Pages at https://www.rothwellsrunning.com.
+| Area               | Score | Weight | Was | Notes                                                                                                                 |
+| ------------------ | ----- | ------ | --- | --------------------------------------------------------------------------------------------------------------------- |
+| Performance        | 90    | 15%    | 95  | Lighthouse 96–100 mobile, now with real photos; carousel photos oversized on phones; 25 MB of unused PNG fallbacks    |
+| Accessibility      | 90    | 15%    | 92  | Lighthouse 100 and a WCAG 2.2 review done; auto-playing carousel has no pause button; label-in-name mismatches        |
+| SEO                | 88    | 15%    | 62  | Sitemap, robots, share image, JSON-LD, 404, RSS and preview `noindex` all in place; small polish left                 |
+| Content            | 55    | 20%    | 45  | Peter's own photos now in; sample posts are invented first-person copy with stock covers; 13 placeholders remain      |
+| Features           | 82    | 15%    | 60  | Admin area, demo modes, journal features done; form and Instagram await keys; admin can't tell Peter a save failed    |
+| Code quality       | 88    | 10%    | 82  | 0 type errors, Prettier, CI, HTML validation, Lighthouse CI; no unit or end-to-end tests; `admin/main.ts` 3,200 lines |
+| Security & privacy | 78    | 10%    | 80  | No trackers, 0 npm vulnerabilities; a broken `</script>` escape; admin token in localStorage on a shared origin       |
 
-Add SEO foundations:
-1. Preview protection: add a PREVIEW env var (set to "true" in deploy.yml). When set, add <meta name="robots" content="noindex, nofollow"> to every page in src/layouts/Base.astro and output a robots.txt that disallows everything. When not set, robots.txt allows everything and points to the sitemap.
-2. Add @astrojs/sitemap. Exclude the old Wix redirect pages (/english-*, /accessibility-statement).
-3. Add Open Graph and Twitter card tags in Base.astro: og:image (default share image at public/og-default.png, 1200×630, built from the brand: dark green #1b211e, gorse yellow #e3b23c, "ROTHWELLS RUNNING" in Big Shoulders Display), og:url, og:site_name, twitter:card=summary_large_image. Blog posts use their cover as og:image when they have one.
-4. Add JSON-LD: on the home page a LocalBusiness (or HealthAndBeautyBusiness) plus Person for Peter Rothwell, using src/data/site.json for the name, phone, email, address (1 Moray Park, Meadowbank, Edinburgh EH7 5TS), Instagram URL and the three services with prices from src/data/services.json. On blog posts, a BlogPosting with headline, datePublished and author.
-5. Add a branded 404 page (src/pages/404.astro) using Base.astro, with links to the home page, coaching plans and contact.
-6. Add apple-touch-icon (180×180 PNG) and a web manifest using the favicon mountain logo.
+Weighted total: 80.1, rounded to 80.
 
-Respect the base path (use href() from src/lib/url.ts). Run npm run build and check the output for each item. Don't change the visual design.
-```
+## What was tested
 
-### 2. Image performance (do before adding photos)
+| Check                                             | Result                                                                                |
+| ------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| `npm run format:check`                            | Pass                                                                                  |
+| `npm run check` (TypeScript, 59 files)            | 0 errors, 0 warnings, 0 hints                                                         |
+| `npm run build`                                   | Pass, 18 pages                                                                        |
+| `npm run validate:html`                           | Pass                                                                                  |
+| `npm run check:links`                             | 148 links, none broken                                                                |
+| `npm audit --omit=dev`                            | 0 vulnerabilities                                                                     |
+| Lighthouse CI, mobile, `PREVIEW=true` (best of 3) | Home 97 / 100 / 100, Journal 99 / 100 / 100, Terms 100 / 100 / 100 (Perf / A11y / BP) |
+| Home page, mobile                                 | LCP 2.3 s, CLS 0.000, TBT 38 ms, 601 KiB                                              |
+| Layout                                            | One-screen hero and "Ways to train" correct at 1366×768; no sideways scroll at 375 px |
+| Browser console                                   | No errors on home, journal post or admin                                              |
 
-```
-In this Astro 7 site (see README.md), prepare image handling so real photos don't hurt performance.
+## Findings
 
-1. src/components/Photo.astro: add a `priority` prop. When true, use loading="eager", fetchpriority="high" and decoding="sync"; otherwise keep lazy loading. Use it for the hero photo in src/components/Hero.astro.
-2. Make sure every <Image> outputs width/height (no layout shift), uses modern formats (avif/webp), and has sensible `sizes` for its layout: hero about 40vw on desktop and 100vw on mobile; About portrait about 45vw; blog cards about 33vw.
-3. Instagram images (src/components/InstagramFeed.astro) are downloaded by scripts/fetch-instagram.mjs into public/instagram/ and shown with a plain <img>. Change the script to save them into src/assets/instagram/ (gitignored) and render them through astro:assets so they're resized to about 400px squares and given width/height. Keep a placeholder fallback when there are no posts.
-4. Set build.inlineStylesheets to 'always' in astro.config.mjs (the CSS is small) and preload the latin Big Shoulders Display 900 font used in the hero headline.
-5. Add a few test images to check, then run Lighthouse on mobile against `npm run build && npx astro preview`. Target: Performance ≥ 95, CLS < 0.05. Remove the test images afterwards.
-```
+### High priority
 
-### 3. Add real photos and content
+1. **Broken `<` escaping in two inline scripts.** `src/components/JsonLd.astro` and `src/pages/admin/index.astro` both do `.replace(/</g, '<')`. In JavaScript source `'<'` _is_ `<`, so the replace does nothing. Any content containing `</script>` (a blog post, an FAQ answer, any `site.json` text, all of which are embedded in the admin page) closes the script tag early: the admin breaks, and in the worst case content becomes markup. Should be `'\\u003c'`.
+2. **Sample posts read as real.** The three journal posts are invented first-person copy (one is a race report Peter didn't write), with stock cover photos from `src/assets/demo/`. The "Sample" label was removed in `6db368a`, so on the preview they look like Peter's own words. This breaks the project's "never invent facts about Peter" rule, and Peter may approve them without noticing.
+3. **Auto-playing carousels have no pause control** (WCAG 2.2.2). The hero and Run Club photos change every 6 s. They pause on hover and focus, and not at all with reduced motion, but touch users can't stop them, and they keep running off screen and in background tabs.
+4. **The admin can't tell Peter when a save didn't go live.** Every save commits to `main`, and the deploy only runs if Checks pass. If a save breaks the build, Peter still sees "your site will update in about a minute" and nothing changes.
 
-```
-Peter Rothwell has supplied photos in [FOLDER]. In this Astro site (see README.md):
-1. Put them in src/assets/photos/ with descriptive file names. Resize anything over 2400px on its long edge.
-2. Wire them into the hero (Hero.astro), About portrait (About.astro) and blog covers (frontmatter `cover` in src/content/journal/*.md), replacing the placeholders in Photo.astro calls. Write specific alt text for each (who, doing what, where).
-3. Choose crops that keep faces in frame at desktop and phone widths (object-position).
-4. Remove the three sample posts (`sample: true`) if Peter has written real ones, and the `sample` field from the schema in src/content.config.ts if none are left.
-5. Update src/data/site.json about.stats and hero.badge with the numbers Peter supplied: [NUMBERS].
-Run the build and check the home page at 1440×900 and 375 px wide.
-```
+### Medium priority
 
-### 4. Build the admin area
+5. **Carousel photos are oversized on phones.** Slides only come in 540 and 1080 px widths, so a 379 px-wide slide on a typical phone downloads the 1080 version, and all four slides of each carousel load up front. Lighthouse estimates 300–430 KiB of savings on the home page.
+6. **25 MB of PNG fallbacks.** `Photo.astro` uses `<Picture>` with WebP sources, so Astro's fallback `<img>` is PNG (18 files up to 3.3 MB each). Modern browsers never fetch them, but they bloat every deploy and are what old browsers and some crawlers get. Set `fallbackFormat="jpg"`.
+7. **Label in Name** (WCAG 2.5.3, flagged by Lighthouse). The map link and the journal post cards have accessible names that don't contain their visible text.
+8. **Admin token storage on GitHub Pages.** The token sits in `localStorage` on `jack-lawrence.github.io`, an origin shared by every Pages site on that account. Any script on any of those sites could read it. Fine on Cloudflare later; worth a "remember on this device" opt-in and a CSP on `/admin` now.
+9. **No unit or end-to-end tests.** CI checks build, types, HTML, links and Lighthouse, but nothing checks behaviour: the Markdown round trip in the editor, contrast checks for colour themes, the mobile menu, the form's demo mode, or the admin's demo saves.
+10. **Hourly deploys that do nothing.** `deploy.yml` rebuilds and redeploys every hour to fetch Instagram posts, but there's no token yet, so that's 24 identical deploys a day.
 
-```
-Build the admin area for this Astro 7 static site (see README.md). It's for Peter, a personal trainer who is not confident with websites. Design mockups are on the "Admin — Dashboard" and "Admin — Write a post" artboards at https://claude.ai/artifact/3Ny5cGNSJTWcKYYAeVur8z (read them with the Artifact tool).
+### Low priority
 
-Constraints: the site is static (GitHub Pages now, Cloudflare Pages later), with no server or database. All content is files in the repo:
-- src/data/site.json (hero, about, contact, location, enquiries)
-- src/data/services.json (plans and prices)
-- src/data/testimonials.json
-- src/data/week.json
-- src/content/journal/*.md (blog posts; schema in src/content.config.ts)
-- src/content/legal/*.md (policies)
+11. Footer legal links are 15 px tall (WCAG 2.2 target size wants 24 px or enough spacing).
+12. Four fonts are preloaded on every page; only the two above the fold need it.
+13. The admin sign-in screen says changes "go live on rothwellsrunning.com", which isn't true on the preview.
+14. `src/admin/main.ts` is 3,221 lines in one file, which makes future changes slow and risky.
+15. Sitemap has no `lastmod`; blog posts have no breadcrumb data. Minor SEO polish.
+16. Patch updates available: `astro` 7.3.5 → 7.3.8, `marked`, `@astrojs/markdown-satteri`, `prettier-plugin-astro`.
 
-Build /admin as a client-side app that reads and writes those files through the GitHub REST API (contents endpoint), committing each change to main, which triggers the existing deploy workflow. Requirements:
-1. Sign in with GitHub. Peter has a GitHub account added as a collaborator. Use the GitHub OAuth device flow, or a fine-grained token he pastes once, kept in localStorage. Document the trade-off and pick the simplest secure option.
-2. Dashboard as in the mockup: "Write a blog post", "Change prices", "Set Run Club dates", "Add a testimonial", recent posts with Draft/Live status, and Instagram status (read src/data/instagram.json).
-3. Post editor: title, cover photo upload (commit the image to src/assets/journal/, resized in the browser to max 2000px), a simple rich text editor that saves Markdown (headings, bold, italic, lists, links, images), topic, draft/publish, and preview.
-4. Forms for prices/services, testimonials, the week strip, contact details and policies. Validate before committing, and show friendly errors.
-5. After each save, show "Saved. Your site will update in about a minute" and the commit link.
-6. Big buttons, plain English, works well on a phone. Use the site's fonts and colours.
-7. Exclude /admin from the sitemap and add noindex.
-Write a short guide for Peter in docs/admin-guide.md.
-```
+### Content Peter still has to supply (not code)
 
-### 5. Move to Cloudflare
+- Answers for the 13 `<mark>` placeholders: 10 in the policies (`privacy.md` ×3, `refunds.md` ×2, `terms.md` ×5) and 3 in `faq.json`, which show on the home page.
+- Confirmation of what's included in each plan (`services.json`), and prices.
+- Real blog posts, or approval to launch with none.
+- More testimonials (there are 2), optional hero badge and About stats.
+- Web3Forms key, Instagram token and the domain: see [LAUNCH.md](LAUNCH.md).
+
+### What's already good
+
+- Fast and light: 95–180 KiB on inner pages, inline CSS, self-hosted fonts, almost no JavaScript on public pages (the 512 KB editor bundle only loads on `/admin`).
+- Accessible: Lighthouse 100 everywhere, skip link, visible focus, reduced-motion support, a written accessibility statement.
+- Preview protection works: `noindex`, disallow-all robots and a "not live yet" bar on GitHub Pages builds only.
+- Every visitor-facing word is editable in the admin, with a demo mode Peter can try safely.
+- CI blocks a broken build from deploying.
+- No cookies, trackers or third-party requests.
+
+---
+
+## Going live: Cloudflare prompt
+
+For after Peter has signed off and the domain is available (see [LAUNCH.md](LAUNCH.md) step 7). The pre-launch work is in [PROMPTS.md](PROMPTS.md).
 
 ```
 Move this Astro 7 site (see README.md and LAUNCH.md) from GitHub Pages to Cloudflare Pages with the custom domain www.rothwellsrunning.com.
@@ -147,39 +146,6 @@ Move this Astro 7 site (see README.md and LAUNCH.md) from GitHub Pages to Cloudf
 4. Replace Web3Forms with a Cloudflare Pages Function at /api/enquiry. Verify a Turnstile token server-side, re-run the honeypot, time and link checks on the server, rate-limit by IP, and send the email to Peter using Cloudflare Email Routing's send_email binding (destination address verified). Update src/components/EnquiryForm.astro to use Turnstile and the new endpoint.
 5. Instagram: replace the hourly GitHub Actions rebuild with a scheduled Worker that refreshes the token (stored in Workers KV) and triggers a Pages deploy hook only when the latest posts change.
 6. Add Cloudflare Web Analytics (cookieless) and mention it in src/content/legal/privacy.md.
+7. Remove PREVIEW from deploy.yml and checks.yml so live builds are indexable.
 Write the setup steps into LAUNCH.md.
-```
-
-### 6. Quality gates
-
-```
-Add automated checks to this Astro 7 project (see README.md):
-1. Install @astrojs/check and typescript; add "check": "astro check" to package.json. Fix any type errors it finds.
-2. Add a GitHub Actions workflow (.github/workflows/checks.yml) that runs on pull requests and on pushes to main: npm ci, npm run check, npm run build, an internal link check on dist/ (e.g. lychee or linkinator, offline), and html-validate on dist/**/*.html.
-3. Add Lighthouse CI (@lhci/cli) against `astro preview` for /, /journal/ and /terms/, with budgets: performance ≥ 90, accessibility 100, best practices ≥ 95, SEO 100 (SEO assertions off when PREVIEW=true, since preview pages are noindex).
-4. Add Prettier with prettier-plugin-astro, matching the current style (2 spaces, single quotes, 120 columns), and a format check in CI.
-Keep the checks fast (under 3 minutes).
-```
-
-### 7. Accessibility review
-
-```
-Do a manual accessibility review of this Astro site (see README.md) against WCAG 2.2 AA, beyond what Lighthouse checks:
-1. Keyboard only: tab through every page, including the mobile menu (<details> in Header.astro), the testimonials carousel arrows (Testimonials.astro) and the enquiry form (EnquiryForm.astro). Check focus order, visible focus and that nothing traps focus.
-2. Screen reader semantics: check the accessibility tree for the hero headline, the week strip (an <ol>), the price cards, the carousel (should it be announced as a carousel? are off-screen slides reachable?), the form's success and error messages (role=status), and the map link.
-3. Check 200% and 400% zoom (reflow), text spacing overrides, and prefers-reduced-motion.
-4. Check contrast for every text and background pair in src/styles/global.css, including placeholder text and yellow-on-dark.
-Fix what you find, then update the "How this was checked" section of src/content/legal/accessibility.md with what was tested, and remove its placeholder.
-```
-
-### 8. Journal improvements
-
-```
-Improve the blog ("Training journal") in this Astro 7 site (see README.md; posts in src/content/journal/, pages in src/pages/journal/):
-1. RSS feed with @astrojs/rss at /journal/rss.xml, linked in Base.astro's <head>.
-2. Reading time on cards and posts (words ÷ 230, rounded).
-3. Topic filter on /journal/ (static pages at /journal/topic/[topic]/, not client-side JS).
-4. Previous/next post links and a "Train with Peter" call to action at the end of each post linking to /#coaching and /#contact.
-5. Pagination once there are more than 12 posts.
-Match the existing design (light chalk background, Big Shoulders Display headings, mono labels).
 ```

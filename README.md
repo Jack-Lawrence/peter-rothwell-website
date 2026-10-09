@@ -30,7 +30,7 @@ Optional fields that are left empty are hidden: `hero.badge` (e.g. "Longest run 
 
 ## Before launch
 
-- [ ] Replace the photo placeholders (hero, About, blog covers)
+- [x] Replace the photo placeholders (hero, About, blog covers)
 - [ ] Delete the three sample posts in `src/content/journal/` (marked `sample: true`)
 - [ ] Peter to confirm what's included in each plan in `services.json`
 - [ ] Add hero badge and About stats if wanted
@@ -43,28 +43,33 @@ A small app for Peter to edit the content files above: blog posts (with a simple
 It has two modes:
 
 - **Demo** (the default on the preview site, no sign-in): everything works, but changes stay in that browser (localStorage). "Reset demo" clears them. Nothing leaves the browser.
-- **Live**: Peter signs in once per device by pasting a GitHub fine-grained personal access token. Each save is one commit to `main` (for example "Update prices (via admin)"), which triggers the deploy workflow, so the site updates in about a minute. A post and its photos go up in the same commit. Photos are resized in the browser to at most 2000px before upload.
+- **Live**: Peter signs in once per device by pasting a GitHub fine-grained personal access token. Each save is one commit to `main` (for example "Update prices (via admin)"), which triggers the Checks and then the Deploy workflow. Before committing, the admin checks the change against the same rules the build uses (`src/lib/content-rules.ts`, kept in step with `src/content.config.ts` by a unit test) and refuses a save that would break the build. After committing it follows the two workflow runs for that commit through the GitHub Actions API (`src/admin/deploy-status.ts`) and shows "Updating your site…", then "Live" or "That change didn't go live" with a link to the failed run. It reads the API with Peter's token when it has _Actions: Read-only_, and without one otherwise (the repo is public); it stops after five minutes or while the tab is hidden. A post and its photos go up in the same commit. Photos are resized in the browser to at most 2000px before upload.
 
 The repo it commits to is `ADMIN_REPO` (default `Jack-Lawrence/peter-rothwell-website`; set it as an environment variable at build time if the repo moves).
 
-**Why a pasted token, not "Sign in with GitHub" (OAuth)?** GitHub's OAuth flow needs a server to swap the login code for a token while keeping a client secret hidden, and this site deliberately has no server. A fine-grained token can be limited to this one repository and to _Contents: read and write_, expires on a date Peter chooses, and can be revoked at any time on GitHub. It's stored only in Peter's browser (localStorage) and sent only to api.github.com. "Sign out" deletes it. If the site moves to Cloudflare, a small Worker could do the OAuth swap instead, and the admin would need only a new sign-in screen.
+**Why a pasted token, not "Sign in with GitHub" (OAuth)?** GitHub's OAuth flow needs a server to swap the login code for a token while keeping a client secret hidden, and this site deliberately has no server. A fine-grained token can be limited to this one repository and to _Contents: read and write_ (plus _Actions: read-only_ for the save status), expires on a date Peter chooses, and can be revoked at any time on GitHub. It's stored only in Peter's browser and sent only to api.github.com. "Sign out" deletes it.
+
+On GitHub Pages the admin shares its web address (`<user>.github.io`) with every other Pages site on that account, so the token is kept only until the tab closes (sessionStorage) unless Peter ticks "Keep me signed in on this device" (localStorage). `/admin` also sets a Content-Security-Policy that only allows scripts from the site itself and connections to api.github.com, so injected code can't load or send the token anywhere else. If the site moves to Cloudflare, a small Worker could do the OAuth swap instead, and the admin would need only a new sign-in screen.
 
 To set Peter up: give him a GitHub account with write access to the repo, then follow "Signing in" in the admin guide together.
 
 ## Checks
 
-`.github/workflows/checks.yml` runs on pull requests and every push to `main` (including saves from the admin area), and the deploy only goes ahead if it passes. It takes about three minutes:
+`.github/workflows/checks.yml` runs on pull requests and every push to `main` (including saves from the admin area), and the deploy only goes ahead if it passes. It takes about four to five minutes:
 
-| Step                                    | Command                                                                                                     |
-| --------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
-| Formatting (Prettier)                   | `npm run format:check` (fix with `npm run format`)                                                          |
-| Types                                   | `npm run check`                                                                                             |
-| Build                                   | `npm run build`                                                                                             |
-| Internal links, offline                 | `npm run check:links`                                                                                       |
-| HTML validation (`.htmlvalidate.mjs`)   | `npm run validate:html`                                                                                     |
-| Lighthouse, mobile (`lighthouserc.cjs`) | `npm run lhci`: performance ≥ 90, accessibility 100, best practices ≥ 95 (and SEO when not a preview build) |
+| Step                                    | Command                                                                                                                                                                                                                                                                                                                  |
+| --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Formatting (Prettier)                   | `npm run format:check` (fix with `npm run format`)                                                                                                                                                                                                                                                                       |
+| Types                                   | `npm run check`                                                                                                                                                                                                                                                                                                          |
+| Unit tests (Vitest, `tests/unit/`)      | `npm test`: the editor's Markdown round trip, colour contrast, URLs, dates, the "Still to do" list, and that every content file has the fields the site needs                                                                                                                                                            |
+| Build                                   | `npm run build`                                                                                                                                                                                                                                                                                                          |
+| Internal links, offline                 | `npm run check:links`                                                                                                                                                                                                                                                                                                    |
+| HTML validation (`.htmlvalidate.mjs`)   | `npm run validate:html`                                                                                                                                                                                                                                                                                                  |
+| SEO basics (`scripts/check-seo.mjs`)    | `npm run check:seo`: every public page has a title, description, canonical link and share image, and no two share a title or description                                                                                                                                                                                 |
+| Lighthouse, mobile (`lighthouserc.cjs`) | `npm run lhci`: performance ≥ 90, accessibility 100, best practices ≥ 95 (and SEO when not a preview build)                                                                                                                                                                                                              |
+| End-to-end (Playwright, `tests/e2e/`)   | `npm run test:e2e`: builds a GitHub Pages-style copy (base path, `PREVIEW=true`) into `dist-e2e/` and checks layout at four screen sizes, the menu, light/dark mode, the carousel, the enquiry form's demo mode, the journal, the admin's demo mode and axe accessibility. First time: `npx playwright install chromium` |
 
-The content files the admin area writes (`src/data/`, `src/content/`) aren't formatted by Prettier, so a save from Peter can't fail on style. Run the last three after a build; locally, stop any other `astro preview` first (Astro allows one at a time).
+The content files the admin area writes (`src/data/`, `src/content/`) aren't formatted by Prettier, so a save from Peter can't fail on style. Run links, HTML, SEO and Lighthouse after a build. Lighthouse and the end-to-end tests start their own `astro preview` (with `--ignore-lock`, so they can run alongside another one). On Windows, run commands that set `BASE_PATH` from PowerShell or cmd: Git Bash turns `/peter-rothwell-website/` into a Windows path (or prefix the command with `MSYS_NO_PATHCONV=1`).
 
 ## Hosting
 

@@ -1,166 +1,177 @@
-# Pre-launch handoff prompts
+# Pre-launch handoff prompts (round 2)
 
-Everything that can be built **before launch**, with no paid services, accounts or keys, so the GitHub Pages preview is as complete as possible to show Peter.
+Fixes and improvements from the [9 October audit](AUDIT.md) (80/100). Everything here works on the GitHub Pages preview and needs no accounts, keys or paid services.
 
-Paste one prompt into a new Claude Code session opened in this folder. Project context, design rules and content rules load automatically from `AGENTS.md`, so the prompts don't repeat them.
+## How to run them
 
-Run them in this order: later prompts assume earlier ones are done. Prompts 7 to 9 can run in any order.
+These are written for **one long Claude Code session**, opened in this folder, with the prompts pasted **in order, one after another**. Project rules load automatically from `AGENTS.md`, so the prompts don't repeat them.
 
-| #   | Prompt                                 | Why it matters for the client demo                      |
-| --- | -------------------------------------- | ------------------------------------------------------- |
-| 1   | GitHub preview with preview protection | Gives Peter a link to look at                           |
-| 2   | SEO foundations                        | Proper share previews when the link is sent on WhatsApp |
-| 3   | Image pipeline                         | Photos won't slow the site down                         |
-| 4   | Demo photos                            | The site looks finished instead of full of grey boxes   |
-| 5   | Preview demo modes                     | The form and Instagram grid can be tried out            |
-| 6   | Admin area with demo mode              | Peter can try editing his own site                      |
-| 7   | "How it works" and FAQ                 | Answers questions before people enquire                 |
-| 8   | Journal improvements                   | The blog feels complete                                 |
-| 9   | Automated checks                       | Nothing breaks unnoticed as changes are made            |
-| 10  | Accessibility review                   | Final pass once everything above is in                  |
+- Steps 1–7 change code but **don't commit**. Each ends with a quick check (types and build) so the next step starts from a working state.
+- Step 8 is the only full test run. When it passes, it commits and pushes to `main`, which updates the GitHub Pages preview.
+- If a step fails its own check, fix it before pasting the next one.
+- If the session gets long and compacts, carry on: each prompt names the files it needs.
 
-Still for after launch (see AUDIT.md prompt 5 and LAUNCH.md): connecting Web3Forms, the Instagram token, the move to Cloudflare, Turnstile, Email Routing and analytics.
+| #   | Step                           | Audit findings                | Size   |
+| --- | ------------------------------ | ----------------------------- | ------ |
+| 0   | Session rules                  | –                             | –      |
+| 1   | Bug and security fixes         | 1, 6, 8, 13                   | Small  |
+| 2   | Accessibility fixes            | 3, 7, 11                      | Small  |
+| 3   | Performance                    | 5, 10, 12, 16                 | Medium |
+| 4   | Honest preview content         | 2, plus a checklist for Peter | Medium |
+| 5   | Automated tests                | 9                             | Large  |
+| 6   | Admin: save status and tidy-up | 4, 14                         | Large  |
+| 7   | SEO polish                     | 15                            | Small  |
+| 8   | Full test, commit and deploy   | –                             | Medium |
+
+Still for after launch: the Cloudflare prompt at the end of [AUDIT.md](AUDIT.md), and [LAUNCH.md](LAUNCH.md).
 
 ---
 
-## 1. GitHub preview with preview protection
+## 0. Session rules
 
 ```
-Set this project up for client preview on GitHub Pages.
+This session works through a series of prompts I'll paste one at a time, based on AUDIT.md (9 October 2026). Read AGENTS.md, AUDIT.md and README.md now, then wait for step 1.
 
-1. Make the first git commit (check .gitignore covers node_modules, dist, .astro, public/instagram). Ask me for the repository name and whether it should be public (GitHub Pages on a free plan needs public), then create it with `gh repo create` and push main.
-2. Preview protection. In .github/workflows/deploy.yml set PREVIEW=true for the build step. When PREVIEW is "true":
-   - Base.astro adds <meta name="robots" content="noindex, nofollow">
-   - the build outputs a robots.txt that disallows everything (generate it from src/pages/robots.txt.ts so it depends on the env var)
-   - a slim, dismissible "Preview site, not live yet" bar shows at the top of every page (granite background, gorse text, mono label; it must not break the one-screen hero, so subtract its height or overlay it)
-   When PREVIEW is not set, none of this appears and robots.txt allows everything.
-3. Turn on Pages (source: GitHub Actions) with `gh api`, wait for the workflow, and give me the live preview URL. Check it in the browser: pages load under the /<repo>/ base path, links work, robots.txt disallows, and the noindex meta is present.
+Rules for the whole session:
+- Don't commit or push until step 8 tells you to.
+- Don't change the visual design except where a step asks. Keep the design and content rules in AGENTS.md (square corners, colour tokens only, base-path-safe links via href(), no invented facts about Peter, every visitor-facing word in site.json and editable in the admin).
+- End every step with `npm run check` and `npm run build`, both passing, and a short summary: what changed, which files, anything you decided not to do and why. Use the browser preview (launch config "site") only where the step asks.
+- Keep a running list of anything you notice that's out of scope; I'll want it in step 8.
 ```
 
-## 2. SEO foundations
+## 1. Bug and security fixes
 
 ```
-Add SEO foundations, so the site is ready for Google at launch and shared links look good now.
+Step 1: bug and security fixes (AUDIT.md findings 1, 6, 8, 13).
 
-1. Add @astrojs/sitemap. Exclude the old Wix redirect pages (/english-*, /accessibility-statement) and anything under /admin. Link it from robots.txt when PREVIEW isn't set.
-2. Create a default share image at public/og-default.png (1200×630) in the site's style: granite background, "ROTHWELLS RUNNING" in Big Shoulders Display, the mountain logo from Logo.astro in gorse, and the line "Running & strength coaching · Edinburgh & online". Generate it with a script (e.g. satori + @resvg/resvg-js, using the Fontsource font files) so it can be regenerated, and keep the script in scripts/.
-3. In Base.astro add og:image (absolute URL), og:url, og:site_name, og:locale en_GB, and twitter:card summary_large_image. Blog posts use their cover image when they have one.
-4. Add JSON-LD from the data files (src/data/site.json, services.json): on the home page, a LocalBusiness with name, url, telephone, email, address (1 Moray Park, Meadowbank, Edinburgh EH7 5TS), sameAs (Instagram), and makesOffer for each service with its price in GBP, plus a Person for Peter Rothwell. On blog posts, a BlogPosting. Validate the output against schema.org types.
-5. Add a branded 404 page (src/pages/404.astro): a big display heading ("Wrong turn"), a short line, and buttons to the home page and coaching plans.
-6. Add a 180×180 apple-touch-icon and a web manifest (name, short_name, theme colour #1b211e) based on public/favicon.svg.
-Run the build and show me each item in the output.
+1. Script escaping. src/components/JsonLd.astro and src/pages/admin/index.astro both do `.replace(/</g, '<')`, which is a no-op because '<' in JS source is "<". Make both produce the six characters < (i.e. '\\u003c'). Put the escaping in one small shared helper (e.g. in src/lib/) and use it in both places. Prove it: temporarily add `</script><b>x</b>` to an FAQ answer and a site.json string, build, and confirm the JSON-LD and #admin-config scripts still parse (JSON.parse on their text) and the admin still loads in demo mode. Then remove the test text.
+2. PNG fallbacks. In src/components/Photo.astro, pass fallbackFormat="jpg" to <Picture> so WebP sources don't fall back to multi-megabyte PNGs. Rebuild and confirm dist/_astro has no photo PNGs left (the icons and og-default.png in public/ are fine). Report dist size before and after.
+3. Admin token storage. On GitHub Pages the admin runs on jack-lawrence.github.io, an origin shared by every Pages site on that account, so a token in localStorage is readable by them all. In src/admin/ (store.ts and the sign-in screen in main.ts):
+   - add a "Keep me signed in on this device" checkbox, unticked by default; unticked stores the token in sessionStorage, ticked in localStorage. Existing localStorage tokens keep working. Sign out clears both.
+   - add a Content-Security-Policy <meta> to src/pages/admin/index.astro only: default-src 'self'; connect-src 'self' https://api.github.com; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; script-src 'self' plus whatever Astro's inline scripts need (prefer hashes over 'unsafe-inline'; check the built page). Check that demo mode, sign-in, image cropping and the editor all still work with it, with no CSP errors in the console.
+   - add two sentences about this to README.md's admin section.
+4. The admin sign-in screen says changes "go live on rothwellsrunning.com". Use the configured siteUrl (already in the admin config) so it names the right address on the preview.
 ```
 
-## 3. Image pipeline
+## 2. Accessibility fixes
 
 ```
-Prepare image handling so real photos don't hurt performance. Do this before any photos are added.
+Step 2: accessibility fixes (AUDIT.md findings 3, 7, 11).
 
-1. src/components/Photo.astro: add a `priority` prop. When true use loading="eager", fetchpriority="high"; otherwise keep lazy loading. Use priority on the hero photo (Hero.astro). The hero photo stretches to fill the remaining screen height, so make sure the image covers its box at any size (object-fit: cover, with an object-position prop for choosing the focal point).
-2. Every <Image> must output width and height, use avif/webp, and have `sizes` that match its layout: hero about 40vw on desktop and 100vw below 900px; About portrait about 45vw; blog cards about 33vw; blog post cover up to 1240px.
-3. Instagram: change scripts/fetch-instagram.mjs to save images into src/assets/instagram/ (gitignored), and render them in InstagramFeed.astro through astro:assets as about 400px squares with width and height. Keep the placeholder tiles when there are no posts.
-4. Set build.inlineStylesheets to 'always' in astro.config.mjs and preload the latin Big Shoulders Display 900 font file used by the hero headline.
-5. Test with a few temporary large images. Run Lighthouse (mobile) on `npm run build && npx astro preview`: Performance ≥ 95, CLS < 0.05, and no render-blocking warning. Remove the temporary images afterwards and tell me the before and after numbers.
+1. Carousels (src/components/Carousel.astro, used by Hero.astro and RunClub.astro) auto-advance every 6 s with no way for touch users to stop them (WCAG 2.2.2).
+   - Add a pause/play button next to the existing "next" arrow, in the same style (square, mono, same size). It needs an accessible name that changes ("Pause photos" / "Play photos") and aria-pressed or equivalent. Once paused by the button it stays paused until played again, regardless of hover/focus.
+   - Stop advancing while the carousel is off screen (IntersectionObserver) and while the tab is hidden (visibilitychange).
+   - With prefers-reduced-motion, keep today's behaviour (never auto-advances) and hide the pause button, since there's nothing to pause.
+   - Button labels come from site.json with fields in the admin, per AGENTS.md.
+2. Label in Name (WCAG 2.5.3, flagged by Lighthouse): the map link in src/components/LocationMap.astro / ContactFooter.astro and the post cards in src/components/PostCard.astro have accessible names that don't contain their visible text. Fix so the name starts with the visible text. Re-run Lighthouse on / and confirm label-content-name-mismatch passes.
+3. Target size: the footer's legal links are 15 px tall. Make every link and button on the public site at least 24×24 px or spaced per WCAG 2.5.8. Write a quick script in the browser console to list any remaining offenders at 375 px and 1440 px.
+4. Check the hero still fits the first screen at 1920×929, 1440×900 and 1366×768, and nothing scrolls sideways at 375 px.
 ```
 
-## 4. Demo photos
+## 3. Performance
 
 ```
-The site has grey placeholder boxes where photos go, which makes the client preview look unfinished. Add temporary demo photos so Peter sees the real look, while making it obvious they get replaced.
+Step 3: performance (AUDIT.md findings 5, 10, 12, 16).
 
-1. If there's a folder of Peter's own photos at [FOLDER, or "none"], use those first.
-2. Otherwise use free-licence stock photos from Unsplash or Pexels (their licences allow this). Ask me before downloading anything, listing each file, its source page and size. Choose:
-   - hero: a trail or hill runner in action, moody light, landscape, room for the photo to crop tall
-   - About portrait: a runner or coach outdoors, face not clearly identifiable (it isn't Peter)
-   - three blog covers matching the sample posts (squats/strength, an ultra trail race, race-day fuel)
-   - six square images for the Instagram demo grid (running, strength training, group runs)
-3. Put them in src/assets/demo/ and record each one in src/assets/demo/CREDITS.md (photographer, source URL, licence).
-4. Wire them in through Photo.astro (using the priority and object-position props if prompt 3 is done). Add a `demo` flag so each demo photo shows a tiny "Demo photo" label in its corner, visible only when PREVIEW is "true".
-5. Write proper alt text for each.
-6. Add a step to LAUNCH.md section 8: "Replace all demo photos (src/assets/demo/) with Peter's own, and delete the folder."
-Check the home page at 1440×900 and 375px wide, including that faces aren't cropped badly in the hero.
+Measure first: npm run build, then `PREVIEW=true npm run lhci` (stop any other astro preview first). Note the home page's performance score, LCP and total bytes. Target afterwards: home page under 400 KiB on mobile, performance ≥ 97, no regressions on /journal/ or /terms/.
+
+1. Carousel images: slides are only generated at 540 and 1080 px wide, so phones download the 1080 version for a ~380 px slide. Pick widths that cover the `sizes` in Hero.astro and RunClub.astro at 1x–3x (e.g. 400, 640, 800, 1080). Then only load the first slide up front: the other slides should load lazily just before they're shown (e.g. start them with loading="lazy" and switch to eager when the carousel first advances, or load slide n+1 when slide n shows). The first hero slide stays priority.
+2. Font preloads: Base.astro preloads four fonts on every page. Keep preloads only for the fonts used on the first screen of most pages (check which weights the hero and header actually use); drop the rest. Confirm no visible font swap on the hero with font-display as it is.
+3. Hourly deploy: .github/workflows/deploy.yml rebuilds every hour for Instagram, but there's no token yet. Make the scheduled run skip the build and deploy when the IG_ACCESS_TOKEN secret is empty (secrets can't be used in job-level `if`, so set an output in a first step and gate on it). Pushes and manual runs still always deploy. Add a comment explaining it.
+4. Update the patch versions: astro, @astrojs/markdown-satteri, marked, prettier-plugin-astro (stay within current majors). Run the build and check nothing changed visually on the home page and a blog post.
+
+Re-measure with lhci and report before/after numbers.
 ```
 
-## 5. Preview demo modes for the form and Instagram
+## 4. Honest preview content
 
 ```
-On the preview site the enquiry form and Instagram grid aren't connected to real services yet. Make both demonstrable to the client without sending anything anywhere.
+Step 4: make the preview honest about what's placeholder, and give Peter a list of what he needs to supply (AUDIT.md finding 2 and "Content Peter still has to supply").
 
-1. Enquiry form (src/components/EnquiryForm.astro): when PREVIEW is "true" and no access key is set, a correctly filled form shows the normal success screen, plus a clear note: "Preview only: this message wasn't sent. When the site is live it goes straight to Peter's email." Show a small inline sample of the email Peter would receive (subject line "New enquiry: … from …", name, email, phone, interest and message), so he understands what he'd get. Keep every spam check active, and send no network request.
-2. Instagram (src/components/InstagramFeed.astro): when there are no real posts and PREVIEW is "true", show the six demo images from src/assets/demo/ (from prompt 4, if present) with a small "Demo" label and a line under the grid: "Preview: this grid fills with Peter's latest Instagram posts automatically once connected." Without PREVIEW, keep the current placeholders.
-3. Production builds (PREVIEW unset) must behave exactly as now. Build once each way and confirm.
-Test the form in the browser: bot-style instant submit, honeypot filled, too many links, empty fields, and a proper human submission. Confirm no network request is made in preview mode.
+1. Sample posts. The three posts in src/content/journal/ are invented first-person copy (one is a race report Peter didn't write) and use stock covers from src/assets/demo/. The "Sample" label was removed in commit 6db368a. Bring back a clear label, preview builds only (PREVIEW), on the post card and at the top of the post page: something like "Example post: Peter will replace this". Use the existing `sample` frontmatter field. Wording goes in site.json with an admin field. The admin's post list should show the same flag, and saving a post from the admin clears `sample`.
+2. In those three posts, replace any specific claim about Peter (races he ran, times, distances, personal anecdotes) with a <mark>[Peter to confirm: …]</mark> placeholder, per AGENTS.md. General training advice can stay.
+3. Covers: swap the stock covers for suitable photos of Peter from src/assets/library/ (write specific alt text). If nothing in src/assets/demo/ is still used afterwards, delete the folder and its CREDITS.md, and remove the now-dead "Demo photo" logic (src/lib/demo.ts, the `demo` prop in Photo.astro) if nothing else uses it.
+4. "Still to do" checklist for Peter in the admin dashboard (src/admin/main.ts, home screen): scan the content the admin already loads for
+   - every <mark>…</mark> placeholder (policies, FAQ, posts), showing its text and which page it's on
+   - sample posts still published
+   - empty optional fields that matter: enquiries.accessKey (say "Jack will set this up"), hero.badge, about.stats
+   Each item links to the screen where it's fixed. Show a count ("13 things to confirm"), and a tick when none are left. Plain English, Peter-friendly, matching the admin's existing style. It must work in demo mode and live mode.
+5. Check in the browser: a sample post card and page show the label on a PREVIEW build and not on a normal build; the dashboard list matches `grep -o '<mark>' -r src/content src/data | wc -l`.
 ```
 
-## 6. Admin area with demo mode
+## 5. Automated tests
 
 ```
-Build the admin area at /admin for Peter, who isn't confident with websites. Design mockups are on the "Admin — Dashboard" and "Admin — Write a post" artboards at https://claude.ai/artifact/3Ny5cGNSJTWcKYYAeVur8z (read them with the Artifact tool and match them closely).
+Step 5: add behaviour tests (AUDIT.md finding 9). There are none yet; CI only checks types, build, HTML, links and Lighthouse.
 
-The site is static, with no server or database. Content is the files listed in AGENTS.md. The admin reads and writes those files through the GitHub REST API (contents endpoint), committing to main, which triggers the existing deploy workflow.
-
-Build it with two modes:
-- **Demo mode** (the default on the preview site; no sign-in): everything works, but changes are kept only in this browser (localStorage), and a banner explains "Demo: changes aren't saved to the website". Publishing a post shows what would happen ("Your post would appear on the site in about a minute") and lets the demo preview the post. A "Reset demo" button clears everything. This is what Peter will try first.
-- **Live mode**: sign in with GitHub, using a fine-grained personal access token pasted once (repo contents: read and write), stored in localStorage, with a clear "Sign out". Explain in the README why this was chosen over OAuth, which would need a server. Commits use clear messages like "Update prices (via admin)".
-
-Screens (both modes):
-1. Dashboard as in the mockup: "Morning, Peter" (time of day aware); big buttons for "Write a blog post", "Change prices", "Set Run Club dates", "Add a testimonial"; the list of posts with Draft/Live status; and Instagram feed status from src/data/instagram.json.
-2. Post editor: title, cover photo (drag-drop or choose; resized in the browser to max 2000px; committed to src/assets/journal/), a simple rich text editor that saves Markdown (heading, bold, italic, list, link, photo), topic, draft or publish, preview, and auto-saved drafts.
-3. Simple forms for prices and plan details (services.json), testimonials (with a "Client agreed to this being published" tick box that must be ticked), the week strip, contact details, and the four policy pages (plain Markdown editor with preview; highlight any remaining <mark> placeholders).
-4. Validate everything before saving and show friendly, specific errors.
-5. Big touch targets; works well on a phone; the site's fonts and colours; light theme for readability.
-6. /admin is noindex and excluded from the sitemap.
-Keep the JavaScript self-contained to /admin (a small Preact or vanilla TS app is fine) so public pages stay as light as now. Write docs/admin-guide.md for Peter in plain English with short numbered steps. Test every screen in demo mode in the browser at desktop and phone widths.
+1. Unit tests with Vitest (add `npm test`). Cover the pure logic:
+   - src/admin/markdown.ts: Markdown → HTML → Markdown round trip for headings, bold/italic, nested and ordered lists, links, images with titles (figures), and <mark> placeholders. A round trip must not change the file.
+   - src/lib/theme.ts: every preset passes checkPalette in both modes; a deliberately bad palette fails with a useful message; Pentlands produces its exact hand-picked values.
+   - src/lib/url.ts (href/absolute/baseLinks with and without a base path), src/lib/schedule.ts, src/lib/tenure.ts, src/lib/slots.ts, src/lib/journal.ts (reading time, topics, pagination).
+   - the escaping helper from step 1.
+   - every src/data/*.json file parses and has the fields the components read (a cheap guard against an admin save breaking the build; share the shape with step 6 if useful).
+2. End-to-end smoke tests with Playwright (Chromium only, to keep CI fast; add `npm run test:e2e`). Run against `astro preview` of a build made with BASE_PATH=/peter-rothwell-website/ and PREVIEW=true, so base-path bugs show up. Cover:
+   - home page at 375×812, 1366×768, 1440×900 and 1920×929: no horizontal scroll; first screen and #coaching each exactly one viewport tall above 900 px wide
+   - mobile menu opens, traps nothing, closes with Escape, links work
+   - light/dark toggle switches and persists across reload
+   - carousel: next button advances, pause button stops auto-advance
+   - enquiry form in preview demo mode: validation errors show, a valid submit shows the demo success message, nothing is sent
+   - journal: list, a post, a topic page, RSS returns XML, 404 page for an unknown URL
+   - preview build: robots meta noindex present, robots.txt disallows
+   - admin in demo mode: change a price, see it saved, reset demo restores it
+   - axe-core (@axe-core/playwright) on home, a post, terms and admin: no serious or critical violations
+3. Add both to .github/workflows/checks.yml (install Chromium with caching). Keep the whole Checks workflow under about 5 minutes; report the timing locally.
+4. Document the commands in README.md's Checks table.
 ```
 
-## 7. "How it works" and FAQ
+## 6. Admin: save status and tidy-up
 
 ```
-Add two sections to the home page that answer common questions before people enquire.
+Step 6: make the admin safe for Peter to use alone (AUDIT.md findings 4 and 14). Run `npm test` and `npm run test:e2e` before and after; they must pass both times.
 
-1. "How it works", between the plans section and "Meet your coach": three real steps, because the order matters: (1) "Free 15-minute chat", (2) "Your plan, written for you", (3) "Train, check in, adjust". One short sentence each. Keep it compact. It must not affect the one-screen "Ways to train" section above it.
-2. "Questions", just before the Instagram section: an accessible accordion (native <details>/<summary>) with about 6 questions, stored in a new src/data/faq.json so the admin can edit them later. Suggested questions: Do I need to be a runner already? Can I do online coaching if I'm not in Edinburgh? What happens in the first chat? What do I need for Run Club? Can I pause my plan? How do I pay?
-   Write answers only from facts in src/data/*.json and src/content/legal/terms.md. Where an answer needs something Peter hasn't confirmed, use a <mark>[Peter to confirm: …]</mark> placeholder.
-3. Add FAQPage JSON-LD generated from faq.json.
-4. Match the design: chalk or granite section, display heading, mono labels, gorse accent.
-Check at 1440×900 and 375px wide.
+1. Validate before committing. Before a live save, check the content against the same rules the build uses (src/content.config.ts schemas for posts and policies; the data-file checks from step 5 for JSON). If it fails, don't commit; show a plain-English message pointing at the field ("The post needs a title"). Share the rules between the build and the admin rather than writing them twice, if that's practical without pulling zod/astro into the admin bundle in a heavy way; otherwise mirror them and add a unit test that keeps both in step.
+2. Save status. After a live save, the admin currently says the site will update in about a minute. Instead, poll the GitHub Actions API for the Checks and Deploy runs for that commit (the token has Contents access only; check whether the Actions read endpoints work with it for this repo, and if not, request "Actions: read" in the sign-in instructions and admin guide, and degrade gracefully when it's missing). Show: "Updating your site…", then "Live" with a link to the page, or "That change didn't go live. Your site is unchanged and Jack has the details." with a link to the failed run. The dashboard shows the latest deploy's status. Don't poll forever (stop after ~5 minutes) and stop when the tab is hidden.
+3. Demo mode: simulate the same states so Peter can see what they look like.
+4. Split src/admin/main.ts (3,200 lines) into modules by screen (e.g. src/admin/screens/{dashboard,website,posts,photos,theme,contact,policies}.ts) plus shared helpers. Pure move: no behaviour or wording changes. The e2e admin test and a manual click through every admin screen in demo mode must pass afterwards. Check the admin bundle size didn't grow.
+5. Update docs/admin-guide.md for anything Peter will now see (the "Still to do" list from step 4, the save status, the "keep me signed in" box from step 1).
 ```
 
-## 8. Journal improvements
+## 7. SEO polish
 
 ```
-Improve the blog ("Training journal"): posts are in src/content/journal/, pages in src/pages/journal/.
+Step 7: SEO polish (AUDIT.md finding 15). Small changes only.
 
-1. RSS feed with @astrojs/rss at /journal/rss.xml, linked in Base.astro's <head>.
-2. Reading time on cards and posts (words ÷ 230, rounded up, e.g. "4 min read").
-3. Topic filter on /journal/: links to static pages at /journal/topic/[topic]/ (no client-side JS).
-4. On each post: previous/next post links and an end-of-post call to action ("Want a plan like this? Book a free chat") linking to /#coaching and /#contact.
-5. Pagination at /journal/page/2/ etc. once there are more than 12 posts (test with temporary posts, then delete them).
-6. A better post layout: wider pull quotes (Markdown blockquote), styled lists, images with captions (Markdown image title), and a table style.
-Match the existing light chalk design. Use href() for every link.
+1. Sitemap lastmod: add lastmod for blog posts (from their date, or an updated date if the schema has one) via @astrojs/sitemap's serialize. Leave other pages without one rather than inventing a date.
+2. Blog posts: add BreadcrumbList JSON-LD (Home › Training journal › post) and make sure BlogPosting has image, dateModified (falls back to datePublished), author and publisher. Use the escaping helper from step 1.
+3. Write a small script (scripts/check-seo.mjs, run after a build, add to CI) that fails if any public page in dist/ is missing a <title>, meta description, canonical or og:image, or if two pages share a title or description. Fix whatever it finds (topic and pagination pages are the likely duplicates; give them distinct titles like "Strength | Training journal, page 2").
+4. Run Lighthouse once on a normal build (PREVIEW unset) and confirm SEO is 100 on /, /journal/ and a post. Then return to PREVIEW=true for everything else.
 ```
 
-## 9. Automated checks
+## 8. Full test, commit and deploy
 
 ```
-Add automated checks so changes (including ones from the admin area) can't silently break the site.
+Step 8: full test, then commit and push to update the GitHub Pages preview. I'm asking you to commit and push in this step.
 
-1. Install @astrojs/check and typescript; add "check": "astro check" to package.json; fix any errors it finds.
-2. Add .github/workflows/checks.yml, running on pull requests and pushes to main: npm ci, npm run check, npm run build, an offline internal link check on dist/ (linkinator or lychee), and html-validate on dist/**/*.html (configure sensible rules; don't weaken them just to pass).
-3. Add Lighthouse CI (@lhci/cli) against `astro preview` for /, /journal/ and /terms/, with mobile budgets: performance ≥ 90, accessibility 100, best practices ≥ 95. Skip the SEO category when PREVIEW is "true" (preview pages are noindex on purpose).
-4. Add Prettier with prettier-plugin-astro matching the current style (2-space indent, single quotes, 120 columns), format the codebase in one separate commit, and add a format check to CI.
-5. Make the deploy workflow wait for the checks to pass.
-The whole check run should take under 3 minutes. Show me a passing run.
-```
-
-## 10. Accessibility review
-
-```
-Do a manual accessibility review against WCAG 2.2 AA, beyond what Lighthouse checks. Run this last, after the other prompts.
-
-1. Keyboard only, on every page: the mobile menu (<details> in Header.astro), the testimonials carousel (Testimonials.astro), the FAQ accordion, the enquiry form and its success screen, the preview bar, and the admin area. Check focus order, visible focus, no traps, and that focus goes somewhere sensible after each action.
-2. Screen reader semantics: check the accessibility tree for the hero headline, the week strip (<ol>), the price cards, the carousel (off-screen reviews reachable; arrows labelled; position announced), the form's errors and success (role=status), and the map link.
-3. Reflow at 400% zoom (320 CSS px), text-spacing overrides, prefers-reduced-motion, and Windows high contrast mode (forced-colors).
-4. Contrast of every text and background pair, including placeholder text, mono labels on chalk, and yellow on dark.
-Fix what you find. Then rewrite the "How this was checked" section of src/content/legal/accessibility.md to say what was tested and how, and remove its placeholder.
+1. Clean run, in this order, all must pass (fix anything that fails, then restart the list):
+   npm ci
+   npm run format:check
+   npm run check
+   npm test
+   npm run build
+   npm run validate:html
+   npm run check:links
+   node scripts/check-seo.mjs
+   npm run test:e2e
+   PREVIEW=true npm run lhci   (stop any other astro preview first)
+   npm audit --omit=dev
+2. Manual browser pass on a BASE_PATH=/peter-rothwell-website/ PREVIEW=true build (launch config "built"):
+   - home at 1920×929, 1440×900, 1366×768 and 375×812, in dark and light mode: first screen and Ways to train each fill one screen on desktop, no sideways scroll on mobile, no console errors
+   - a sample post shows its "Example post" label; the 404 page; the journal topic pages
+   - admin in demo mode: the "Still to do" list, edit a price, write a post, crop a photo, change colours, reset demo
+   Take screenshots of the home page at 1440×900 and 375×812 and show them to me.
+3. Update AUDIT.md: add a short "Re-audit after round 2" section at the top with the new scores per area (same weights), the test results table, and which findings are fixed. Be honest: content Peter hasn't supplied still counts against the Content score. Add your out-of-scope list from the session as "Next".
+4. Review `git status` and `git diff` yourself. Make sure nothing unintended is included: no lighthouse-reports/, .lighthouseci/, test output, screenshots or temporary test text. Leave "docs/Peter - Finishing your website.docx" uncommitted unless I say otherwise.
+5. Commit in logical commits (roughly one per step), with clear messages, then push to origin main.
+6. Watch the run: `gh run watch` for Checks, then the "Deploy to GitHub Pages" run that follows it. If either fails, fix, commit and push again.
+7. Open the live preview URL in the browser and check: home loads under the base path, photos show, the preview bar and noindex are present, a blog post and /admin/ load. Then give me the URL, the final score and a summary of the session.
 ```
