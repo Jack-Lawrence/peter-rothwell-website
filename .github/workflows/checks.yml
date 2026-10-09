@@ -47,6 +47,9 @@ jobs:
       - name: Type check (astro check)
         run: npm run check
 
+      - name: Unit tests (Vitest)
+        run: npm test
+
       - name: Build
         run: npm run build
 
@@ -56,8 +59,37 @@ jobs:
       - name: HTML validation
         run: npm run validate:html
 
+      - name: SEO basics (titles, descriptions, canonical, share images)
+        run: npm run check:seo
+
       - name: Lighthouse (mobile)
         run: npm run lhci
+
+      # Playwright's headless Chromium, cached between runs. GitHub's runners
+      # already have the system libraries it needs (they ship with Chrome).
+      - name: Cache Playwright's Chromium
+        id: playwright-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+
+      - name: Install Playwright's Chromium
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        run: npx playwright install chromium --only-shell
+
+      # Builds its own copy under /peter-rothwell-website/ (dist-e2e/), so base-path bugs show up.
+      - name: End-to-end tests (Playwright)
+        run: npm run test:e2e
+
+      - name: Keep the Playwright traces
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-results
+          path: test-results
+          if-no-files-found: ignore
+          retention-days: 14
 
       - name: Keep the Lighthouse reports
         if: always()

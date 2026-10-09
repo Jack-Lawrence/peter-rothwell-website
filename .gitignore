@@ -29,3 +29,8 @@ src/assets/instagram/
 # Lighthouse CI working files and reports
 .lighthouseci/
 lighthouse-reports/
+
+# End-to-end test build and results
+dist-e2e/
+test-results/
+playwright-report/
