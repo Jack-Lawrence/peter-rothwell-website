@@ -13,7 +13,7 @@ Every prompt in [PROMPTS.md](PROMPTS.md) (round 2) has been done. Re-scored with
 | SEO                | 95    | 15%    | 88  | Sitemap `lastmod` for posts, breadcrumbs and `dateModified` on posts, distinct titles for list pages, an SEO check in CI; Lighthouse SEO 100 on a normal build                                         |
 | Content            | 60    | 20%    | 55  | Example posts clearly labelled on the preview, claims about Peter replaced with placeholders, stock photos gone. Still waiting on Peter: 17 placeholders, real posts, plan details, more reviews       |
 | Features           | 90    | 15%    | 82  | The admin checks a save before committing, then shows "Updating…", "Live" or "didn't go live"; "Still to do" list; keep-me-signed-in option; hero badge editable. Form and Instagram still await keys  |
-| Code quality       | 95    | 10%    | 88  | 113 unit tests (Vitest) and 26 end-to-end tests (Playwright) in CI; `admin/main.ts` split from 3,350 lines into 15 modules; content rules shared by the tests and the admin                            |
+| Code quality       | 95    | 10%    | 88  | 113 unit tests (Vitest) and 27 end-to-end tests (Playwright) in CI; `admin/main.ts` split from 3,350 lines into 15 modules; content rules shared by the tests and the admin                            |
 | Security & privacy | 88    | 10%    | 78  | Script escaping fixed and tested; CSP on `/admin`; token kept per tab unless Peter opts in. The shared `github.io` origin and missing security headers remain until Cloudflare                         |
 
 Weighted total: 87.2, rounded to 87. Content is still the biggest gap, and only Peter can close it.
@@ -29,7 +29,7 @@ Weighted total: 87.2, rounded to 87. Content is still the biggest gap, and only 
 | `npm run validate:html`                   | Pass                                                                                                                                 |
 | `npm run check:links`                     | 278 links, none broken                                                                                                               |
 | `node scripts/check-seo.mjs`              | 13 public pages, none missing a title, description, canonical link or share image, no repeats                                        |
-| `npm run test:e2e` (Playwright, Chromium) | 26 tests pass, including its own base-path build (about 50 s)                                                                        |
+| `npm run test:e2e` (Playwright, Chromium) | 27 tests pass, including its own base-path build (about 50 s)                                                                        |
 | Lighthouse CI, mobile, best of 3          | Home 98 / 100 / 100, Journal 99 / 100 / 100, Terms 100 / 100 / 100 (Perf / A11y / BP)                                                |
 | Lighthouse SEO, normal build              | 100 on `/`, `/journal/` and a post                                                                                                   |
 | `npm audit --omit=dev`                    | 0 vulnerabilities                                                                                                                    |

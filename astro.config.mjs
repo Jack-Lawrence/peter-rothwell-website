@@ -43,7 +43,8 @@ export default defineConfig({
       // Leave out the old Wix redirect pages and the admin area.
       filter: (page) => !/\/(english-[^/]+|accessibility-statement|admin)(\/|$)/.test(new URL(page).pathname),
       serialize(item) {
-        const path = new URL(item.url).pathname.slice(base.length - 1);
+        // The page's path without the base (which may or may not end in "/").
+        const path = new URL(item.url).pathname.slice(base.replace(/\/$/, '').length);
         const date = postDates.get(path);
         return date ? { ...item, lastmod: date } : item;
       },

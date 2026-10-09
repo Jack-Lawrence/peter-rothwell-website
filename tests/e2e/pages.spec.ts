@@ -46,6 +46,12 @@ test('unknown addresses get the 404 page', async ({ page }) => {
   await expect(home).toHaveAttribute('href', /^\/peter-rothwell-website\//);
 });
 
+test('the sitemap dates each blog post', async ({ request }) => {
+  const sitemap = await (await request.get('sitemap-0.xml')).text();
+  expect(sitemap).toMatch(/peter-rothwell-website\/journal\/why-runners-should-squat\/<\/loc><lastmod>2026-09-21/);
+  expect(sitemap).not.toMatch(/peter-rothwell-website\/terms\/<\/loc><lastmod>/);
+});
+
 test.describe('preview build', () => {
   test('is hidden from search engines', async ({ page, request }) => {
     await page.goto('');

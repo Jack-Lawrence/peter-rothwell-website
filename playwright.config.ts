@@ -21,7 +21,8 @@ export default defineConfig({
   webServer: {
     command: `npx astro build && npx astro preview --port ${port} --ignore-lock`,
     url: `http://localhost:${port}${base}`,
-    env: { BASE_PATH: base, PREVIEW: 'true', OUT_DIR: './dist-e2e' },
+    // GitHub's Pages action gives the base path without a trailing slash, so the tests do too.
+    env: { BASE_PATH: base.replace(/\/$/, ''), PREVIEW: 'true', OUT_DIR: './dist-e2e' },
     timeout: 300_000,
     reuseExistingServer: !process.env.CI,
   },
