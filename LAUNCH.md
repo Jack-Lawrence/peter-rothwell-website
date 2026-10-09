@@ -34,7 +34,7 @@ Everything to sign up for, collect and check so all the site's features work. Wo
 - [ ] **Public or private:** GitHub Pages on a free plan needs a public repo. Private needs GitHub Pro.
 - [ ] Settings → Pages → Source: **GitHub Actions**.
 - [ ] Check the preview site loads at `https://<user>.github.io/<repo>/`.
-- [ ] Before sharing the link widely, make preview builds `noindex` (AUDIT.md prompt 1), so Google doesn't index the preview.
+- [x] Preview builds are `noindex`, so Google doesn't index the preview.
 - [ ] Send Peter the preview link.
 
 ## 4. Enquiry form: Web3Forms 🤝
@@ -73,7 +73,7 @@ Peter's account needs to be a **Business or Creator** account. Check in Instagra
 - [ ] Create a **Cloudflare Pages** project connected to the GitHub repo: build command `npm run build`, output `dist`, Node 24.
 - [ ] Add the environment variable `IG_ACCESS_TOKEN` (production).
 - [ ] Add custom domains `www.rothwellsrunning.com` and `rothwellsrunning.com` (redirect the bare domain to www).
-- [ ] Optional, recommended (AUDIT.md prompt 5):
+- [ ] Optional, recommended (the Cloudflare prompt at the end of AUDIT.md):
   - **Turnstile** site key and secret, for server-side spam checks on the form
   - **Email Routing** with Peter's Gmail verified as a destination, to send enquiries without Web3Forms
   - **Web Analytics**, which is cookieless (add a line to the privacy policy)
@@ -82,7 +82,7 @@ Peter's account needs to be a **Business or Creator** account. Check in Instagra
 ## 8. Pre-launch checks 🧑‍💻
 
 - [ ] All photos in place, with alt text.
-- [ ] Replace all demo photos (src/assets/demo/) with Peter's own, and delete the folder. The hero, About portrait and blog covers import from it, so the build will point out anything missed.
+- [x] Replace all demo photos with Peter's own. Done: `src/assets/demo/` is gone and the sample posts use photos from his library.
 - [ ] Sample blog posts removed or replaced.
 - [ ] No yellow placeholders left on the policy pages (search the repo for `<mark>`).
 - [ ] Prices and contact details match what Peter currently charges.
@@ -97,7 +97,7 @@ Peter's account needs to be a **Business or Creator** account. Check in Instagra
 
 - [ ] Switch the domain to Cloudflare Pages and wait for HTTPS to show as active.
 - [ ] Visit the live site on mobile data (not Wi-Fi) to confirm the new site is showing.
-- [ ] **Google Search Console:** add the domain (verify with a DNS TXT record in Cloudflare) and submit `https://www.rothwellsrunning.com/sitemap-index.xml` (once the sitemap is added, AUDIT.md prompt 1).
+- [ ] **Google Search Console:** add the domain (verify with a DNS TXT record in Cloudflare) and submit `https://www.rothwellsrunning.com/sitemap-index.xml`.
 - [ ] **Google Business Profile** 🏃: check the website link and address (Meadowbank Shopping Park), and add photos. This matters a lot for "personal trainer Edinburgh" searches.
 - [ ] Update the website link in the Instagram bio, if it isn't already rothwellsrunning.com.
 - [ ] Keep the Wix site for a week in case anything needs checking, then cancel the Wix premium plan. Don't cancel any Wix domain subscription until the domain has been moved.

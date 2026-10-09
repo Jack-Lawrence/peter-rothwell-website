@@ -2,13 +2,15 @@
 title: "Why runners should squat: three lifts that make you faster"
 date: 2026-09-21
 topic: Strength
-excerpt: "Lifting won't make you heavy and slow. Here are the three lifts I give almost every runner I coach."
+excerpt: "Lifting won't make you heavy and slow. Here are three lifts that help almost every runner."
 sample: true
-cover: ../../assets/demo/cover-strength.jpg
-coverAlt: A lifter gripping a loaded barbell at the start of a deadlift
+cover: ../../assets/journal/deadly-dozen-plate-overhead.jpg
+coverAlt: Peter with his arms locked out overhead during a lift at the Deadly Dozen fitness race in Edinburgh
 ---
 
-Most of the runners I coach come to me with the same worry: "If I lift, won't I get heavy and slow?" The short answer is no. Two or three short strength sessions a week make you more resilient and more efficient, especially late in a race.
+A common worry among runners is: "If I lift, won't I get heavy and slow?" The short answer is no. Two or three short strength sessions a week make you more resilient and more efficient, especially late in a race.
+
+<mark>[Peter to confirm: how you build strength work into the plans you write, if you'd like to add it]</mark>
 
 ## 1. The back squat
 
@@ -21,5 +23,3 @@ Your hamstrings and glutes drive you up hills. The RDL trains them through a lon
 ## 3. Single-leg work
 
 Running is a series of single-leg hops. Split squats and step-ups expose and fix the differences between your left and right side.
-
-*This is a sample post for the website preview.*

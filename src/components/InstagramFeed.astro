@@ -23,7 +23,7 @@ const imageFor = (file: string) => images[`../assets/instagram/${file}`]?.defaul
 const handle = site.contact.instagram;
 const profile = `https://www.instagram.com/${handle}/`;
 // Filled by scripts/fetch-instagram.mjs at build time. Until a token is set up,
-// the preview site shows demo photos and the live site six placeholder tiles.
+// the preview site shows six of Peter's own photos and the live site six placeholder tiles.
 const posts = (instagram.posts as Post[]).filter((p) => imageFor(p.image)).slice(0, 6);
 const demo = posts.length === 0 && PREVIEW ? demoInstagram : [];
 const placeholders = posts.length === 0 && demo.length === 0 ? 6 : 0;

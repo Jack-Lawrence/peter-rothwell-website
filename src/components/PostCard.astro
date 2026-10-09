@@ -3,6 +3,8 @@ import type { CollectionEntry } from 'astro:content';
 import Photo from './Photo.astro';
 import { href } from '../lib/url';
 import { readingTime } from '../lib/journal';
+import { PREVIEW } from 'astro:env/server';
+import site from '../data/site.json';
 
 interface Props {
   post: CollectionEntry<'journal'>;
@@ -12,14 +14,15 @@ interface Props {
 
 const { post, level: Heading = 'h3' } = Astro.props;
 const minutes = readingTime(post);
-// The link is named by the title alone; the date and topic are its description.
-const titleId = `post-${post.id}-title`;
-const metaId = `post-${post.id}-meta`;
-const { title, topic, date, cover } = post.data;
+// The link is named by its visible text, in the order it shows (topic, date,
+// reading time, then title), so speech-input users can say what they see (WCAG 2.5.3).
+const { title, topic, date, cover, sample } = post.data;
+// Example posts written for the preview are labelled there, so nobody mistakes them for Peter's own.
+const showSample = PREVIEW && sample;
 const dateLabel = date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
 ---
 
-<a class="post" href={href(`/journal/${post.id}/`)} aria-labelledby={titleId} aria-describedby={metaId}>
+<a class="post" href={href(`/journal/${post.id}/`)}>
   <Photo
     class="cover"
     tone="light"
@@ -29,13 +32,12 @@ const dateLabel = date.toLocaleDateString('en-GB', { day: 'numeric', month: 'sho
     widths={[400, 800, 1100]}
   >
     {!cover && <span class="mono ph">Cover image</span>}
+    {showSample && <span class="mono sample">{site.journal.sampleLabel}</span>}
   </Photo>
-  <span class="mono meta" id={metaId}>
+  <span class="mono meta">
     {topic} · <time datetime={date.toISOString()}>{dateLabel}</time> · {minutes}
   </span>
-  <Heading class="post-title" id={titleId}>
-    {title}
-  </Heading>
+  <Heading class="post-title">{title}</Heading>
 </a>
 
 <style>
@@ -50,6 +52,15 @@ const dateLabel = date.toLocaleDateString('en-GB', { day: 'numeric', month: 'sho
   }
   .ph {
     padding: 14px;
+  }
+  .sample {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    padding: 5px 8px;
+    font-size: 11px;
+    background: var(--gorse);
+    color: var(--ink);
   }
   .meta {
     color: var(--ink-muted);

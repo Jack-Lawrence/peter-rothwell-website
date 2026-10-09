@@ -4,7 +4,7 @@
 // its slot's shape before saving, so the site never has to guess the framing.
 import type { ImageMetadata } from 'astro';
 
-const files = import.meta.glob<{ default: ImageMetadata }>('/src/assets/{demo,photos}/*.{jpg,jpeg,png,webp}', {
+const files = import.meta.glob<{ default: ImageMetadata }>('/src/assets/photos/*.{jpg,jpeg,png,webp}', {
   eager: true,
 });
 

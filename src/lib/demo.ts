@@ -1,13 +1,4 @@
-// Temporary stock photos in src/assets/demo/ (see CREDITS.md there), used on
-// the preview site until Peter's own photos are added. Photo.astro labels them.
 import type { ImageMetadata } from 'astro';
-
-const files = import.meta.glob<{ default: ImageMetadata }>('../assets/demo/*.{jpg,jpeg,png,webp}', { eager: true });
-const demoSources = new Set(Object.values(files).map((m) => m.default.src));
-
-export function isDemoPhoto(image?: ImageMetadata): boolean {
-  return !!image && demoSources.has(image.src);
-}
 
 // Until the Instagram feed is connected, the preview site fills the row with
 // six of Peter's own photos from his library.
